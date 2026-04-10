@@ -3102,8 +3102,15 @@ function startNaesteEndagsloeb() {
     G.erEndagsloeb = true;
     
     // Generer felt
-    var felt = genererEndagsFelt(loeb);
+	var felt = genererEndagsFelt(loeb);
     G.ryttere = felt.ryttere;
+    
+    // Giv alle ryttere (inkl. spilleren) mere energi til endagsløb
+    for (var i = 0; i < G.ryttere.length; i++) {
+        if (!G.ryttere[i].sp) {
+            G.ryttere[i].energi = Math.round(100 * loeb.energiMult * 0.5);
+        }
+    }
     G.sprPts = {};
     G.bjgPts = {};
     for (var i = 0; i < G.ryttere.length; i++) {
@@ -6764,28 +6771,31 @@ for (var gi = 0; gi < G.grp.length; gi++) {
 
     
 // AI angreb - baseret på etapetype og energi
-if (e.type === "bjerg" && Math.random() < 0.05) {
+var angrebBoost = G.erEndagsloeb ? 2.5 : 1.0;
+if (e.type === "bjerg" && Math.random() < 0.05 * angrebBoost) {
     aiAngrebBjerg();
-} else if (e.type === "kuperet" && Math.random() < 0.05) {
+} else if (e.type === "kuperet" && Math.random() < 0.05 * angrebBoost) {
     aiAngrebKuperet();
-} else if (e.type === "flad" && Math.random() < 0.04) {
+} else if (e.type === "flad" && Math.random() < 0.04 * angrebBoost) {
     aiAngrebEnergi();
-} else if (e.type === "kuperet" && Math.random() < 0.03) {
+} else if (e.type === "kuperet" && Math.random() < 0.03 * angrebBoost) {
     aiAngrebEnergi();
 }
 
 // Favoritter angriber fra favoritgruppe (fra halvvejs)
-if ((e.type === "bjerg" || e.type === "kuperet") && G.km > e.dist * 0.5) {
+var favMidtStart = G.erEndagsloeb ? 0.35 : 0.5;
+var favSlutDist = G.erEndagsloeb ? 25 : 15;
+var favKupStart = G.erEndagsloeb ? 0.6 : 0.75;
+
+if ((e.type === "bjerg" || e.type === "kuperet") && G.km > e.dist * favMidtStart) {
     favoritAngrebMidtvejs();
 }
     
-// Favoritter angriber hinanden tæt på mål i bjerge
-if (e.type === "bjerg" && G.km > e.dist - 15) {
+if (e.type === "bjerg" && G.km > e.dist - favSlutDist) {
     favoritAngrebSlut();
 }
 
-// Favoritter angriber på kuperet i sidste fjerdedel
-if (e.type === "kuperet" && G.km > e.dist * 0.75) {
+if (e.type === "kuperet" && G.km > e.dist * favKupStart) {
     favoritAngrebKuperet();
 }
 
@@ -6834,10 +6844,11 @@ if (Math.random() < udbChance && udbCount < 5) aiUdb();
 
     
     // Tilbyd udbrud - oftere i bjerge
-    if (sg && sg.type === "felt" && G.spiller.energi > 20 && !G.vent) {
+	if (sg && sg.type === "felt" && G.spiller.energi > 20 && !G.vent) {
         var ch = 0.005;
         if (e.type === "bjerg") ch = 0.020;
         else if (e.type === "kuperet") ch = 0.012;
+        if (G.erEndagsloeb) ch *= 2;
         if (Math.random() < ch) { tilbyd(); return; }
     }
     
@@ -8045,11 +8056,12 @@ if (udb) {
     }
     
     // Sværere at komme op jo længere væk gruppen er
-    var afstandsFaktor = 1 - (mindsteAfstand / 2) * 0.3;
+	var afstandsFaktor = 1 - (mindsteAfstand / 2) * 0.3;
     var ch = 0.35 * afstandsFaktor;
     if (e.type === "bjerg") ch = (0.45 + G.spiller.bj / 200) * afstandsFaktor;
     else if (e.type === "kuperet") ch = (0.40 + G.spiller.bj / 300) * afstandsFaktor;
     else ch = (0.35 + G.spiller.fl / 300) * afstandsFaktor;
+    if (G.erEndagsloeb) ch *= 1.5;
     
     if (Math.random() < ch) {
         sg.ryt = sg.ryt.filter(function(r) { return r !== G.spiller; });
