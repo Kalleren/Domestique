@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GrandTours - Giro · Tour · Vuelta</title>
+    <title>Domestique - Cykelkarriere</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ffff00">
@@ -672,6 +672,66 @@ var ENDAGSLOEB = {
             favoritStat: "bj",
             energiMult: 1.8,
             angrebMult: 2.5
+        },
+		{
+            id: "omloop",
+            navn: "Omloop Het Nieuwsblad",
+            kort: "Omloop",
+            emoji: "🇧🇪",
+            maaned: "Februar",
+            dist: 207,
+            type: "brosten_kuperet",
+            brosten: 0.2,
+            bonus: [1],
+            monument: false,
+            favoritStat: "fl",
+            energiMult: 1.8,
+            angrebMult: 1.8
+        },
+        {
+            id: "kbk",
+            navn: "Kuurne-Bruxelles-Kuurne",
+            kort: "Kuurne",
+            emoji: "🇧🇪",
+            maaned: "Februar",
+            dist: 197,
+            type: "kuperet",
+            brosten: 0.15,
+            bonus: [1],
+            monument: false,
+            favoritStat: "spr",
+            energiMult: 1.6,
+            angrebMult: 1.5
+        },
+        {
+            id: "sanseb",
+            navn: "Clásica de San Sebastián",
+            kort: "San Sebastián",
+            emoji: "🇪🇸",
+            maaned: "Juli",
+            dist: 225,
+            type: "kuperet_bjerg",
+            brosten: 0,
+            bonus: [1],
+            monument: false,
+            favoritStat: "bj",
+            energiMult: 1.8,
+            angrebMult: 2.0
+        },
+        {
+            id: "bretagne",
+            navn: "Bretagne Classic",
+            kort: "Bretagne",
+            emoji: "🇫🇷",
+            maaned: "August",
+            dist: 253,
+            type: "kuperet",
+            brosten: 0,
+            bonus: [1],
+            monument: false,
+            favoritStat: "spr",
+            energiMult: 1.8,
+            angrebMult: 1.5
         }
     ]
 };
@@ -1081,21 +1141,22 @@ function visInstruktioner() {
     '<h2>Instruktioner</h2>' +
     '<div class="box">' +
         '<h3>Grundidé</h3>' +
-        '<p>Du kører op til 10 sæsoner som professionel cykelrytter. Hver sæson vælger du 1 eller 2 Grand Tours at køre: Giro d\'Italia, Tour de France og/eller Vuelta a España.</p>' +
+        '<p>Du kører op til 10 sæsoner som professionel cykelrytter. Hver sæson kan du køre endagsløb (monumenter og klassikere) og 1-2 Grand Tours.</p>' +
     '</div>' +
 
     '<div class="box">' +
         '<h3>Sæsonstruktur</h3>' +
         '<ul style="margin-left:18px;list-style:disc;font-size:14px;line-height:1.6">' +
-            '<li>Vælg 1 eller 2 Grand Tours per sæson</li>' +
-            '<li>Løbene køres i rækkefølge: Giro (maj) → Tour (juli) → Vuelta (aug-sep)</li>' +
-            '<li>Kører du 2 løb, starter det andet med reduceret energi og restitution</li>' +
-            '<li>Bonuspoint fordeles efter sæsonen er slut</li>' +
+            '<li>Vælg endagsløb (valgfrit, feb-okt)</li>' +
+            '<li>Vælg 1 eller 2 Grand Tours</li>' +
+            '<li>Hvert endagsløb koster 10% startenergi til næste løb</li>' +
+            '<li>Kører du 2 GT\'er, starter den anden med reduceret energi</li>' +
+            '<li>Bonuspoint fordeles samlet efter sæsonen</li>' +
         '</ul>' +
     '</div>' +
 
     '<div class="box">' +
-        '<h3>Styring under etaper</h3>' +
+        '<h3>Styring under løb</h3>' +
         '<ul style="margin-left:18px;list-style:disc;font-size:14px;line-height:1.6">' +
             '<li><strong>A</strong> – Accelerer / angrib</li>' +
             '<li><strong>U</strong> – Sig JA til udbrud</li>' +
@@ -1105,7 +1166,7 @@ function visInstruktioner() {
     '</div>' +
 
     '<div class="box">' +
-        '<h3>Grupper på etapen</h3>' +
+        '<h3>Grupper</h3>' +
         '<ul style="margin-left:18px;list-style:disc;font-size:14px;line-height:1.6">' +
             '<li><strong>Feltet</strong> – Hovedgruppen</li>' +
             '<li><strong>Udbrud / Forfølgere</strong> – Foran feltet</li>' +
@@ -1114,11 +1175,30 @@ function visInstruktioner() {
     '</div>' +
 
     '<div class="box">' +
-        '<h3>Energi og træthed</h3>' +
-        '<ul style="margin-left:18px;list-style:disc;font-size:14px;line-height:1.6">' +
-            '<li>Angreb og stigninger koster energi</li>' +
-            '<li>Løber du tør, ryger du i gruppetto</li>' +
-            '<li>Kører du 2 Grand Tours, er du træt i det andet løb</li>' +
+        '<h3>🏛️ Endagsløb</h3>' +
+        '<table style="width:100%;font-size:12px;border-collapse:collapse;margin-top:8px">' +
+            '<tr style="border-bottom:1px solid #333">' +
+                '<th style="text-align:left;padding:4px;color:#888">Type</th>' +
+                '<th style="text-align:center;padding:4px;color:#888">Antal</th>' +
+                '<th style="text-align:center;padding:4px;color:#888">Bonus</th>' +
+            '</tr>' +
+            '<tr style="border-bottom:1px solid #222">' +
+                '<td style="padding:4px;color:#0a0">⭐ Monumenter</td>' +
+                '<td style="text-align:center;padding:4px">5</td>' +
+                '<td style="text-align:center;padding:4px">3/2/1 point</td>' +
+            '</tr>' +
+            '<tr>' +
+                '<td style="padding:4px;color:#0a0">🏆 Klassikere</td>' +
+                '<td style="text-align:center;padding:4px">10</td>' +
+                '<td style="text-align:center;padding:4px">1 point (sejr)</td>' +
+            '</tr>' +
+        '</table>' +
+        '<ul style="margin-left:18px;list-style:disc;font-size:13px;line-height:1.5;margin-top:8px;color:#ccc">' +
+            '<li>Hårdere end normale etaper (højere energiforbrug)</li>' +
+            '<li>🧱 Brosten/grus koster ekstra energi</li>' +
+            '<li>Mere angrebsivrige ryttere</li>' +
+            '<li>Ryttere står af når 30+ min bagud</li>' +
+            '<li>Ingen trøjer eller indlagte spurter</li>' +
         '</ul>' +
     '</div>' +
 
@@ -1201,33 +1281,37 @@ function visInstruktioner() {
     '</div>' +
 
     '<div class="box">' +
-        '<h3>Træthed mellem Grand Tours</h3>' +
+        '<h3>Træthed</h3>' +
         '<table style="width:100%;font-size:12px;border-collapse:collapse;margin-top:8px">' +
             '<tr style="border-bottom:1px solid #333">' +
-                '<th style="text-align:left;padding:4px;color:#888">Kombination</th>' +
-                '<th style="text-align:center;padding:4px;color:#888">Startenergi</th>' +
-                '<th style="text-align:center;padding:4px;color:#888">Restitution</th>' +
+                '<th style="text-align:left;padding:4px;color:#888">Situation</th>' +
+                '<th style="text-align:center;padding:4px;color:#888">Effekt</th>' +
+            '</tr>' +
+            '<tr style="border-bottom:1px solid #222">' +
+                '<td style="padding:4px;color:#0a0">Per endagsløb</td>' +
+                '<td style="text-align:center;padding:4px;color:#f80">-10% energi</td>' +
+            '</tr>' +
+            '<tr style="border-bottom:1px solid #222">' +
+                '<td style="padding:4px;color:#0a0">Max endagsløb-træthed</td>' +
+                '<td style="text-align:center;padding:4px;color:#f44">-30%</td>' +
             '</tr>' +
             '<tr style="border-bottom:1px solid #222">' +
                 '<td style="padding:4px">Giro → Tour</td>' +
-                '<td style="text-align:center;padding:4px;color:#f80">80%</td>' +
-                '<td style="text-align:center;padding:4px;color:#f80">92%</td>' +
+                '<td style="text-align:center;padding:4px;color:#f80">80% energi, 92% restitution</td>' +
             '</tr>' +
             '<tr style="border-bottom:1px solid #222">' +
                 '<td style="padding:4px">Giro → Vuelta</td>' +
-                '<td style="text-align:center;padding:4px;color:#0f0">90%</td>' +
-                '<td style="text-align:center;padding:4px;color:#0f0">97%</td>' +
+                '<td style="text-align:center;padding:4px;color:#0f0">90% energi, 97% restitution</td>' +
             '</tr>' +
             '<tr>' +
                 '<td style="padding:4px">Tour → Vuelta</td>' +
-                '<td style="text-align:center;padding:4px;color:#f44">75%</td>' +
-                '<td style="text-align:center;padding:4px;color:#f44">90%</td>' +
+                '<td style="text-align:center;padding:4px;color:#f44">75% energi, 90% restitution</td>' +
             '</tr>' +
         '</table>' +
     '</div>' +
 
     '<div class="ctrls">' +
-        '<button class="btn btn-big btn-y" onclick="intro()">← Tilbage</button>' +
+        '<button class="btn btn-big btn-y" onclick="intro()">Tilbage</button>' +
     '</div>');
 }
 	
@@ -2443,12 +2527,13 @@ function intro() {
             '</div>';
     }
     
-    R('<div style="text-align:center;padding:20px 0">' +
+R('<div style="text-align:center;padding:20px 0">' +
         getInstallBannerHtml() +
-        '<div style="font-size:36px;margin-bottom:5px;color:#ff69b4">🇮🇹 🚴‍♂️ 🇫🇷 🏔️ 🇪🇸</div>' +
-        '<h1 style="font-size:42px;margin:0;letter-spacing:3px">DOMISTIQUE</h1>' +
-        '<div style="font-size:12px;color:#f44;margin-top:5px">Giro d\'Italia · Tour de France · Vuelta a España</div>' +
+        '<div style="font-size:36px;margin-bottom:5px">🚴‍♂️🏔️🧱🏁</div>' +
+        '<h1 style="font-size:42px;margin:0;letter-spacing:3px">DOMESTIQUE</h1>' +
+        '<div style="font-size:12px;color:#f44;margin-top:5px">Monumenter · Grand Tours · Klassikere</div>' +
         '<div style="margin-top:10px">' +
+            '<span style="display:inline-block;width:12px;height:12px;background:#0a0;border-radius:50%;margin:0 4px"></span>' +
             '<span style="display:inline-block;width:12px;height:12px;background:#ff69b4;border-radius:50%;margin:0 4px"></span>' +
             '<span style="display:inline-block;width:12px;height:12px;background:#ff0;border-radius:50%;margin:0 4px"></span>' +
             '<span style="display:inline-block;width:12px;height:12px;background:#f44;border-radius:50%;margin:0 4px"></span>' +
@@ -2459,27 +2544,33 @@ function intro() {
         '<h3 style="color:#fff;margin-bottom:12px">Indtast dit rytternavn:</h3>' +
         '<input id="pn" placeholder="Dit navn..." maxlength="18" style="text-align:center;font-size:18px"><br><br>' +
         '<button class="btn btn-big btn-y" onclick="startGame()">🏁 START KARRIERE 🏁</button>' +
-        '<p style="color:#666;font-size:11px;margin-top:15px">Kør op til 10 sæsoner med Giro, Tour og Vuelta</p>' +
+        '<p style="color:#666;font-size:11px;margin-top:15px">Kør klassikere og Grand Tours i op til 10 sæsoner</p>' +
+    '</div>' +
+    '<div class="box" style="background:linear-gradient(180deg,#010 0%,#000 100%);border-color:#0a0">' +
+        '<h3 style="text-align:center;margin-bottom:12px;color:#0a0">🏛️ Endagsløb:</h3>' +
+        '<div style="text-align:center;color:#0a0;font-size:12px">' +
+            '5 monumenter · 10 klassikere · Brosten & bakker' +
+        '</div>' +
     '</div>' +
     '<div class="box" style="background:linear-gradient(180deg,#020 0%,#010 100%);border-color:#0f0">' +
         '<h3 style="text-align:center;margin-bottom:12px">🏆 Tre Grand Tours:</h3>' +
-	'<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">' +
-    '<div style="text-align:center;padding:10px;border:2px solid #ff69b4;border-radius:8px;flex:1;min-width:80px">' +
-        '<div style="font-size:20px;color:#ff69b4">🇮🇹</div>' +
-        '<div style="color:#ff69b4;font-size:18px;font-weight:bold">Giro</div>' +
-        '<div style="color:#888;font-size:9px">Maj</div>' +
-    '</div>' +
-    '<div style="text-align:center;padding:10px;border:2px solid #ff0;border-radius:8px;flex:1;min-width:80px">' +
-        '<div style="font-size:20px;color:#ff0">🇫🇷</div>' +
-        '<div style="color:#ff0;font-size:18px;font-weight:bold">Tour</div>' +
-        '<div style="color:#888;font-size:9px">Juli</div>' +
-    '</div>' +
-    '<div style="text-align:center;padding:10px;border:2px solid #f44;border-radius:8px;flex:1;min-width:80px">' +
-        '<div style="font-size:20px;color:#f44">🇪🇸</div>' +
-        '<div style="color:#f44;font-size:18px;font-weight:bold">Vuelta</div>' +
-        '<div style="color:#888;font-size:9px">Aug-Sep</div>' +
-    '</div>' +
-'</div>' +
+        '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">' +
+            '<div style="text-align:center;padding:10px;border:2px solid #ff69b4;border-radius:8px;flex:1;min-width:80px">' +
+                '<div style="font-size:20px;color:#ff69b4">🇮🇹</div>' +
+                '<div style="color:#ff69b4;font-size:18px;font-weight:bold">Giro</div>' +
+                '<div style="color:#888;font-size:9px">Maj</div>' +
+            '</div>' +
+            '<div style="text-align:center;padding:10px;border:2px solid #ff0;border-radius:8px;flex:1;min-width:80px">' +
+                '<div style="font-size:20px;color:#ff0">🇫🇷</div>' +
+                '<div style="color:#ff0;font-size:18px;font-weight:bold">Tour</div>' +
+                '<div style="color:#888;font-size:9px">Juli</div>' +
+            '</div>' +
+            '<div style="text-align:center;padding:10px;border:2px solid #f44;border-radius:8px;flex:1;min-width:80px">' +
+                '<div style="font-size:20px;color:#f44">🇪🇸</div>' +
+                '<div style="color:#f44;font-size:18px;font-weight:bold">Vuelta</div>' +
+                '<div style="color:#888;font-size:9px">Aug-Sep</div>' +
+            '</div>' +
+        '</div>' +
     '</div>' +
     '<div style="text-align:center;margin-top:15px">' +
         '<button class="btn" style="border-color:#3399ff;color:#3399ff" onclick="visInstruktioner()">Instruktioner</button>' +
@@ -2577,42 +2668,80 @@ function visEndagsValg() {
         '<p style="color:#666;font-size:11px">Hvert løb koster 10% startenergi til næste løb/GT</p>' +
     '</div>';
     
-    // Forårsklassikere (marts-april)
-    html += '<div class="box" style="border-color:#0a0"><h3 style="color:#0a0">🏛️ Monumenter</h3>';
-    html += '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
-    for (var i = 0; i < ENDAGSLOEB.monumenter.length; i++) {
-        var loeb = ENDAGSLOEB.monumenter[i];
-        if (loeb.maaned === "Oktober") continue; // Lombardia vises separat
-        var valgt = G.valgteEndagsloeb.indexOf(loeb.id) >= 0;
-        html += endagsLoebKort(loeb, valgt);
+    // Hjælpefunktion til at finde løb efter måned
+    function loebIMaaned(maaneder) {
+        var alle = ENDAGSLOEB.monumenter.concat(ENDAGSLOEB.klassikere);
+        var resultat = [];
+        for (var i = 0; i < alle.length; i++) {
+            if (maaneder.indexOf(alle[i].maaned) >= 0) resultat.push(alle[i]);
+        }
+        // Sortér kronologisk
+        var kronologisk = ["omloop","kbk","strade","msr","e3","gw","ddv","flandern","roubaix","agr","fleche","lbl","sanseb","bretagne","lombardia"];
+        resultat.sort(function(a,b) { return kronologisk.indexOf(a.id) - kronologisk.indexOf(b.id); });
+        return resultat;
     }
-    html += '</div></div>';
     
-    html += '<div class="box" style="border-color:#070"><h3 style="color:#0a0">🏆 Klassikere</h3>';
-    html += '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
-    for (var i = 0; i < ENDAGSLOEB.klassikere.length; i++) {
-        var loeb = ENDAGSLOEB.klassikere[i];
-        var valgt = G.valgteEndagsloeb.indexOf(loeb.id) >= 0;
-        html += endagsLoebKort(loeb, valgt);
-    }
-    html += '</div></div>';
-    
-    // Lombardia separat (oktober)
-    var lombardia = findEndagsLoeb("lombardia");
-    if (lombardia) {
-        html += '<div class="box" style="border-color:#0a0"><h3 style="color:#0a0">🍂 Sæsonafslutning (oktober)</h3>';
+    // Februar
+    var febLoeb = loebIMaaned(["Februar"]);
+    if (febLoeb.length > 0) {
+        html += '<div class="box" style="border-color:#070"><h3 style="color:#0a0">❄️ Februar - Sæsonåbning</h3>';
         html += '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
-        var lValgt = G.valgteEndagsloeb.indexOf("lombardia") >= 0;
-        html += endagsLoebKort(lombardia, lValgt);
+        for (var i = 0; i < febLoeb.length; i++) {
+            html += endagsLoebKort(febLoeb[i], G.valgteEndagsloeb.indexOf(febLoeb[i].id) >= 0);
+        }
+        html += '</div></div>';
+    }
+    
+    // Marts
+    var marsLoeb = loebIMaaned(["Marts"]);
+    if (marsLoeb.length > 0) {
+        html += '<div class="box" style="border-color:#0a0"><h3 style="color:#0a0">🌸 Marts - Forårsklassikere</h3>';
+        html += '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
+        for (var i = 0; i < marsLoeb.length; i++) {
+            html += endagsLoebKort(marsLoeb[i], G.valgteEndagsloeb.indexOf(marsLoeb[i].id) >= 0);
+        }
+        html += '</div></div>';
+    }
+    
+    // April
+    var aprilLoeb = loebIMaaned(["April"]);
+    if (aprilLoeb.length > 0) {
+        html += '<div class="box" style="border-color:#0a0"><h3 style="color:#0a0">🏛️ April - Monumenter & Ardenner</h3>';
+        html += '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
+        for (var i = 0; i < aprilLoeb.length; i++) {
+            html += endagsLoebKort(aprilLoeb[i], G.valgteEndagsloeb.indexOf(aprilLoeb[i].id) >= 0);
+        }
+        html += '</div></div>';
+    }
+    
+    // Sommer (juli-august)
+    var sommerLoeb = loebIMaaned(["Juli", "August"]);
+    if (sommerLoeb.length > 0) {
+        html += '<div class="box" style="border-color:#070"><h3 style="color:#0a0">☀️ Sommer - Efter Touren</h3>';
+        html += '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
+        for (var i = 0; i < sommerLoeb.length; i++) {
+            html += endagsLoebKort(sommerLoeb[i], G.valgteEndagsloeb.indexOf(sommerLoeb[i].id) >= 0);
+        }
+        html += '</div></div>';
+    }
+    
+    // Oktober
+    var oktLoeb = loebIMaaned(["Oktober"]);
+    if (oktLoeb.length > 0) {
+        html += '<div class="box" style="border-color:#0a0"><h3 style="color:#0a0">🍂 Oktober - Sæsonafslutning</h3>';
+        html += '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
+        for (var i = 0; i < oktLoeb.length; i++) {
+            html += endagsLoebKort(oktLoeb[i], G.valgteEndagsloeb.indexOf(oktLoeb[i].id) >= 0);
+        }
         html += '</div></div>';
     }
     
     // Træthed-info
     if (G.valgteEndagsloeb.length > 0) {
-        // Tæl kun forår-løb (ikke Lombardia) for GT-træthed
         var foraarLoeb = 0;
         for (var i = 0; i < G.valgteEndagsloeb.length; i++) {
-            if (G.valgteEndagsloeb[i] !== "lombardia") foraarLoeb++;
+            var l = findEndagsLoeb(G.valgteEndagsloeb[i]);
+            if (l && l.maaned !== "Oktober" && l.maaned !== "Juli" && l.maaned !== "August") foraarLoeb++;
         }
         if (foraarLoeb > 0) {
             var traethedPct = Math.min(foraarLoeb * 10, 30);
@@ -2655,7 +2784,7 @@ function toggleEndagsValg(loebId) {
     for (var i = 0; i < ENDAGSLOEB.monumenter.length; i++) ordre.push(ENDAGSLOEB.monumenter[i].id);
     for (var i = 0; i < ENDAGSLOEB.klassikere.length; i++) ordre.push(ENDAGSLOEB.klassikere[i].id);
     // Interleave i kronologisk rækkefølge
-    var kronologisk = ["strade","msr","e3","gw","ddv","flandern","roubaix","agr","fleche","lbl","lombardia"];
+    var kronologisk = ["omloop","kbk","strade","msr","e3","gw","ddv","flandern","roubaix","agr","fleche","lbl","sanseb","bretagne","lombardia"];
     G.valgteEndagsloeb.sort(function(a,b) { return kronologisk.indexOf(a) - kronologisk.indexOf(b); });
     visEndagsValg();
 }
