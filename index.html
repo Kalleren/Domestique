@@ -1045,7 +1045,7 @@ var TEAMS = {
         { n: "Harrison Wood", gc: 64, bj: 74, sp: 52, tt: 72, ud: 84, re: 80, fl: 74, pri: "giro", pref: ["giro","vuelta"] },
         { n: "Nicolas Debeaumarché", gc: 52, bj: 60, sp: 56, tt: 72, ud: 86, re: 82, fl: 78, pri: "giro", pref: ["giro"] }
     ]},
-	"Tudor Pro Cycling": { abbr: "TUD", clr: "#1a1a2e", r: [
+	"Tudor Pro Cycling": { abbr: "TUD", clr: "#8888cc", r: [
         { n: "Stefan Küng", gc: 52, bj: 50, sp: 68, tt: 94, ud: 90, re: 86, fl: 92, pri: "tdf", pref: ["tdf"] },
         { n: "Julian Alaphilippe", gc: 68, bj: 78, sp: 76, tt: 70, ud: 76, re: 72, fl: 74, pri: "tdf", pref: ["tdf"] },
         { n: "Marc Soler", gc: 74, bj: 82, sp: 48, tt: 76, ud: 84, re: 78, fl: 72, pri: "tdf", pref: ["tdf","vuelta"] },
@@ -2132,6 +2132,14 @@ function erstatGTHtml(html) {
     html = html.replace(/border:1px solid #aa0/g, 'border:1px solid ' + gt.secondary);
     html = html.replace(/border:2px solid #aa0/g, 'border:2px solid ' + gt.secondary);
 
+	    // Endagsløb: override med grønt tema
+    if (G.erEndagsloeb) {
+        html = html.replace(/border-color:#ff0/g, 'border-color:#0a0');
+        html = html.replace(/color:#ff0/g, 'color:#0a0');
+        html = html.replace(/background:#110/g, 'background:#010');
+        html = html.replace(/border:1px solid #aa0/g, 'border:1px solid #070');
+        html = html.replace(/border:2px solid #aa0/g, 'border:2px solid #070');
+    }
     return html;
 }
 
@@ -2305,8 +2313,19 @@ function visEndagsAlleResultater() {
         }
     }
     html += '</div>';
-    
-    html += '<div class="ctrls"><button class="btn btn-big" style="border-color:#0a0;color:#0a0" onclick="visEndagsResultat(G.gemtRes, findEndagsLoeb(G.valgteEndagsloeb[G.aktuelEndagsIdx]), G.gemtSpiPlads, G.gemtBonus)">TILBAGE</button></div>';
+        // Udgåede ryttere (DNF)
+    var dnfRyttere = [];
+    for (var i = 0; i < res.length; i++) {
+        if (res[i].r.ude) dnfRyttere.push(res[i].r);
+    }
+    if (dnfRyttere.length > 0) {
+        html += '<div class="box" style="border-color:#f44"><h3 style="color:#f44">🚶 Udgået (' + dnfRyttere.length + ')</h3>';
+        for (var i = 0; i < dnfRyttere.length; i++) {
+            html += '<div class="row" style="color:#666"><span>' + dnfRyttere[i].navn + ' <span style="color:#444">' + dnfRyttere[i].holdAbbr + '</span></span><span style="color:#f44">DNF</span></div>';
+        }
+        html += '</div>';
+    }
+    html += '<div class="ctrls"><button class="btn btn-big" style="border-color:#0a0;color:#0a0" onclick="visEndagsResultat(G.gemtRes, findEndagsLoeb(G.valgteEndagsloeb[G.aktuelEndagsIdx]), G.gemtSpiPlads, G.gemtBonus)">← TILBAGE</button></div>';
     
     R(html);
 }
@@ -3338,11 +3357,11 @@ function visEndagsResultat(res, loeb, spiPlads, bonus) {
         var naeste = G.saesonKalender[naesteIdx];
         if (naeste.type === "endags") {
             var naesteLoeb = findEndagsLoeb(naeste.id);
-            naesteTekst = naesteLoeb ? naesteLoeb.kort.toUpperCase() : "NÆSTE LØB";
+            naesteTekst = naesteLoeb ? naesteLoeb.kort.toUpperCase() : "VIDERE";
         } else if (naeste.type === "gt") {
             naesteTekst = GT_CONFIG[naeste.id].kort.toUpperCase();
         } else {
-            naesteTekst = "NÆSTE LØB";
+            naesteTekst = "VIDERE";
         }
     }
     
@@ -4179,7 +4198,7 @@ function visResume() {
         '<div style="text-align:center;margin-top:12px;color:#666;font-size:10px">' +
             '📰 Etape ' + (G.enr + 1) + ' · ' + G.etaper[G.enr].start + ' → ' + G.etaper[G.enr].slut + ' · ' + G.etaper[G.enr].dist + ' km' +
         '</div>' +
-        '<div class="ctrls ctrls-2"><button class="btn btn-big" style="border-color:#3399ff;color:#3399ff" onclick="tilbageTilResultat()">TILBAGE</button></div>' +
+        '<div class="ctrls ctrls-2"><button class="btn btn-big" style="border-color:#3399ff;color:#3399ff" onclick="tilbageTilResultat()">← TILBAGE</button></div>' +
     '</div>';
     
     R(html);
