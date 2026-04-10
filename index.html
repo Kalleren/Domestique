@@ -1281,16 +1281,16 @@ function visInstruktioner() {
         '</table>' +
     '</div>' +
 
-    '<div class="box">' +
+'<div class="box">' +
         '<h3>Træthed</h3>' +
         '<table style="width:100%;font-size:12px;border-collapse:collapse;margin-top:8px">' +
             '<tr style="border-bottom:1px solid #333">' +
-                '<th style="text-align:left;padding:4px;color:#888">Situation</th>' +
-                '<th style="text-align:center;padding:4px;color:#888">Effekt</th>' +
+                '<th style="text-align:left;padding:4px">Situation</th>' +
+                '<th style="text-align:center;padding:4px">Effekt</th>' +
             '</tr>' +
             '<tr style="border-bottom:1px solid #222">' +
                 '<td style="padding:4px;color:#0a0">Per endagsløb</td>' +
-                '<td style="text-align:center;padding:4px;color:#f80">-10% energi</td>' +
+                '<td style="text-align:center;padding:4px;color:#f80">-10% startenergi (akkumuleres)</td>' +
             '</tr>' +
             '<tr style="border-bottom:1px solid #222">' +
                 '<td style="padding:4px;color:#0a0">Max endagsløb-træthed</td>' +
@@ -1298,17 +1298,18 @@ function visInstruktioner() {
             '</tr>' +
             '<tr style="border-bottom:1px solid #222">' +
                 '<td style="padding:4px">Giro → Tour</td>' +
-                '<td style="text-align:center;padding:4px;color:#f80">80% energi, 92% restitution</td>' +
+                '<td style="text-align:center;padding:4px;color:#f80">-20% startenergi, -8% restitution</td>' +
             '</tr>' +
             '<tr style="border-bottom:1px solid #222">' +
                 '<td style="padding:4px">Giro → Vuelta</td>' +
-                '<td style="text-align:center;padding:4px;color:#0f0">90% energi, 97% restitution</td>' +
+                '<td style="text-align:center;padding:4px;color:#0f0">-10% startenergi, -3% restitution</td>' +
             '</tr>' +
             '<tr>' +
                 '<td style="padding:4px">Tour → Vuelta</td>' +
-                '<td style="text-align:center;padding:4px;color:#f44">75% energi, 90% restitution</td>' +
+                '<td style="text-align:center;padding:4px;color:#f44">-25% startenergi, -10% restitution</td>' +
             '</tr>' +
         '</table>' +
+        '<p style="font-size:10px;margin-top:6px">Endagsløb-træthed og GT-træthed lægges sammen</p>' +
     '</div>' +
 
 	'</div>' +
