@@ -535,7 +535,7 @@ var ENDAGSLOEB = {
             maaned: "April",
             dist: 278,
             type: "brosten_kuperet",
-            brosten: 0.3,
+            brosten: 0.25,
             bonus: [3, 2, 1],
             monument: true,
             favoritStat: "fl",
@@ -597,7 +597,7 @@ var ENDAGSLOEB = {
             maaned: "Marts",
             dist: 213,
             type: "grus_kuperet",
-            brosten: 0.3,
+            brosten: 0.40,
             bonus: [1],
             monument: false,
             favoritStat: "bj",
@@ -612,7 +612,7 @@ var ENDAGSLOEB = {
             maaned: "Marts",
             dist: 209,
             type: "brosten_kuperet",
-            brosten: 0.25,
+            brosten: 0.20,
             bonus: [1],
             monument: false,
             favoritStat: "fl",
@@ -2321,7 +2321,7 @@ function visEndagsAlleResultater() {
         if (res[i].r.ude) dnfRyttere.push(res[i].r);
     }
 	if (dnfRyttere.length > 0) {
-        html += '<div class="box" style="border-color:#f44;max-height:100px;overflow-y:auto"><h3 style="color:#f44">🚶 Udgået (' + dnfRyttere.length + ')</h3>';
+        html += '<div class="box" style="border-color:#f44;max-height:200px;overflow-y:auto"><h3 style="color:#f44">🚶 Udgået (' + dnfRyttere.length + ')</h3>';
         for (var i = 0; i < dnfRyttere.length; i++) {
             html += '<div class="row" style="color:#666"><span>' + dnfRyttere[i].navn + ' <span style="color:#444">' + dnfRyttere[i].holdAbbr + '</span></span><span style="color:#f44">DNF</span></div>';
         }
@@ -3035,7 +3035,8 @@ function gaaVidereIKalender() {
 }
 
 function endagsLoebKort(loeb, valgt) {
-    var brostTxt = loeb.brosten > 0 ? '<div style="color:#a86;font-size:8px">🧱 ' + Math.round(loeb.brosten * 100) + '%</div>' : '';
+    var brostKm = loeb.brosten > 0 ? Math.round(loeb.brosten * loeb.dist * 0.4) : 0;
+    var brostTxt = loeb.brosten > 0 ? '<div style="color:#a86;font-size:8px">🧱 ' + brostKm + ' km</div>' : '';
     var starTxt = loeb.monument ? ' ⭐' : '';
     
     // Tjek om klassiker er disabled (max 5)
@@ -3143,10 +3144,23 @@ function startNaesteEndagsloeb() {
                 slut: Math.min(startKm + laengde, loeb.dist)
             });
         }
-        // Sortér efter startposition
+// Sortér efter startposition
         sektioner.sort(function(a, b) { return a.start - b.start; });
-        G.etaper[0].brostenSektioner = sektioner;
-    }
+        
+        // Fjern overlaps
+        var renset = [sektioner[0]];
+        for (var bi2 = 1; bi2 < sektioner.length; bi2++) {
+            var forrige = renset[renset.length - 1];
+            var aktuel = sektioner[bi2];
+            if (aktuel.start > forrige.slut + 2) {
+                // Ingen overlap - tilføj
+                renset.push(aktuel);
+            } else {
+                // Overlap - forlæng den forrige sektion
+                forrige.slut = Math.max(forrige.slut, aktuel.slut);
+            }
+        }
+        G.etaper[0].brostenSektioner = renset;    }
 	
     G.enr = 0;
     G.stilTab = "gc";
@@ -3174,9 +3188,11 @@ function startNaesteEndagsloeb() {
     }
     
     if (loeb.brosten > 0) {
-        var brostTekst = loeb.type === "grus_kuperet" ? "grus" : "brosten";
+        var brostTekst = loeb.type === "grus_kuperet" ? "grus (sterrato)" : "brostenspavéer";
+        var brostKm = Math.round(loeb.brosten * loeb.dist * 0.4);
         html += '<div class="box" style="border-color:#a86;text-align:center">' +
-            '<p style="color:#a86">🧱 ' + Math.round(loeb.brosten * 100) + '% ' + brostTekst + ' - koster ekstra energi!</p>' +
+            '<p style="color:#a86">🧱 Ca. ' + brostKm + ' km ' + brostTekst + '</p>' +
+            '<p style="color:#888;font-size:10px">Koster ekstra energi · Dårligt tempo straffes</p>' +
         '</div>';
     }
     
@@ -4796,7 +4812,8 @@ function getStigningVis() {
         for (var bsi = 0; bsi < etape.brostenSektioner.length; bsi++) {
             var bs = etape.brostenSektioner[bsi];
             if (G.km >= bs.start && G.km <= bs.slut) {
-                return '<span style="' + baseStyle + ';border:1px solid #a86;color:#a86;background:#221100">🧱 Brosten!</span>';
+                var brostLabel = (G.etaper[G.enr] && G.etaper[G.enr].type === "grus_kuperet") ? "🧱 Sterrato!" : "🧱 Pavéer!";
+				return '<span style="' + baseStyle + ';border:1px solid #a86;color:#a86;background:#221100">' + brostLabel + '</span>';
             }
         }
     }
