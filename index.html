@@ -2532,14 +2532,20 @@ function intro() {
     var fortsaetKnap = '';
     if (harGemtSpil()) {
         var saved = hentSpil();
-        var gtNavn = saved.aktuelGT ? (GT_CONFIG[saved.aktuelGT] ? GT_CONFIG[saved.aktuelGT].kort : "?") : "TdF";
+        var loebNavn = "";
+        if (saved.erEndagsloeb && saved.valgteEndagsloeb && saved.aktuelEndagsIdx !== undefined) {
+            var endagsId = saved.valgteEndagsloeb[saved.aktuelEndagsIdx];
+            var endagsLoeb = findEndagsLoeb(endagsId);
+            loebNavn = endagsLoeb ? endagsLoeb.kort : "Endagsløb";
+        } else {
+            loebNavn = saved.aktuelGT ? (GT_CONFIG[saved.aktuelGT] ? GT_CONFIG[saved.aktuelGT].kort : "?") : "TdF";
+        }
         fortsaetKnap =
             '<button class="btn btn-big btn-y" onclick="fortsaetSpil()" style="margin-bottom:6px">' +
 		    	'▶️ FORTSÆT SPIL' +
 			'</button>' +
-            '<div style="color:#888;font-size:11px;margin-bottom:10px">' +
-                'Sæson ' + (saved.saeson || 1) + ', ' + gtNavn +
-                ', Etape ' + ((saved.enr || 0) + 1) +
+			'<div style="color:#888;font-size:11px;margin-bottom:10px">' +
+                'Sæson ' + (saved.saeson || 1) + ', ' + loebNavn +
             '</div>';
     }
     
@@ -2798,17 +2804,7 @@ function visEndagsValg() {
     var antalEndags = G.valgteEndagsloeb.length;
     var antalGT = G.valgteGT.length;
     var antalTotal = antalEndags + antalGT;
-    
-    // Klassiker-tæller
-    var antalKlassikere = 0;
-    for (var i = 0; i < G.valgteEndagsloeb.length; i++) {
-        var l = findEndagsLoeb(G.valgteEndagsloeb[i]);
-        if (l && !l.monument) antalKlassikere++;
-    }
-    if (antalKlassikere > 0) {
-        html += '<div style="text-align:center;color:#888;font-size:11px;margin:5px 0">Klassikere: ' + antalKlassikere + '/5</div>';
-    }
-    
+        
     if (antalTotal > 0) {
         var foraarLoeb = 0;
         var sommerLoeb = 0;
@@ -3706,7 +3702,7 @@ else if (G.aktuelGTIdx > 0) {
             G.msg = "😓 Du føler dig ikke helt frisk i dag... (-" + faktiskPct + "% energi)";
         }
     }
-    
+    gemSpil(false);
     if (e.type === "tt") startTT();
     else startNorm();
 }
