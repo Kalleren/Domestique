@@ -315,7 +315,9 @@
 .instr td { color: #ccc; }
 .instr th { color: #888; }
 .instr p { color: #ccc; }
-    button, .btn { touch-action: manipulation; }
+    .btn[style*="border-color:#0f0"]:hover { background: #030; color: #0f0; }
+	.btn[style*="border-color:#0a0"]:hover { background: #020; color: #0a0; }
+	button, .btn { touch-action: manipulation; }
     html, body { touch-action: pan-y; }
     </style>
 </head>
@@ -2659,8 +2661,8 @@ function rytterInfoStartKnap() {
 
 function setEndagsTema() {
     var root = document.documentElement;
-    root.style.setProperty('--gt-primary', '#0a0');
-    root.style.setProperty('--gt-secondary', '#070');
+    root.style.setProperty('--gt-primary', '#0f0');
+    root.style.setProperty('--gt-secondary', '#0a0');
     root.style.setProperty('--gt-bg', '#010');
     root.style.setProperty('--gt-bg-box', '#010');
 }
@@ -3133,7 +3135,7 @@ function startNaesteEndagsloeb() {
     var typeTekst = loeb.monument ? "🏛️ MONUMENT" : "🏆 KLASSIKER";
     var html = '<div style="text-align:center;padding:20px 0">' +
         '<div style="font-size:40px">' + loeb.emoji + '</div>' +
-        '<h1 style="color:#0a0">' + loeb.navn.toUpperCase() + '</h1>' +
+        '<h1 style="color:#0f0">' + loeb.navn.toUpperCase() + '</h1>' +
         '<div style="color:#0a0">' + typeTekst + ' · ' + loeb.dist + ' km</div>' +
         '<div style="color:#888;font-size:12px;margin-top:5px">Løb ' + (G.aktuelEndagsIdx + 1) + ' af ' + G.valgteEndagsloeb.length + '</div>' +
     '</div>';
