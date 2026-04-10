@@ -742,7 +742,7 @@ var ENDAGSLOEB = {
 
 var ENDAGS_TRAETHED = {
     perLoeb: 0.10,
-    maxAkkumuleret: 0.30,
+    maxAkkumuleret: 0.35,
     efterGT: 0.80
 };
 
@@ -1154,7 +1154,7 @@ function visInstruktioner() {
         '<ul style="margin-left:18px;list-style:disc;font-size:14px;line-height:1.6">' +
             '<li>Vælg alle monumenter, op til 5 klassikere og 1-2 Grand Tours</li>' +
             '<li>Løbene køres i kronologisk rækkefølge (feb-okt)</li>' +
-            '<li>Endagsløb akkumulerer -10% energi per løb (max -30%) til næste GT</li>' +
+            '<li>Endagsløb akkumulerer -10% energi per løb (max -35%) til næste GT</li>' +
             '<li>Kører du 2 GT\'er, starter den anden med reduceret energi</li>' +
             '<li>Bonuspoint fordeles samlet efter sæsonen</li>' +
         '</ul>' +
@@ -1294,7 +1294,7 @@ function visInstruktioner() {
             '</tr>' +
             '<tr style="border-bottom:1px solid #222">' +
                 '<td style="padding:4px">Max endagsløb-træthed</td>' +
-                '<td style="text-align:center;padding:4px;color:#f44">-30% startenergi</td>' +
+                '<td style="text-align:center;padding:4px;color:#f44">-35% startenergi</td>' +
             '</tr>' +
             '<tr style="border-bottom:1px solid #222">' +
                 '<td style="padding:4px">Giro → Tour</td>' +
@@ -2745,7 +2745,6 @@ function visEndagsValg() {
     }
     
     if (antalTotal > 0) {
-        // Tæl løb per periode
         var foraarLoeb = 0;
         var sommerLoeb = 0;
         var harLombardia = false;
@@ -2764,59 +2763,57 @@ function visEndagsValg() {
         html += '<div class="box" style="border-color:#0ff;text-align:center">' +
             '<p style="color:#0ff;font-weight:bold">' + antalEndags + ' endagsløb + ' + antalGT + ' Grand Tour' + (antalGT !== 1 ? 's' : '') + '</p>';
         
-        // Beregn og vis træthed kronologisk
         var traethedLinjer = [];
         
-        // Forårsløb → Giro/Tour
+        // 1. Endagsløb akkumulering (altid først hvis flere end 1)
+        if (foraarLoeb + sommerLoeb + (harLombardia ? 1 : 0) > 1) {
+            traethedLinjer.push('<span style="color:#888">Endagsløb: -10% startenergi per løb (max -35%)</span>');
+        }
+        
+        // 2. Forårsløb → første GT
         if (foraarLoeb > 0) {
             var foraarPct = Math.min(foraarLoeb * 10, 30);
             if (harGiro) {
-                traethedLinjer.push('<span style="color:#f80">' + foraarLoeb + ' forårsløb: -' + foraarPct + '% energi til Giro</span>');
+                traethedLinjer.push('<span style="color:#f80">' + foraarLoeb + ' forårsløb: -' + foraarPct + '% startenergi til Giro</span>');
             } else if (harTour) {
-                traethedLinjer.push('<span style="color:#f80">' + foraarLoeb + ' forårsløb: -' + foraarPct + '% energi til Tour</span>');
+                traethedLinjer.push('<span style="color:#f80">' + foraarLoeb + ' forårsløb: -' + foraarPct + '% startenergi til Tour</span>');
             }
         }
-        // Endagsløb → endagsløb træthed
-        if (foraarLoeb > 1) {
-            traethedLinjer.push('<span style="color:#888">Endagsløb akkumulerer: -10% energi per løb (max -30%)</span>');
-        }
-        // Giro → Tour
+        
+        // 3. Giro → Tour
         if (harGiro && harTour) {
-            traethedLinjer.push('<span style="color:#f80">Giro → Tour: 80% energi, 92% restitution</span>');
+            traethedLinjer.push('<span style="color:#f80">Giro → Tour: -20% startenergi, -8% restitution</span>');
         }
         
-        // Giro → sommerløb
-        if (harGiro && sommerLoeb > 0 && !harTour) {
-            traethedLinjer.push('<span style="color:#f80">Giro → sommerløb: 80% energi</span>');
-        }
-        
-        // Tour → sommerløb
+        // 4. Tour → sommerløb (kun hvis Tour køres)
         if (harTour && sommerLoeb > 0) {
-            traethedLinjer.push('<span style="color:#f80">Tour → sommerløb: 80% energi</span>');
+            traethedLinjer.push('<span style="color:#f80">Tour → sommerløb: -20% startenergi</span>');
         }
         
-        // Sommerløb → Vuelta
+        // 5. Giro → Vuelta (uden Tour)
+        if (harGiro && harVuelta && !harTour) {
+            traethedLinjer.push('<span style="color:#0f0">Giro → Vuelta: -10% startenergi, -3% restitution</span>');
+        }
+        
+        // 6. Tour → Vuelta
+        if (harTour && harVuelta) {
+            traethedLinjer.push('<span style="color:#f44">Tour → Vuelta: -25% startenergi, -10% restitution</span>');
+        }
+        
+// 7. Sommerløb → Vuelta (ekstra oven i GT-træthed)
         if (sommerLoeb > 0 && harVuelta) {
             var sommerPct = Math.min(sommerLoeb * 10, 30);
-            traethedLinjer.push('<span style="color:#f80">' + sommerLoeb + ' sommerløb: -' + sommerPct + '% ekstra til Vuelta</span>');
+            traethedLinjer.push('<span style="color:#f80">' + sommerLoeb + ' sommerløb: yderligere -' + sommerPct + '% til Vuelta (max -35% samlet)</span>');
         }
         
-        // Giro → Vuelta (uden Tour)
-        if (harGiro && harVuelta && !harTour) {
-            traethedLinjer.push('<span style="color:#0f0">Giro → Vuelta: 90% energi, 97% restitution</span>');
-        }
-        
-        // Tour → Vuelta
-        if (harTour && harVuelta) {
-            traethedLinjer.push('<span style="color:#f44">Tour → Vuelta: 75% energi, 90% restitution</span>');
-        }
-        
-        // GT → Lombardia
+        // 8. Sidste GT → Lombardia
         if (harLombardia) {
             if (harVuelta) {
-                traethedLinjer.push('<span style="color:#f80">Vuelta → Lombardia: 80% energi</span>');
+                traethedLinjer.push('<span style="color:#f80">Vuelta → Lombardia: -20% startenergi</span>');
             } else if (harTour) {
-                traethedLinjer.push('<span style="color:#f80">Tour → Lombardia: 80% energi</span>');
+                traethedLinjer.push('<span style="color:#f80">Tour → Lombardia: -20% startenergi</span>');
+            } else if (harGiro) {
+                traethedLinjer.push('<span style="color:#f80">Giro → Lombardia: -20% startenergi</span>');
             }
         }
         
@@ -2914,13 +2911,26 @@ function startSaesonKalender() {
 
 function koerNaesteIKalender() {
     if (G.saesonKalenderIdx >= G.saesonKalender.length) {
-        // Sæsonen er slut
         G.erEndagsloeb = false;
         afslutSaeson();
         return;
     }
     
     var aktuel = G.saesonKalender[G.saesonKalenderIdx];
+    
+    // Sæt træthed efter en Grand Tour til endagsløb
+    if (G.saesonKalenderIdx > 0) {
+        var forrige = G.saesonKalender[G.saesonKalenderIdx - 1];
+        if (forrige.type === "gt" && aktuel.type === "endags") {
+            if (forrige.id === "tdf") {
+                G.endagsTraethed = 1 - GT_TRAETHED["tdf_vuelta"].energiStart; // 0.25
+            } else if (forrige.id === "giro") {
+                G.endagsTraethed = 1 - GT_TRAETHED["giro_tdf"].energiStart; // 0.20
+            } else if (forrige.id === "vuelta") {
+                G.endagsTraethed = 1 - ENDAGS_TRAETHED.efterGT; // 0.20
+            }
+        }
+    }
     
     if (aktuel.type === "endags") {
         G.erEndagsloeb = true;
@@ -3478,12 +3488,20 @@ function startEtape() {
             // Energi allerede sat i startNaesteEndagsloeb()
         }
         // Træthed fra tidligere GT i sæsonen
-        else if (G.aktuelGTIdx > 0) {
+else if (G.aktuelGTIdx > 0) {
             var tidligereGT = G.valgteGT[G.aktuelGTIdx - 1];
             var key = tidligereGT + "_" + G.aktuelGT;
             var traethed = GT_TRAETHED[key];
             if (traethed) {
-                G.spiller.energi = Math.round(maxE * traethed.energiStart);
+                var gtEnergi = traethed.energiStart;
+                // Tilføj træthed fra sommerløb mellem GT'erne
+                if (G.endagsTraethed > 0) {
+                    var ekstraTraethed = G.endagsTraethed - (1 - gtEnergi);
+                    if (ekstraTraethed > 0) {
+                        gtEnergi = Math.max(0.65, gtEnergi - ekstraTraethed);
+                    }
+                }
+                G.spiller.energi = Math.round(maxE * gtEnergi);
             } else {
                 G.spiller.energi = maxE;
             }
