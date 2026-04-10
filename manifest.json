@@ -1,0 +1,24 @@
+{
+    "name": "GrandTours - Giro · Tour · Vuelta",
+    "short_name": "GrandTours",
+    "description": "Kør Giro d'Italia, Tour de France og Vuelta a España",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#000000",
+    "theme_color": "#ffff00",
+    "icons": [
+        {
+            "src": "icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
