@@ -3503,13 +3503,13 @@ function genererEndagsFelt(loeb) {
     
     return { ryttere: ryttere };
 }
-    // Tjek om dette løb allerede er afsluttet
+
+function afslutEndagsloeb(res) {
+    var loebId = G.valgteEndagsloeb[G.aktuelEndagsIdx];
+	    // Tjek om dette løb allerede er afsluttet
     for (var di = 0; di < G.endagsResultater.length; di++) {
         if (G.endagsResultater[di].loebId === loebId) return;
     }
-function afslutEndagsloeb(res) {
-    var loebId = G.valgteEndagsloeb[G.aktuelEndagsIdx];
-	
     var loeb = findEndagsLoeb(loebId);
     
     var spiPlads = -1;
