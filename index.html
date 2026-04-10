@@ -1669,6 +1669,160 @@ function startSaeson() {
     startGrandTour();
 }
 
+function visSaesonKalender() {
+    var html = '<h2>📋 SÆSONKALENDER ' + (2025 + G.saeson) + '</h2>';
+    
+    var aktuelMaaned = "";
+    var loebNr = 0;
+    
+    html += '<div class="box" style="max-height:450px;overflow-y:auto">';
+    
+    for (var i = 0; i < G.saesonKalender.length; i++) {
+        var k = G.saesonKalender[i];
+        if (k.type === "reset") continue;
+        
+        loebNr++;
+        var erAktuel = (i === G.saesonKalenderIdx);
+        var erKoert = (i < G.saesonKalenderIdx);
+        var erKommende = (i === G.saesonKalenderIdx);
+        
+        var navn = "";
+        var maaned = "";
+        var dist = "";
+        var typeTekst = "";
+        var typeClr = "#888";
+        var emoji = "";
+        var placering = "";
+        
+        if (k.type === "endags") {
+            var loeb = findEndagsLoeb(k.id);
+            if (!loeb) continue;
+            navn = loeb.navn;
+            maaned = loeb.maaned;
+            dist = loeb.dist + " km";
+            emoji = loeb.emoji;
+            if (loeb.monument) {
+                typeTekst = "⭐ Monument";
+                typeClr = "#0f0";
+            } else {
+                typeTekst = "🏆 Klassiker";
+                typeClr = "#0a0";
+            }
+            // Find resultat
+            if (erKoert && G.endagsResultater) {
+                for (var ei = 0; ei < G.endagsResultater.length; ei++) {
+                    if (G.endagsResultater[ei].loebId === k.id) {
+                        var plads = G.endagsResultater[ei].plads;
+                        if (plads <= 3) {
+                            var medalje = plads === 1 ? "🥇" : plads === 2 ? "🥈" : "🥉";
+                            placering = '<span style="color:#0f0;font-weight:bold">' + medalje + ' ' + plads + '.</span>';
+                        } else {
+                            placering = '<span style="color:#888">' + plads + '. plads</span>';
+                        }
+                        break;
+                    }
+                }
+            }
+        } else if (k.type === "gt") {
+            var gt = GT_CONFIG[k.id];
+            navn = gt.navn;
+            maaned = gt.maaned;
+            dist = "21 etaper";
+            emoji = gt.emoji;
+            typeTekst = "🚴 Grand Tour";
+            typeClr = gt.primary;
+            // Find resultat
+            if (erKoert && G.saesonResultater) {
+                for (var gi = 0; gi < G.saesonResultater.length; gi++) {
+                    if (G.saesonResultater[gi].gtId === k.id) {
+                        var res = G.saesonResultater[gi];
+                        if (res.udgaaet) {
+                            placering = '<span style="color:#f44">💀 DNF</span>';
+                        } else if (res.gcPlads <= 3) {
+                            var medalje = res.gcPlads === 1 ? "🥇" : res.gcPlads === 2 ? "🥈" : "🥉";
+                            placering = '<span style="color:' + gt.primary + ';font-weight:bold">' + medalje + ' ' + res.gcPlads + '.</span>';
+                        } else {
+                            placering = '<span style="color:#888">' + res.gcPlads + '. plads</span>';
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Vis måned-header hvis ny måned
+        if (maaned !== aktuelMaaned) {
+            aktuelMaaned = maaned;
+            html += '<div style="padding:4px 8px;color:#888;font-size:10px;border-bottom:1px solid #333;margin-top:8px">' + maaned.toUpperCase() + '</div>';
+        }
+        
+        // Stil
+        var rowStyle = '';
+        var marker = '';
+        var scrollId = '';
+        if (erKommende) {
+            rowStyle = 'background:linear-gradient(90deg,#0f02 0%,#110 100%);border:2px solid #0f0;';
+            marker = ' <span style="color:#0f0;font-weight:bold">◄</span>';
+            scrollId = ' id="kalender-aktuel"';
+        } else if (erKoert) {
+            rowStyle = 'opacity:0.6;';
+            marker = ' <span style="color:#0f0">✓</span>';
+        }
+        
+        html += '<div' + scrollId + ' style="padding:8px;margin:3px 0;border-radius:4px;border:1px solid #333;' + rowStyle + '">' +
+            '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:5px">' +
+                '<span style="font-weight:bold;color:#fff">' + emoji + ' ' + navn + marker + '</span>' +
+                '<span style="color:' + typeClr + ';font-size:10px;padding:2px 6px;border:1px solid ' + typeClr + ';border-radius:8px;white-space:nowrap">' + typeTekst + '</span>' +
+            '</div>' +
+            '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">' +
+                '<span style="font-size:11px;color:#666">' + dist + '</span>' +
+                (placering ? placering : '') +
+            '</div>' +
+        '</div>';
+    }
+    
+    html += '</div>';
+    
+    // Opsummering
+    var antalEndags = G.valgteEndagsloeb.length;
+    var antalGT = G.valgteGT.length;
+    html += '<div style="text-align:center;color:#888;font-size:11px;margin-top:8px">' +
+        antalEndags + ' endagsløb · ' + antalGT + ' Grand Tour' + (antalGT !== 1 ? 's' : '') +
+    '</div>';
+    
+    // Tilbage-knap
+    html += '<div class="ctrls" style="margin-top:10px">' +
+        '<button class="btn btn-big" style="border-color:#3399ff;color:#3399ff" onclick="tilbageFraKalender()">← TILBAGE</button>' +
+    '</div>';
+    
+    R(html);
+    
+    // Auto-scroll til aktuel
+    setTimeout(function() {
+        var marker = document.getElementById('kalender-aktuel');
+        if (marker && marker.parentElement) {
+            var container = marker.closest('.box');
+            if (container) {
+                container.scrollTop = marker.offsetTop - container.offsetTop - 40;
+            }
+        }
+    }, 50);
+}
+
+function tilbageFraKalender() {
+    var aktuel = G.saesonKalender[G.saesonKalenderIdx];
+    if (!aktuel) {
+        visEndagsValg();
+        return;
+    }
+    
+    if (aktuel.type === "endags") {
+        startNaesteEndagsloeb();
+    } else if (aktuel.type === "gt") {
+        startGrandTour();
+    }
+}
+
 function startGrandTour() {
     var gtId = G.aktuelGT;
     setGTTema(gtId);
@@ -1691,7 +1845,6 @@ function startGrandTour() {
     var html = '<div style="text-align:center;padding:20px 0">' +
         '<div style="font-size:50px">' + gt.emoji + '🚴‍♂️🏔️🚴‍♂️' + gt.emoji + '</div>' +
         '<h1 style="color:' + gt.primary + '">' + gt.navn.toUpperCase() + ' ' + gt.aar() + '</h1>' +
-        (G.valgteGT.length > 1 ? '<div style="color:#888;font-size:12px;margin-top:5px">Løb ' + (G.aktuelGTIdx + 1) + ' af ' + G.valgteGT.length + ' denne sæson</div>' : '') +
     '</div>';
     
     // Vis træthed-status
@@ -1718,7 +1871,10 @@ function startGrandTour() {
         '<div class="sbar"><span class="lbl">Udholdenhed:</span><div class="bg"><div class="fill" style="width:'+G.spiller.ud+'%;background:#f80"></div></div><span>'+G.spiller.ud+'</span></div>' +
         '<div class="sbar"><span class="lbl">Restitution:</span><div class="bg"><div class="fill" style="width:'+G.spiller.re+'%;background:#a4f"></div></div><span>'+G.spiller.re+'</span></div>' +
     '</div>' +
-    '<div class="ctrls"><button class="btn btn-big btn-y" onclick="startEtape()" style="white-space:nowrap">START ETAPE 1</button></div>';
+    '<div class="ctrls">' +
+        '<button class="btn btn-big" style="border-color:#888;color:#888" onclick="visSaesonKalender()">📋 KALENDER</button>' +
+        '<button class="btn btn-big btn-y" onclick="startEtape()" style="white-space:nowrap">START ETAPE 1</button>' +
+    '</div>';
     
     R(html);
 }
@@ -2045,7 +2201,21 @@ function getGruppeFarve(g, spiller, gcLeder, spLeder, bjLeder) {
         if (r === spLeder) harSp = true;
         if (r === bjLeder) harBj = true;
     }
-    
+
+	    // Endagsløb: ingen trøjefarver, brug standard
+    if (G.erEndagsloeb) {
+        if (g.type === "gruppetto") {
+            return { border: "#888", bg: "#111", text: "#888" };
+        }
+        if (g.type === "felt") {
+            return { border: "#0cc", bg: "#023", text: "#0cc" };
+        }
+        if (g.type === "udbrud") {
+            return { border: "#f80", bg: "#210", text: "#f80" };
+        }
+        return { border: "#888", bg: "#111", text: "#888" };
+    }
+	
     if (harGC) {
         return { border: gt.gcColor, bg: gt.bg, text: gt.gcColor };
     }
@@ -2088,7 +2258,15 @@ function erstatTroejeTekster(tekst) {
 // ========== TILPASSET visResume() ==========
 
 function erstatGTHtml(html) {
-    var gt = getGT();
+    	// Endagsløb: override med grønt tema
+    if (G.erEndagsloeb) {
+        html = html.replace(/border-color:#ff0/g, 'border-color:#0f0');
+        html = html.replace(/color:#ff0/g, 'color:#0f0');
+        html = html.replace(/background:#110/g, 'background:#010');
+        html = html.replace(/border:1px solid #aa0/g, 'border:1px solid #0a0');
+        html = html.replace(/border:2px solid #aa0/g, 'border:2px solid #0a0');
+    }
+	var gt = getGT();
     
     // Trøje-emojis (kun i klassement-kontekst)
     html = html.replace(/🟡 Samlet/g, gt.gcEmoji + ' Samlet');
@@ -2134,14 +2312,6 @@ function erstatGTHtml(html) {
     html = html.replace(/border:1px solid #aa0/g, 'border:1px solid ' + gt.secondary);
     html = html.replace(/border:2px solid #aa0/g, 'border:2px solid ' + gt.secondary);
 
-	    // Endagsløb: override med grønt tema
-    if (G.erEndagsloeb) {
-        html = html.replace(/border-color:#ff0/g, 'border-color:#0a0');
-        html = html.replace(/color:#ff0/g, 'color:#0a0');
-        html = html.replace(/background:#110/g, 'background:#010');
-        html = html.replace(/border:1px solid #aa0/g, 'border:1px solid #070');
-        html = html.replace(/border:2px solid #aa0/g, 'border:2px solid #070');
-    }
     return html;
 }
 
@@ -2738,7 +2908,7 @@ function visEndagsValg() {
     // ===== GIRO (maj) =====
 	var giroValgt = G.valgteGT.indexOf("giro") >= 0;
     var giroDisabled = !giroValgt && G.valgteGT.length >= 2;
-    html += '<div class="box" style="border-color:' + (giroDisabled ? '#333' : '#ff69b4') + ';' + (giroDisabled ? 'opacity:0.3' : '') + '">' +
+    html += '<div class="box" style="border-color:' + (giroDisabled ? '#333' : '#ff69b4') + ';' + (giroDisabled ? 'opacity:0.3' : '') + (giroValgt ? ';border-width:3px;background:#200015;box-shadow:0 0 10px #ff69b44' : '') + '">' +
         '<div style="text-align:center;cursor:pointer" onclick="' + (giroDisabled ? '' : 'toggleGTValg(\'giro\');visEndagsValg()') + '">' +
     '<h3 style="color:' + (giroDisabled ? '#333' : '#ff69b4') + ';margin:0">🇮🇹 Giro d\'Italia · Maj ' + (giroValgt ? '<span style="color:#0f0">✓</span>' : '') + '</h3>' +
 	'</div>' +
@@ -2747,7 +2917,7 @@ function visEndagsValg() {
     // ===== TOUR (juli) =====
     var tourValgt = G.valgteGT.indexOf("tdf") >= 0;
     var tourDisabled = !tourValgt && G.valgteGT.length >= 2;
-    html += '<div class="box" style="border-color:' + (tourDisabled ? '#333' : '#ff0') + ';' + (tourDisabled ? 'opacity:0.3' : '') + '">' +
+    html += '<div class="box" style="border-color:' + (tourDisabled ? '#333' : '#ff0') + ';' + (tourDisabled ? 'opacity:0.3' : '') + (tourValgt ? ';border-width:3px;background:#330;box-shadow:0 0 10px #ff04' : '') + '">' +
         '<div style="text-align:center;cursor:pointer" onclick="' + (tourDisabled ? '' : 'toggleGTValg(\'tdf\');visEndagsValg()') + '">' +
     '<h3 style="color:' + (tourDisabled ? '#333' : '#ff0') + ';margin:0">🇫🇷 Tour de France · Juli ' + (tourValgt ? '<span style="color:#0f0">✓</span>' : '') + '</h3>' +
 	'</div>' +
@@ -2767,7 +2937,7 @@ function visEndagsValg() {
     // ===== VUELTA (aug-sep) =====
     var vueltaValgt = G.valgteGT.indexOf("vuelta") >= 0;
     var vueltaDisabled = !vueltaValgt && G.valgteGT.length >= 2;
-    html += '<div class="box" style="border-color:' + (vueltaDisabled ? '#333' : '#f44') + ';' + (vueltaDisabled ? 'opacity:0.3' : '') + '">' +
+    html += '<div class="box" style="border-color:' + (vueltaDisabled ? '#333' : '#f44') + ';' + (vueltaDisabled ? 'opacity:0.3' : '') + (vueltaValgt ? ';border-width:3px;background:#200;box-shadow:0 0 10px #f444' : '') + '">' +
         '<div style="text-align:center;cursor:pointer" onclick="' + (vueltaDisabled ? '' : 'toggleGTValg(\'vuelta\');visEndagsValg()') + '">' +
     '<h3 style="color:' + (vueltaDisabled ? '#333' : '#f44') + ';margin:0">🇪🇸 Vuelta a España · Aug-Sep ' + (vueltaValgt ? '<span style="color:#0f0">✓</span>' : '') + '</h3>' +
 	'</div>' +
@@ -3109,25 +3279,55 @@ function startNaesteEndagsloeb() {
     var etapeType = "kuperet";
     if (loeb.type === "bjerg" || loeb.type === "kuperet_bjerg") etapeType = "bjerg";
     
-    G.etaper = [{
+	G.etaper = [{
         nr: 1,
         type: etapeType,
-        start: loeb.navn.split("-")[0].trim() || loeb.kort,
-        slut: loeb.navn.split("-").pop().trim() || loeb.kort,
+        start: loeb.monument ? "Monument" : "Klassiker",
+        slut: loeb.navn,
         dist: loeb.dist
-    }];
-	// Generer brosten-sektioner for endagsløb
+    }];	// Generer brosten-sektioner for endagsløb
     if (loeb.brosten > 0) {
         var sektioner = [];
-        var antalSektioner = Math.round(loeb.brosten * 10) + ri(1, 3);
+        // Flere kortere sektioner - matcher virkeligheden bedre
+        // Paris-Roubaix har ~30 sektioner af 1-3 km
+        // Flandern har ~17 korte hellingen med brosten
+        var antalSektioner;
+        if (loeb.id === "roubaix") {
+            antalSektioner = ri(25, 30);
+        } else if (loeb.id === "flandern") {
+            antalSektioner = ri(14, 18);
+        } else if (loeb.id === "strade") {
+            antalSektioner = ri(8, 11);
+        } else {
+            antalSektioner = Math.round(loeb.brosten * 30) + ri(2, 5);
+        }
+        
         for (var bi = 0; bi < antalSektioner; bi++) {
-            // Brosten typisk i midten og slutningen af løbet
-            var startPct = 0.3 + Math.random() * 0.6; // 30-90% af distancen
-            var laengde = ri(3, 12); // 3-12 km lange sektioner
+            var startPct, laengde;
+            
+            if (loeb.id === "roubaix") {
+                // Roubaix: sektioner fra 40% til 95%, 1-3.5 km lange
+                // De hårdeste sektioner er i slutningen (Carrefour de l'Arbre, Mons-en-Pévèle)
+                startPct = 0.40 + Math.random() * 0.55;
+                laengde = rf(1.0, 3.5);
+            } else if (loeb.id === "flandern") {
+                // Flandern: korte stejle hellingen, 0.5-2 km
+                startPct = 0.35 + Math.random() * 0.60;
+                laengde = rf(0.5, 2.0);
+            } else if (loeb.id === "strade") {
+                // Strade Bianche: grus-sektioner, 2-8 km lange
+                startPct = 0.15 + Math.random() * 0.75;
+                laengde = rf(2.0, 8.0);
+            } else {
+                // Andre løb: blandede korte sektioner
+                startPct = 0.30 + Math.random() * 0.60;
+                laengde = rf(0.8, 3.0);
+            }
+            
             var startKm = Math.round(startPct * loeb.dist);
             sektioner.push({
                 start: startKm,
-                slut: Math.min(startKm + laengde, loeb.dist)
+                slut: Math.min(startKm + Math.round(laengde), loeb.dist)
             });
         }
 // Sortér efter startposition
@@ -3159,12 +3359,12 @@ function startNaesteEndagsloeb() {
     G.spiller.energi = Math.round(maxE * traethedFaktor);
     
     // Vis intro
-    var typeTekst = loeb.monument ? "🏛️ MONUMENT" : "🏆 KLASSIKER";
+    var typeTekst = loeb.monument ? "⭐ MONUMENT ⭐" : "🏆 KLASSIKER";
+    
     var html = '<div style="text-align:center;padding:20px 0">' +
         '<div style="font-size:40px">' + loeb.emoji + '</div>' +
         '<h1 style="color:#0f0">' + loeb.navn.toUpperCase() + '</h1>' +
-        '<div style="color:#0a0">' + typeTekst + ' · ' + loeb.dist + ' km</div>' +
-        '<div style="color:#888;font-size:12px;margin-top:5px">Løb ' + (G.saesonKalender.filter(function(k,idx) { return k.type !== "reset" && idx <= G.saesonKalenderIdx; }).length) + ' af ' + G.saesonKalender.filter(function(k) { return k.type !== "reset"; }).length + '</div>' +
+        '<div style="color:' + (loeb.monument ? '#ff0' : '#0f0') + ';font-weight:bold">' + typeTekst + ' · ' + loeb.dist + ' km</div>' +
     '</div>';
     
     if (G.endagsTraethed > 0) {
@@ -3187,7 +3387,10 @@ function startNaesteEndagsloeb() {
         '<p style="color:#ccc">Bonus: ' + loeb.bonus.join('/') + ' point for top ' + loeb.bonus.length + '</p>' +
     '</div>';
     
-    html += '<div class="ctrls"><button class="btn btn-big" style="border-color:#0f0;color:#0f0" onclick="startEtape()">START</button></div>';
+    html += '<div class="ctrls">' +
+        '<button class="btn btn-big" style="border-color:#888;color:#888" onclick="visSaesonKalender()">📋 KALENDER</button>' +
+        '<button class="btn btn-big" style="border-color:#0f0;color:#0f0" onclick="startEtape()">START</button>' +
+    '</div>';
     gemSpil(false);
     R(html);
 }
@@ -3300,9 +3503,13 @@ function genererEndagsFelt(loeb) {
     
     return { ryttere: ryttere };
 }
-
+    // Tjek om dette løb allerede er afsluttet
+    for (var di = 0; di < G.endagsResultater.length; di++) {
+        if (G.endagsResultater[di].loebId === loebId) return;
+    }
 function afslutEndagsloeb(res) {
     var loebId = G.valgteEndagsloeb[G.aktuelEndagsIdx];
+	
     var loeb = findEndagsLoeb(loebId);
     
     var spiPlads = -1;
@@ -3337,7 +3544,7 @@ function afslutEndagsloeb(res) {
 
 function visEndagsResultat(res, loeb, spiPlads, bonus) {
     setEndagsTema();
-    var typeTekst = loeb.monument ? "🏛️ MONUMENT" : "🏆 KLASSIKER";
+    var typeTekst = loeb.monument ? "⭐ MONUMENT" : "🏆 KLASSIKER";
     
     var html = '<div style="text-align:center;padding:15px 0">' +
         '<h1 style="color:#0a0">' + loeb.kort.toUpperCase() + ' SLUT</h1>' +
@@ -3692,10 +3899,12 @@ else if (G.aktuelGTIdx > 0) {
             G.msg = "😓 Du føler dig ikke helt frisk i dag... (-" + faktiskPct + "% energi)";
         }
     }
-    gemSpil(false);
+	if (!G.erEndagsloeb) {
+        gemSpil(false);
+    }
     if (e.type === "tt") startTT();
     else startNorm();
-}
+	}
 
 // ========== TILPASSET afslut() - RESTITUTION ==========
 // I den originale afslut() og afslutTT(), erstat restitutions-beregningen.
@@ -7166,14 +7375,14 @@ function favoritAngrebSlut() {
         if (g.type !== "udbrud" || g.ryt.length < 2) continue;
         
         // Tæl favoritter i gruppen
-        var favoritter = [];
+		var favoritter = [];
         for (var i = 0; i < g.ryt.length; i++) {
             var r = g.ryt[i];
-            if (r.gc > 82 && !r.ude) {
+            var erFavorit = G.erEndagsloeb ? (r.bj > 75 || r.spr > 80 || r.fl > 82) : (r.gc > 82);
+            if (erFavorit && !r.ude) {
                 favoritter.push(r);
             }
-        }
-        
+        }        
         // Hvis 2+ favoritter, chance for angreb
         if (favoritter.length >= 2) {
             var kmTilMaal = e.dist - G.km;
@@ -7217,7 +7426,8 @@ g.ryt = g.ryt.filter(function(r) { return r !== angriber; });
 var reagerende = [];
 for (var fi = 0; fi < g.ryt.length; fi++) {
     var rival = g.ryt[fi];
-    if (rival.gc > 80 && !rival.ude && !rival.sp) {
+    var rivalErFavorit = G.erEndagsloeb ? (rival.bj > 75 || rival.spr > 78 || rival.fl > 80) : (rival.gc > 80);
+	if (rivalErFavorit && !rival.ude && !rival.sp) {
         // Reagerer hvis de har energi og er stærke nok
         var reaktionsChance = (rival.energi - 30) / 70 * (rival.bj / 100);
         if (rival.energi > 50 && Math.random() < reaktionsChance * 0.7) {
@@ -7272,7 +7482,8 @@ return;
             var feltFavoritter = [];
             for (var i = 0; i < felt.ryt.length; i++) {
                 var r = felt.ryt[i];
-                if (r.gc > 84 && !r.ude && !r.sp && r.energi > 40) {
+                var erTopFavorit = G.erEndagsloeb ? (r.bj > 78 || r.spr > 82 || r.fl > 84) : (r.gc > 84);
+                if (erTopFavorit && !r.ude && !r.sp && r.energi > 40) {
                     feltFavoritter.push(r);
                 }
             }
@@ -7299,7 +7510,8 @@ return;
     var reagerende = [];
     for (var fi = 0; fi < felt.ryt.length; fi++) {
         var rival = felt.ryt[fi];
-        if (rival.gc > 80 && !rival.ude && !rival.sp && rival.energi > 45) {
+        var rivalErFavorit2 = G.erEndagsloeb ? (rival.bj > 75 || rival.spr > 78 || rival.fl > 80) : (rival.gc > 80);
+		if (rivalErFavorit2 && !rival.ude && !rival.sp && rival.energi > 45) {
             var reaktionsChance = (rival.energi - 40) / 60 * (rival.bj / 100);
             if (Math.random() < reaktionsChance * 0.6) {
                 reagerende.push(rival);
@@ -7361,13 +7573,13 @@ function favoritAngrebMidtvejs() {
         
         // Tæl GC-ryttere i gruppen
         var gcRyttere = [];
-        for (var i = 0; i < g.ryt.length; i++) {
+		        for (var i = 0; i < g.ryt.length; i++) {
             var r = g.ryt[i];
-            if (r.gc > 80 && !r.ude && !r.sp) {
+            var erFavorit = G.erEndagsloeb ? (r.bj > 75 || r.spr > 78 || r.fl > 80) : (r.gc > 80);
+            if (erFavorit && !r.ude && !r.sp) {
                 gcRyttere.push(r);
             }
-        }
-        
+        }        
         // Hvis 2+ GC-ryttere, chance for angreb
         if (gcRyttere.length < 2) continue;
         
@@ -7407,7 +7619,8 @@ function favoritAngrebMidtvejs() {
         var reagerende = [];
         for (var fi = 0; fi < g.ryt.length; fi++) {
             var rival = g.ryt[fi];
-            if (rival.gc > 78 && !rival.ude && !rival.sp && rival.energi > 40) {
+            var rivalErFavorit = G.erEndagsloeb ? (rival.bj > 73 || rival.spr > 76 || rival.fl > 78) : (rival.gc > 78);
+			if (rivalErFavorit && !rival.ude && !rival.sp && rival.energi > 40) {
                 var reaktionsChance = (rival.energi - 35) / 65 * (rival.bj / 100);
                 if (Math.random() < reaktionsChance * 0.6) {
                     reagerende.push(rival);
@@ -7481,7 +7694,8 @@ function favoritAngrebKuperet() {
     var favoritter = [];
     for (var i = 0; i < felt.ryt.length; i++) {
         var r = felt.ryt[i];
-        if (!r.sp && !r.ude && r.gc > 80) {
+		var erFavorit = G.erEndagsloeb ? (r.bj > 75 || r.spr > 78 || r.fl > 80) : (r.gc > 80);
+        if (!r.sp && !r.ude && erFavorit) {
             var energiTilMaal = kmTilMaal * 0.9;
             if (r.energi > energiTilMaal + 15) {
                 favoritter.push(r);
@@ -7504,7 +7718,8 @@ function favoritAngrebKuperet() {
 var reagerende = [];
 for (var fi = 0; fi < felt.ryt.length; fi++) {
     var rival = felt.ryt[fi];
-    if (rival.gc > 78 && !rival.ude && !rival.sp && rival.energi > 40) {
+    var rivalErFavorit = G.erEndagsloeb ? (rival.bj > 73 || rival.spr > 76 || rival.fl > 78) : (rival.gc > 78);
+	if (rivalErFavorit && !rival.ude && !rival.sp && rival.energi > 40) {
         var reaktionsChance = (rival.energi - 35) / 65 * ((rival.bj + rival.gc) / 200);
         if (Math.random() < reaktionsChance * 0.5) {
             reagerende.push(rival);
@@ -7837,7 +8052,8 @@ function accUdb() {
     var reagerende = [];
     for (var i = 0; i < felt.ryt.length; i++) {
         var r = felt.ryt[i];
-        if (r.gc > 78 && !r.ude && r.energi > 35) {
+        var rErFavorit = G.erEndagsloeb ? (r.bj > 73 || r.spr > 76 || r.fl > 78) : (r.gc > 78);
+		if (rErFavorit && !r.ude && r.energi > 35) {
             // Højere chance for at reagere jo bedre GC-rytter
             var reaktionsChance = (r.gc - 75) / 25 * (r.energi / 100);
             // Øget chance på bjerge og kuperet
@@ -7939,7 +8155,17 @@ for (var i = 0; i < G.grp.length; i++) {
             udbrudEnergi += g.ryt[ui].energi;
         }
         udbrudEnergi = g.ryt.length > 0 ? udbrudEnergi / g.ryt.length : 50;
-        
+        // Endagsløb: Stærke ryttere i udbrud er sværere at indhente
+        if (G.erEndagsloeb) {
+            var udbrudStyrke = 0;
+            for (var ui2 = 0; ui2 < g.ryt.length; ui2++) {
+                var uR = g.ryt[ui2];
+                udbrudStyrke += (uR.fl * 0.4 + uR.bj * 0.3 + uR.spr * 0.3) / 100;
+            }
+            udbrudStyrke = g.ryt.length > 0 ? udbrudStyrke / g.ryt.length : 0.5;
+            if (udbrudStyrke > 0.75) modJagteRate *= 0.3;
+            else if (udbrudStyrke > 0.65) modJagteRate *= 0.5;
+        }
         // Modificer jagterate baseret på klassement og energi
     var modJagteRate = jagteRate;
     if (!harKlassement) {
@@ -8136,7 +8362,8 @@ if (udb) {
         var reagerende = [];
         for (var i = 0; i < sg.ryt.length; i++) {
             var r = sg.ryt[i];
-            if (r.gc > 78 && !r.ude && r.energi > 30) {
+            var rErFavorit = G.erEndagsloeb ? (r.bj > 73 || r.spr > 76 || r.fl > 78) : (r.gc > 78);
+			if (rErFavorit && !r.ude && r.energi > 30) {
                 var reaktionsChance = (r.gc - 75) / 25 * (r.energi / 100);
                 if (e.type === "bjerg") reaktionsChance *= 1.4;
                 else if (e.type === "kuperet") reaktionsChance *= 1.2;
@@ -8197,7 +8424,8 @@ var e = G.etaper[G.enr];
 var reagerende = [];
 for (var i = 0; i < sg.ryt.length; i++) {
     var r = sg.ryt[i];
-    if (r.gc > 78 && !r.ude && r.energi > 35) {
+    var rErFavorit = G.erEndagsloeb ? (r.bj > 73 || r.spr > 76 || r.fl > 78) : (r.gc > 78);
+	if (rErFavorit && !r.ude && r.energi > 35) {
         var reaktionsChance = (r.gc - 75) / 25 * (r.energi / 100);
         if (e.type === "bjerg") reaktionsChance *= 1.3;
         else if (e.type === "kuperet") reaktionsChance *= 1.1;
@@ -8290,7 +8518,8 @@ if (Math.random() < ch) {
     var reagerende = [];
     for (var i = 0; i < sg.ryt.length; i++) {
         var r = sg.ryt[i];
-        if (r.gc > 78 && !r.ude && r.energi > 30) {
+        var rErFavorit = G.erEndagsloeb ? (r.bj > 73 || r.spr > 76 || r.fl > 78) : (r.gc > 78);
+		if (rErFavorit && !r.ude && r.energi > 30) {
             var reaktionsChance = (r.gc - 75) / 25 * (r.energi / 100);
             if (e.type === "bjerg") reaktionsChance *= 1.4;
             else if (e.type === "kuperet") reaktionsChance *= 1.2;
