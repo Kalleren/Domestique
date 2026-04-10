@@ -3610,6 +3610,9 @@ function fortsaetSpil() {
     if (result === 'slut') {
         slut();
     } else if (result) {
+        if (G.erEndagsloeb) {
+            setEndagsTema();
+        }
         startEtape();
     } else {
         alert('Kunne ikke indlæse gemt spil');
