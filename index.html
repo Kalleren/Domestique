@@ -2767,16 +2767,16 @@ function visEndagsValg() {
         
         // 1. Endagsløb akkumulering (altid først hvis flere end 1)
         if (foraarLoeb + sommerLoeb + (harLombardia ? 1 : 0) > 1) {
-            traethedLinjer.push('<span style="color:#888">Endagsløb: -10% startenergi per løb (max -35%)</span>');
+            traethedLinjer.push('<span style="color:#888">Endagsløb: -10% startenergi per løb (max -35%), resat ved Grand Tour</span>');
         }
         
         // 2. Forårsløb → første GT
-        if (foraarLoeb > 0) {
-            var foraarPct = Math.min(foraarLoeb * 10, 30);
+		if (foraarLoeb > 0) {
+            var foraarPct = Math.min(foraarLoeb * 10, 35);
             if (harGiro) {
                 traethedLinjer.push('<span style="color:#f80">' + foraarLoeb + ' forårsløb: -' + foraarPct + '% startenergi til Giro</span>');
-            } else if (harTour) {
-                traethedLinjer.push('<span style="color:#f80">' + foraarLoeb + ' forårsløb: -' + foraarPct + '% startenergi til Tour</span>');
+            } else {
+                traethedLinjer.push('<span style="color:#888">' + foraarLoeb + ' forårsløb: nulstilles ved Giro-tidspunkt (maj)</span>');
             }
         }
         
@@ -2787,7 +2787,7 @@ function visEndagsValg() {
         
         // 4. Tour → sommerløb (kun hvis Tour køres)
         if (harTour && sommerLoeb > 0) {
-            traethedLinjer.push('<span style="color:#f80">Tour → sommerløb: -20% startenergi</span>');
+            traethedLinjer.push('<span style="color:#f80">Tour → sommerløb: -25% startenergi</span>');
         }
         
         // 5. Giro → Vuelta (uden Tour)
@@ -2802,7 +2802,7 @@ function visEndagsValg() {
         
 // 7. Sommerløb → Vuelta (ekstra oven i GT-træthed)
         if (sommerLoeb > 0 && harVuelta) {
-            var sommerPct = Math.min(sommerLoeb * 10, 30);
+            var sommerPct = Math.min(sommerLoeb * 10, 35);
             traethedLinjer.push('<span style="color:#f80">' + sommerLoeb + ' sommerløb: yderligere -' + sommerPct + '% til Vuelta (max -35% samlet)</span>');
         }
         
@@ -2864,14 +2864,18 @@ function byggSaesonKalender() {
         }
     }
     
-    // Giro (maj)
+    // Giro (maj) - altid en marker der nulstiller træthed
     if (G.valgteGT.indexOf("giro") >= 0) {
         kalender.push({ type: "gt", id: "giro" });
+    } else {
+        kalender.push({ type: "reset", id: "giro" });
     }
     
-    // Tour (juli)
+    // Tour (juli) - altid en marker
     if (G.valgteGT.indexOf("tdf") >= 0) {
         kalender.push({ type: "gt", id: "tdf" });
+    } else {
+        kalender.push({ type: "reset", id: "tdf" });
     }
     
     // Sommerløb (juli-aug)
@@ -2882,9 +2886,11 @@ function byggSaesonKalender() {
         }
     }
     
-    // Vuelta (aug-sep)
+    // Vuelta (aug-sep) - altid en marker
     if (G.valgteGT.indexOf("vuelta") >= 0) {
         kalender.push({ type: "gt", id: "vuelta" });
+    } else {
+        kalender.push({ type: "reset", id: "vuelta" });
     }
     
     // Lombardia (oktober)
@@ -2918,16 +2924,28 @@ function koerNaesteIKalender() {
     
     var aktuel = G.saesonKalender[G.saesonKalenderIdx];
     
-    // Sæt træthed efter en Grand Tour til endagsløb
+    // Reset-marker: nulstil træthed og spring videre
+    if (aktuel.type === "reset") {
+        G.endagsTraethed = 0;
+        G.saesonKalenderIdx++;
+        koerNaesteIKalender();
+        return;
+    }
+    
+    // Nulstil/sæt træthed efter en Grand Tour
     if (G.saesonKalenderIdx > 0) {
         var forrige = G.saesonKalender[G.saesonKalenderIdx - 1];
-        if (forrige.type === "gt" && aktuel.type === "endags") {
-            if (forrige.id === "tdf") {
-                G.endagsTraethed = 1 - GT_TRAETHED["tdf_vuelta"].energiStart; // 0.25
-            } else if (forrige.id === "giro") {
-                G.endagsTraethed = 1 - GT_TRAETHED["giro_tdf"].energiStart; // 0.20
-            } else if (forrige.id === "vuelta") {
-                G.endagsTraethed = 1 - ENDAGS_TRAETHED.efterGT; // 0.20
+        if (forrige.type === "gt") {
+            if (aktuel.type === "endags") {
+                if (forrige.id === "tdf") {
+                    G.endagsTraethed = 1 - GT_TRAETHED["tdf_vuelta"].energiStart;
+                } else if (forrige.id === "giro") {
+                    G.endagsTraethed = 1 - GT_TRAETHED["giro_tdf"].energiStart;
+                } else if (forrige.id === "vuelta") {
+                    G.endagsTraethed = 1 - ENDAGS_TRAETHED.efterGT;
+                }
+            } else {
+                G.endagsTraethed = 0;
             }
         }
     }
@@ -2939,7 +2957,6 @@ function koerNaesteIKalender() {
     } else if (aktuel.type === "gt") {
         G.erEndagsloeb = false;
         G.aktuelGT = aktuel.id;
-        // Find GT-index
         G.aktuelGTIdx = G.valgteGT.indexOf(aktuel.id);
         startGrandTour();
     }
