@@ -2495,7 +2495,7 @@ R('<div style="text-align:center;padding:20px 0">' +
         '<p style="color:#666;font-size:11px;margin-top:15px">Kør klassikere og Grand Tours i op til 10 sæsoner</p>' +
     '</div>' +
     '<div class="box" style="background:linear-gradient(180deg,#010 0%,#000 100%);border-color:#0a0">' +
-        '<h3 style="text-align:center;margin-bottom:12px;color:#0a0">🏛️ Endagsløb:</h3>' +
+        '<h3 style="text-align:center;margin-bottom:12px">🏛️ Endagsløb:</h3>' +
         '<div style="text-align:center;color:#0a0;font-size:12px">' +
             '5 monumenter · 10 klassikere · Brosten & bakker' +
         '</div>' +
@@ -3214,7 +3214,7 @@ function afslutAlleEndagsloeb() {
 
 function gemSpil(etapeFaerdig) {
     var saveData = {
-        version: 3, // Opdateret version for GrandTours
+        version: 4, // Opdateret version for GrandTours
         navn: G.navn,
         saeson: G.saeson,
         tourNr: G.tourNr,
@@ -3274,12 +3274,12 @@ function gemSpil(etapeFaerdig) {
         });
     }
     
-    localStorage.setItem('grandToursSave', JSON.stringify(saveData));
+	localStorage.setItem('domestiqueSave', JSON.stringify(saveData));
 }
 
 function hentSpil() {
     // KUN læs fra den nye save-key
-    var saved = localStorage.getItem('grandToursSave');
+    var saved = localStorage.getItem('domestiqueSave');
     if (!saved) return null;
     
     try {
@@ -3291,7 +3291,7 @@ function hentSpil() {
 }
 
 function sletGemtSpil() {
-    localStorage.removeItem('grandToursSave');
+    localStorage.removeItem('domestiqueSave');
 }
 
 function harGemtSpil() {
@@ -3302,7 +3302,7 @@ function indlaesGemtSpil() {
     var saveData = hentSpil();
     if (!saveData) return false;
     
-    var CURRENT_VERSION = 3;
+    var CURRENT_VERSION = 4;
     if (!saveData.version || saveData.version < CURRENT_VERSION) {
         // Gammelt format (inkl. LeTour v2) - kan ikke bruges
         console.log('Inkompatibelt save format (v' + (saveData.version || '?') + ') - sletter');
