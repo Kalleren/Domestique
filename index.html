@@ -1137,7 +1137,9 @@ var G = {
     endagsResultater: [],
     endagsTraethed: 0,
     aktuelEndagsIdx: 0,
-    erEndagsloeb: false
+    erEndagsloeb: false,
+    gemtSpiPlads: 0,
+    gemtBonus: 0
 };
 
 function visInstruktioner() {
@@ -1154,7 +1156,7 @@ function visInstruktioner() {
         '<ul style="margin-left:18px;list-style:disc;font-size:14px;line-height:1.6">' +
             '<li>Vælg alle monumenter, op til 5 klassikere og 1-2 Grand Tours</li>' +
             '<li>Løbene køres i kronologisk rækkefølge (feb-okt)</li>' +
-            '<li>Endagsløb akkumulerer -10% energi per løb (max -35%) til næste GT</li>' +
+            '<li>Endagsløb akkumulerer -10% energi per løb (max -35%) til næste Grand Tour</li>' +
             '<li>Kører du 2 GT\'er, starter den anden med reduceret energi</li>' +
             '<li>Bonuspoint fordeles samlet efter sæsonen</li>' +
         '</ul>' +
@@ -2267,6 +2269,48 @@ function afslutGrandTour() {
     }
 }
 
+function visEndagsAlleResultater() {
+    setEndagsTema();
+    var res = G.gemtRes;
+    if (!res) return;
+    
+    var loebId = G.valgteEndagsloeb[G.aktuelEndagsIdx];
+    var loeb = findEndagsLoeb(loebId);
+    var vTid = res[0] ? res[0].tid : 0;
+    
+    var html = '<h2 style="color:#0a0">' + loeb.navn.toUpperCase() + ' - ALLE</h2>';
+    
+    html += '<div class="box" style="max-height:400px;overflow-y:auto;border-color:#0a0"><h3 style="color:#0a0">Komplet resultatliste:</h3>';
+    
+    for (var i = 0; i < res.length; i++) {
+        var x = res[i];
+        var pos = i + 1;
+        var cls = x.r.sp ? "row pl" : "row";
+        var med = "";
+        var visTal = true;
+        if (pos === 1) { med = "🥇 "; visTal = false; }
+        else if (pos === 2) { med = "🥈 "; visTal = false; }
+        else if (pos === 3) { med = "🥉 "; visTal = false; }
+        
+        if (x.r.ude) {
+            // Vis udgåede ryttere
+            var numTxt = visTal ? pos + '. ' : '';
+            html += '<div class="row" style="color:#666"><span>' + med + numTxt + x.r.navn + ' <span style="color:#444">' + x.r.holdAbbr + '</span></span><span style="color:#f44">DNF</span></div>';
+        } else {
+            var diff = x.tid - vTid;
+            var tidTxt = pos === 1 ? ft(x.tid) : (diff === 0 ? "s.t." : '+' + ft(diff));
+            var numTxt = visTal ? pos + '. ' : '';
+            html += '<div class="' + cls + '"><span>' + med + numTxt + x.r.navn + ' <span style="color:' + x.r.holdClr + '">' + x.r.holdAbbr + '</span></span>' +
+                    '<span>' + tidTxt + '</span></div>';
+        }
+    }
+    html += '</div>';
+    
+    html += '<div class="ctrls"><button class="btn btn-big" style="border-color:#0a0;color:#0a0" onclick="visEndagsResultat(G.gemtRes, findEndagsLoeb(G.valgteEndagsloeb[G.aktuelEndagsIdx]), G.gemtSpiPlads, G.gemtBonus)">TILBAGE</button></div>';
+    
+    R(html);
+}
+	
 function visGTResultatOgGaaVidere(resultat) {
     var gt = getGT();
     var naesteGT = GT_CONFIG[G.valgteGT[G.aktuelGTIdx + 1]];
@@ -2767,7 +2811,7 @@ function visEndagsValg() {
         
         // 1. Endagsløb akkumulering (altid først hvis flere end 1)
         if (foraarLoeb + sommerLoeb + (harLombardia ? 1 : 0) > 1) {
-            traethedLinjer.push('<span style="color:#888">Endagsløb: -10% startenergi per løb (max -35%), resat ved Grand Tour</span>');
+            traethedLinjer.push('<span style="color:#888">Endagsløb: -10% startenergi per løb (max -35%)</span>');
         }
         
         // 2. Forårsløb → første GT
@@ -2803,7 +2847,8 @@ function visEndagsValg() {
 // 7. Sommerløb → Vuelta (ekstra oven i GT-træthed)
         if (sommerLoeb > 0 && harVuelta) {
             var sommerPct = Math.min(sommerLoeb * 10, 35);
-            traethedLinjer.push('<span style="color:#f80">' + sommerLoeb + ' sommerløb: yderligere -' + sommerPct + '% til Vuelta (max -35% samlet)</span>');
+            var yderligere = (harTour || harGiro) ? 'yderligere ' : '';
+            traethedLinjer.push('<span style="color:#f80">' + sommerLoeb + ' sommerløb: ' + yderligere + '-' + sommerPct + '% startenergi til Vuelta (max -35% samlet)</span>');
         }
         
         // 8. Sidste GT → Lombardia
@@ -3231,7 +3276,12 @@ function afslutEndagsloeb(res) {
     });
     
     G.endagsTraethed = Math.min(G.endagsTraethed + ENDAGS_TRAETHED.perLoeb, ENDAGS_TRAETHED.maxAkkumuleret);
-    
+
+	G.gemtRes = res;
+    G.gemtSpiPlads = spiPlads;
+    G.gemtBonus = bonus;
+    visEndagsResultat(res, loeb, spiPlads, bonus);
+	
     visEndagsResultat(res, loeb, spiPlads, bonus);
 }
 
@@ -3288,13 +3338,16 @@ function visEndagsResultat(res, loeb, spiPlads, bonus) {
         var naeste = G.saesonKalender[naesteIdx];
         if (naeste.type === "endags") {
             var naesteLoeb = findEndagsLoeb(naeste.id);
-            naesteTekst = naesteLoeb ? naesteLoeb.kort.toUpperCase() : "NÆSTE";
-        } else {
+            naesteTekst = naesteLoeb ? naesteLoeb.kort.toUpperCase() : "NÆSTE LØB";
+        } else if (naeste.type === "gt") {
             naesteTekst = GT_CONFIG[naeste.id].kort.toUpperCase();
+        } else {
+            naesteTekst = "NÆSTE LØB";
         }
     }
     
     html += '<div class="ctrls">' +
+        '<button class="btn btn-big" style="border-color:#888;color:#888" onclick="visEndagsAlleResultater()">📋 ALLE</button>' +
         '<button class="btn btn-big" style="border-color:#0f0;color:#0f0" onclick="' + naesteOnclick + '">' + naesteTekst + '</button>' +
     '</div>';
     
@@ -3428,8 +3481,12 @@ function indlaesGemtSpil() {
     G.karriereHistorik = saveData.karriereHistorik || [];
     G.aiRytterGT = saveData.aiRytterGT || {};
     
-    // Sæt GT-tema
-    setGTTema(G.aktuelGT);
+    // Sørg for korrekt tema
+    if (G.erEndagsloeb) {
+        setEndagsTema();
+    } else {
+        setGTTema(G.aktuelGT);
+    }    setGTTema(G.aktuelGT);
     
     // Genopret ryttere
     G.ryttere = [];
@@ -4675,6 +4732,7 @@ function getStigningVis() {
 
 function genMP(e) {
     if (e.type === "tt") return [];
+	if (G.erEndagsloeb) return [];
     var mps = [];
     if (e.type === "bjerg") {
         if (e.bjergToppe && e.bjergToppe.length > 0) {
@@ -4833,7 +4891,7 @@ gh += '<div style="' + boxStyle + '">' +
     }
     gh += '</div>';
     
-	var jer = getSimJerseyHtml();
+	var jer = G.erEndagsloeb ? '' : getSimJerseyHtml();
     
 var mpRes = "";
 if (G.lastMpResult) {
