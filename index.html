@@ -1636,71 +1636,6 @@ function genEForGT(gtId) {
     return result;
 }
 
-// ========== SÆSONVALG UI ==========
-
-function visSaesonValg() {
-    var gt = getGT();
-    setGTTema("tdf"); // Neutral farve for valg
-    
-    var html = '<div style="text-align:center;padding:15px 0">' +
-        '<h1>SÆSON ' + G.saeson + ' (' + (2025 + G.saeson) + ')</h1>' +
-        '<p style="color:#888">Vælg hvilke Grand Tours du vil køre denne sæson</p>' +
-        '<p style="color:#666;font-size:11px">Du kan vælge 1 eller 2 løb (maks 2)</p>' +
-    '</div>';
-    
-    html += '<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:15px 0">';
-    
-    var gtIds = ["giro","tdf","vuelta"];
-    for (var i = 0; i < gtIds.length; i++) {
-        var gtc = GT_CONFIG[gtIds[i]];
-        var selected = G.valgteGT.indexOf(gtIds[i]) >= 0;
-        var disabled = !selected && G.valgteGT.length >= 2;
-        
-        html += '<div class="gt-card gt-' + gtIds[i] + (selected ? ' selected' : '') + (disabled ? ' disabled' : '') + 
-                '" onclick="' + (disabled ? '' : 'toggleGTValg(\'' + gtIds[i] + '\')') + '">' +
-            '<div class="gt-emoji">' + gtc.emoji + '</div>' +
-            '<div class="gt-name" style="color:' + gtc.primary + '">' + gtc.navn + '</div>' +
-            '<div class="gt-date">' + gtc.maaned + ' ' + (2025 + G.saeson) + '</div>' +
-            '<div class="gt-strength" style="color:' + gtc.primary + '">' + gtc.styrke + ' ' + gtc.styrkeTekst + '</div>' +
-            (selected ? '<div style="color:#0f0;margin-top:5px;font-weight:bold">✓ VALGT</div>' : '') +
-        '</div>';
-    }
-    html += '</div>';
-    
-    // Vis træthed-advarsel hvis 2 er valgt
-    if (G.valgteGT.length === 2) {
-        var key = G.valgteGT[0] + "_" + G.valgteGT[1];
-        var traethed = GT_TRAETHED[key];
-        if (traethed) {
-            var gt2Navn = GT_CONFIG[G.valgteGT[1]].kort;
-            html += '<div class="box" style="border-color:#f80;text-align:center">' +
-                '<p style="color:#f80">⚠️ Træthed: Du starter ' + gt2Navn + ' med ' + Math.round(traethed.energiStart * 100) + '% energi</p>' +
-                '<p style="color:#888;font-size:11px">Restitution mellem etaper reduceret til ' + Math.round(traethed.restitutionMult * 100) + '%</p>' +
-            '</div>';
-        }
-    }
-    
-    // Holdanbefaling
-    if (G.spiller) {
-        var anbefaling = "";
-        if (G.spiller.bj > 85 && G.spiller.gc > 80) {
-            anbefaling = "Holdet anbefaler: Tour de France (+ evt. Vuelta)";
-        } else if (G.spiller.spr > 85) {
-            anbefaling = "Holdet anbefaler: Giro + Tour (flest sprint-chancer)";
-        } else if (G.spiller.bj > 80) {
-            anbefaling = "Holdet anbefaler: Giro (+ evt. Vuelta)";
-        } else {
-            anbefaling = "Holdet giver dig frit valg";
-        }
-        html += '<div style="text-align:center;color:#888;font-size:12px;margin:10px 0">🏢 ' + anbefaling + '</div>';
-    }
-    
-    html += '<div class="ctrls" style="margin-top:20px">' +
-        '<button class="btn btn-big btn-y" onclick="startSaeson()" style="white-space:nowrap"' + (G.valgteGT.length === 0 ? ' disabled' : '') + '>START SÆSON ' + G.saeson + '</button>' +
-    '</div>';
-    
-    R(html);
-}
 
 function toggleGTValg(gtId) {
     var idx = G.valgteGT.indexOf(gtId);
@@ -1708,11 +1643,10 @@ function toggleGTValg(gtId) {
         G.valgteGT.splice(idx, 1);
     } else if (G.valgteGT.length < 2) {
         G.valgteGT.push(gtId);
-        // Sortér kronologisk
         var ordre = ["giro","tdf","vuelta"];
         G.valgteGT.sort(function(a,b) { return ordre.indexOf(a) - ordre.indexOf(b); });
     }
-    visSaesonValg();
+    // Kalder IKKE visEndagsValg() her - det gøres af onclick
 }
 
 function startSaeson() {
@@ -2236,7 +2170,7 @@ function spillerUdgaaet() {
         '</div>');
     }
     // Har vi flere GT'er at køre denne sæson?
-    else if (G.aktuelGTIdx < G.valgteGT.length - 1) {
+else if (G.saesonKalenderIdx < G.saesonKalender.length - 1) {
         R('<div style="text-align:center;padding:20px">' +
             '<div style="font-size:50px">💀</div>' +
             '<h1 style="color:' + gt.primary + '">UDGÅET AF ' + gt.navn.toUpperCase() + '</h1>' +
@@ -2245,7 +2179,7 @@ function spillerUdgaaet() {
                 '<p style="color:#888">Men der er stadig ' + GT_CONFIG[G.valgteGT[G.aktuelGTIdx + 1]].navn + ' at køre!</p>' +
             '</div>' +
             '<div class="ctrls">' +
-                '<button class="btn btn-big btn-y" onclick="naesteGrandTour()">NÆSTE GRAND TOUR</button>' +
+        '<button class="btn btn-big btn-y" onclick="gaaVidereIKalender()">VIDERE</button>' +
             '</div>' +
         '</div>');
     }
@@ -2321,12 +2255,11 @@ function afslutGrandTour() {
     };
     G.saesonResultater.push(resultat);
     
-    // Har vi flere GT'er at køre?
-    if (G.aktuelGTIdx < G.valgteGT.length - 1) {
-        // Vis resultat og gå videre til næste GT
+// Tjek om der er mere i kalenderen
+    var naesteIdx = G.saesonKalenderIdx + 1;
+    if (naesteIdx < G.saesonKalender.length) {
         visGTResultatOgGaaVidere(resultat);
     } else {
-        // Sæsonafslutning
         afslutSaeson();
     }
 }
@@ -2350,9 +2283,21 @@ function visGTResultatOgGaaVidere(resultat) {
         '<p style="color:#888">Træthed: Startenergi ' + Math.round(GT_TRAETHED[G.aktuelGT + "_" + naesteGT.id].energiStart * 100) + '%</p>' +
     '</div>';
     
+	var naesteIdx = G.saesonKalenderIdx + 1;
+    var naesteTekst = "VIDERE";
+    if (naesteIdx < G.saesonKalender.length) {
+        var naeste = G.saesonKalender[naesteIdx];
+        if (naeste.type === "endags") {
+            var naesteLoeb = findEndagsLoeb(naeste.id);
+            naesteTekst = naesteLoeb ? naesteLoeb.kort.toUpperCase() : "VIDERE";
+        } else {
+            naesteTekst = "START " + GT_CONFIG[naeste.id].kort.toUpperCase();
+        }
+    }
+    
     html += '<div class="ctrls">' +
-	    '<button class="btn btn-big btn-y" onclick="naesteGrandTour()">START ' + naesteGT.kort.toUpperCase() + '</button>' +
-	'</div>';
+        '<button class="btn btn-big btn-y" onclick="gaaVidereIKalender()">' + naesteTekst + '</button>' +
+    '</div>';
     
     R(html);
 }
@@ -2471,6 +2416,8 @@ function nySaeson() {
     G.endagsResultater = [];
     G.endagsTraethed = 0;
     G.erEndagsloeb = false;
+    G.saesonKalender = [];
+    G.saesonKalenderIdx = 0;
     
     visEndagsValg();
 }
@@ -2488,24 +2435,25 @@ function fordelPointFaerdig() {
 
 function gtSlutKnapper() {
     var gt = getGT();
+    var naesteIdx = G.saesonKalenderIdx + 1;
+    var naesteTekst = "AFSLUT SÆSON";
     
-    // Har vi flere GT'er?
-    if (G.aktuelGTIdx < G.valgteGT.length - 1) {
-        var naesteGT = GT_CONFIG[G.valgteGT[G.aktuelGTIdx + 1]];
-        return '<div class="ctrls">' +
-            '<button class="btn btn-big btn-y" onclick="visAlleSlut()">📋 ALLE</button>' +
-            '<button class="btn btn-big" style="border-color:#3399ff;color:#3399ff" onclick="visTourResume()">📰 REFERAT</button>' +
-            '<button class="btn btn-big" onclick="visPlots()">📊 STATISTIK</button>' +
-            '<button class="btn btn-big btn-y" onclick="afslutGrandTour()">VIDERE →</button>' +
-        '</div>';
-    } else {
-        return '<div class="ctrls">' +
-            '<button class="btn btn-big btn-y" onclick="visAlleSlut()">📋 ALLE</button>' +
-            '<button class="btn btn-big" style="border-color:#3399ff;color:#3399ff" onclick="visTourResume()">📰 REFERAT</button>' +
-            '<button class="btn btn-big" onclick="visPlots()">📊 STATISTIK</button>' +
-            '<button class="btn btn-big btn-y" onclick="afslutGrandTour()">AFSLUT SÆSON</button>' +
-        '</div>';
+    if (naesteIdx < G.saesonKalender.length) {
+        var naeste = G.saesonKalender[naesteIdx];
+        if (naeste.type === "endags") {
+            var naesteLoeb = findEndagsLoeb(naeste.id);
+            naesteTekst = naesteLoeb ? naesteLoeb.kort.toUpperCase() : "VIDERE";
+        } else {
+            naesteTekst = "START " + GT_CONFIG[naeste.id].kort.toUpperCase();
+        }
     }
+    
+    return '<div class="ctrls">' +
+        '<button class="btn btn-big btn-y" onclick="visAlleSlut()">📋 ALLE</button>' +
+        '<button class="btn btn-big" style="border-color:#3399ff;color:#3399ff" onclick="visTourResume()">📰 REFERAT</button>' +
+        '<button class="btn btn-big" onclick="visPlots()">📊 STATISTIK</button>' +
+        '<button class="btn btn-big btn-y" onclick="afslutGrandTour()">' + naesteTekst + '</button>' +
+    '</div>';
 }
 
 // ========== TILPASSET INTRO ==========
@@ -2664,27 +2612,26 @@ function visEndagsValg() {
     
     var html = '<div style="text-align:center;padding:15px 0">' +
         '<h1 style="color:#0a0">SÆSON ' + G.saeson + ' (' + (2025 + G.saeson) + ')</h1>' +
-        '<p style="color:#888">Vælg endagsløb (valgfrit)</p>' +
-        '<p style="color:#666;font-size:11px">Hvert løb koster 10% startenergi til næste løb/GT</p>' +
+        '<p style="color:#888">Sammensæt din sæson</p>' +
+        '<p style="color:#666;font-size:11px">Vælg endagsløb og 1-2 Grand Tours</p>' +
     '</div>';
     
-    // Hjælpefunktion til at finde løb efter måned
+    // Hjælpefunktion
     function loebIMaaned(maaneder) {
         var alle = ENDAGSLOEB.monumenter.concat(ENDAGSLOEB.klassikere);
         var resultat = [];
         for (var i = 0; i < alle.length; i++) {
             if (maaneder.indexOf(alle[i].maaned) >= 0) resultat.push(alle[i]);
         }
-        // Sortér kronologisk
         var kronologisk = ["omloop","kbk","strade","msr","e3","gw","ddv","flandern","roubaix","agr","fleche","lbl","sanseb","bretagne","lombardia"];
         resultat.sort(function(a,b) { return kronologisk.indexOf(a.id) - kronologisk.indexOf(b.id); });
         return resultat;
     }
     
-    // Februar
+    // ===== FEBRUAR =====
     var febLoeb = loebIMaaned(["Februar"]);
     if (febLoeb.length > 0) {
-        html += '<div class="box" style="border-color:#070"><h3 style="color:#0a0">❄️ Februar - Sæsonåbning</h3>';
+        html += '<div class="box" style="border-color:#070"><h3 style="color:#0a0">❄️ Februar</h3>';
         html += '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
         for (var i = 0; i < febLoeb.length; i++) {
             html += endagsLoebKort(febLoeb[i], G.valgteEndagsloeb.indexOf(febLoeb[i].id) >= 0);
@@ -2692,10 +2639,10 @@ function visEndagsValg() {
         html += '</div></div>';
     }
     
-    // Marts
+    // ===== MARTS =====
     var marsLoeb = loebIMaaned(["Marts"]);
     if (marsLoeb.length > 0) {
-        html += '<div class="box" style="border-color:#0a0"><h3 style="color:#0a0">🌸 Marts - Forårsklassikere</h3>';
+        html += '<div class="box" style="border-color:#0a0"><h3 style="color:#0a0">🌸 Marts</h3>';
         html += '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
         for (var i = 0; i < marsLoeb.length; i++) {
             html += endagsLoebKort(marsLoeb[i], G.valgteEndagsloeb.indexOf(marsLoeb[i].id) >= 0);
@@ -2703,10 +2650,10 @@ function visEndagsValg() {
         html += '</div></div>';
     }
     
-    // April
+    // ===== APRIL =====
     var aprilLoeb = loebIMaaned(["April"]);
     if (aprilLoeb.length > 0) {
-        html += '<div class="box" style="border-color:#0a0"><h3 style="color:#0a0">🏛️ April - Monumenter & Ardenner</h3>';
+        html += '<div class="box" style="border-color:#0a0"><h3 style="color:#0a0">🏛️ April</h3>';
         html += '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
         for (var i = 0; i < aprilLoeb.length; i++) {
             html += endagsLoebKort(aprilLoeb[i], G.valgteEndagsloeb.indexOf(aprilLoeb[i].id) >= 0);
@@ -2714,10 +2661,32 @@ function visEndagsValg() {
         html += '</div></div>';
     }
     
-    // Sommer (juli-august)
+    // ===== GIRO (maj) =====
+    var giroValgt = G.valgteGT.indexOf("giro") >= 0;
+    var giroDisabled = !giroValgt && G.valgteGT.length >= 2;
+    html += '<div class="box" style="border-color:#ff69b4">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="' + (giroDisabled ? '' : 'toggleGTValg(\'giro\');visEndagsValg()') + '">' +
+            '<h3 style="color:#ff69b4;margin:0">🇮🇹 Giro d\'Italia · Maj</h3>' +
+            '<span style="color:' + (giroValgt ? '#0f0' : '#666') + ';font-size:20px">' + (giroValgt ? '✓' : '○') + '</span>' +
+        '</div>' +
+        (giroDisabled ? '<div style="color:#666;font-size:10px">Max 2 Grand Tours</div>' : '') +
+    '</div>';
+    
+    // ===== TOUR (juli) =====
+    var tourValgt = G.valgteGT.indexOf("tdf") >= 0;
+    var tourDisabled = !tourValgt && G.valgteGT.length >= 2;
+    html += '<div class="box" style="border-color:#ff0">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="' + (tourDisabled ? '' : 'toggleGTValg(\'tdf\');visEndagsValg()') + '">' +
+            '<h3 style="color:#ff0;margin:0">🇫🇷 Tour de France · Juli</h3>' +
+            '<span style="color:' + (tourValgt ? '#0f0' : '#666') + ';font-size:20px">' + (tourValgt ? '✓' : '○') + '</span>' +
+        '</div>' +
+        (tourDisabled ? '<div style="color:#666;font-size:10px">Max 2 Grand Tours</div>' : '') +
+    '</div>';
+    
+    // ===== SOMMER (juli-aug) =====
     var sommerLoeb = loebIMaaned(["Juli", "August"]);
     if (sommerLoeb.length > 0) {
-        html += '<div class="box" style="border-color:#070"><h3 style="color:#0a0">☀️ Sommer - Efter Touren</h3>';
+        html += '<div class="box" style="border-color:#070"><h3 style="color:#0a0">☀️ Sommer</h3>';
         html += '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
         for (var i = 0; i < sommerLoeb.length; i++) {
             html += endagsLoebKort(sommerLoeb[i], G.valgteEndagsloeb.indexOf(sommerLoeb[i].id) >= 0);
@@ -2725,45 +2694,201 @@ function visEndagsValg() {
         html += '</div></div>';
     }
     
-    // Oktober
+    // ===== VUELTA (aug-sep) =====
+    var vueltaValgt = G.valgteGT.indexOf("vuelta") >= 0;
+    var vueltaDisabled = !vueltaValgt && G.valgteGT.length >= 2;
+    html += '<div class="box" style="border-color:#f44">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="' + (vueltaDisabled ? '' : 'toggleGTValg(\'vuelta\');visEndagsValg()') + '">' +
+            '<h3 style="color:#f44;margin:0">🇪🇸 Vuelta a España · Aug-Sep</h3>' +
+            '<span style="color:' + (vueltaValgt ? '#0f0' : '#666') + ';font-size:20px">' + (vueltaValgt ? '✓' : '○') + '</span>' +
+        '</div>' +
+        (vueltaDisabled ? '<div style="color:#666;font-size:10px">Max 2 Grand Tours</div>' : '') +
+    '</div>';
+    
+    // ===== LOMBARDIA (oktober) =====
     var oktLoeb = loebIMaaned(["Oktober"]);
     if (oktLoeb.length > 0) {
-        html += '<div class="box" style="border-color:#0a0"><h3 style="color:#0a0">🍂 Oktober - Sæsonafslutning</h3>';
+        html += '<div class="box" style="border-color:#0a0"><h3 style="color:#0a0">🍂 Oktober</h3>';
         html += '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
         for (var i = 0; i < oktLoeb.length; i++) {
             html += endagsLoebKort(oktLoeb[i], G.valgteEndagsloeb.indexOf(oktLoeb[i].id) >= 0);
         }
         html += '</div></div>';
     }
+
+// Klassiker-tæller
+    var antalKlassikere = 0;
+    for (var i = 0; i < G.valgteEndagsloeb.length; i++) {
+        var l = findEndagsLoeb(G.valgteEndagsloeb[i]);
+        if (l && !l.monument) antalKlassikere++;
+    }
+    if (antalKlassikere > 0) {
+        html += '<div style="text-align:center;color:#888;font-size:11px;margin:5px 0">Klassikere: ' + antalKlassikere + '/5</div>';
+    }
+	
+    // ===== OPSUMMERING =====
+    var antalEndags = G.valgteEndagsloeb.length;
+    var antalGT = G.valgteGT.length;
+    var antalTotal = antalEndags + antalGT;
     
-    // Træthed-info
-    if (G.valgteEndagsloeb.length > 0) {
+    if (antalTotal > 0) {
+        // Beregn forårs-træthed til GT
         var foraarLoeb = 0;
         for (var i = 0; i < G.valgteEndagsloeb.length; i++) {
             var l = findEndagsLoeb(G.valgteEndagsloeb[i]);
-            if (l && l.maaned !== "Oktober" && l.maaned !== "Juli" && l.maaned !== "August") foraarLoeb++;
+            if (l && (l.maaned === "Februar" || l.maaned === "Marts" || l.maaned === "April")) foraarLoeb++;
         }
-        if (foraarLoeb > 0) {
+        
+        html += '<div class="box" style="border-color:#0ff;text-align:center">' +
+            '<p style="color:#0ff">' + antalEndags + ' endagsløb + ' + antalGT + ' Grand Tour' + (antalGT !== 1 ? 's' : '') + '</p>';
+        
+        if (foraarLoeb > 0 && antalGT > 0) {
             var traethedPct = Math.min(foraarLoeb * 10, 30);
-            html += '<div class="box" style="border-color:#f80;text-align:center">' +
-                '<p style="color:#f80">⚠️ ' + foraarLoeb + ' forårsløb: -' + traethedPct + '% startenergi til første Grand Tour</p>' +
-            '</div>';
+            html += '<p style="color:#f80;font-size:11px">⚠️ ' + foraarLoeb + ' forårsløb: -' + traethedPct + '% energi til Giro/Tour</p>';
         }
+        
+        // GT træthed
+        if (antalGT >= 2) {
+            var key = G.valgteGT[0] + "_" + G.valgteGT[1];
+            var traethed = GT_TRAETHED[key];
+            if (traethed) {
+                var gt2Navn = GT_CONFIG[G.valgteGT[1]].kort;
+                html += '<p style="color:#f80;font-size:11px">⚠️ ' + gt2Navn + ' starter med ' + Math.round(traethed.energiStart * 100) + '% energi</p>';
+            }
+        }
+        
+        html += '</div>';
+    }
+    
+    // Holdanbefaling
+    if (G.spiller) {
+        var anbefaling = "";
+        if (G.spiller.bj > 85 && G.spiller.gc > 80) {
+            anbefaling = "Holdet anbefaler: Ardenner-klassikere + Tour de France";
+        } else if (G.spiller.spr > 85) {
+            anbefaling = "Holdet anbefaler: Flandern-klassikere + Giro/Tour";
+        } else if (G.spiller.fl > 85) {
+            anbefaling = "Holdet anbefaler: Brosten-klassikere + Tour";
+        } else if (G.spiller.bj > 80) {
+            anbefaling = "Holdet anbefaler: Giro + Lombardia";
+        } else {
+            anbefaling = "Holdet giver dig frit valg";
+        }
+        html += '<div style="text-align:center;color:#888;font-size:12px;margin:10px 0">🏢 ' + anbefaling + '</div>';
     }
     
     html += '<div class="ctrls" style="margin-top:15px">' +
-        '<button class="btn btn-big" style="border-color:#888;color:#888" onclick="skipEndagsloeb()">SPRING OVER</button>' +
-        '<button class="btn btn-big" style="border-color:#0f0;color:#0f0" onclick="startEndagsloeb()"' + 
-        (G.valgteEndagsloeb.length === 0 ? ' disabled' : '') + '>KØR ' + G.valgteEndagsloeb.length + ' LØB</button>' +
+        '<button class="btn btn-big" style="border-color:#0f0;color:#0f0" onclick="startSaesonKalender()"' + 
+        (antalTotal === 0 ? ' disabled' : '') + '>START SÆSON</button>' +
     '</div>';
     
     R(html);
 }
 
+function byggSaesonKalender() {
+    var kalender = [];
+    var kronologisk = ["omloop","kbk","strade","msr","e3","gw","ddv","flandern","roubaix","agr","fleche","lbl"];
+    
+    // Forårsløb (feb-april)
+    for (var i = 0; i < kronologisk.length; i++) {
+        if (G.valgteEndagsloeb.indexOf(kronologisk[i]) >= 0) {
+            kalender.push({ type: "endags", id: kronologisk[i] });
+        }
+    }
+    
+    // Giro (maj)
+    if (G.valgteGT.indexOf("giro") >= 0) {
+        kalender.push({ type: "gt", id: "giro" });
+    }
+    
+    // Tour (juli)
+    if (G.valgteGT.indexOf("tdf") >= 0) {
+        kalender.push({ type: "gt", id: "tdf" });
+    }
+    
+    // Sommerløb (juli-aug)
+    var sommerLoeb = ["sanseb", "bretagne"];
+    for (var i = 0; i < sommerLoeb.length; i++) {
+        if (G.valgteEndagsloeb.indexOf(sommerLoeb[i]) >= 0) {
+            kalender.push({ type: "endags", id: sommerLoeb[i] });
+        }
+    }
+    
+    // Vuelta (aug-sep)
+    if (G.valgteGT.indexOf("vuelta") >= 0) {
+        kalender.push({ type: "gt", id: "vuelta" });
+    }
+    
+    // Lombardia (oktober)
+    if (G.valgteEndagsloeb.indexOf("lombardia") >= 0) {
+        kalender.push({ type: "endags", id: "lombardia" });
+    }
+    
+    return kalender;
+}
+
+function startSaesonKalender() {
+    G.saesonKalender = byggSaesonKalender();
+    G.saesonKalenderIdx = 0;
+    G.saesonResultater = [];
+    G.endagsResultater = [];
+    G.endagsTraethed = 0;
+    G.aktuelGTIdx = 0;
+    
+    // Bestem AI-deltagelse for hele sæsonen
+    G.aiRytterGT = bestemAIGTdeltagelse(G.saeson);
+    
+    koerNaesteIKalender();
+}
+
+function koerNaesteIKalender() {
+    if (G.saesonKalenderIdx >= G.saesonKalender.length) {
+        // Sæsonen er slut
+        G.erEndagsloeb = false;
+        afslutSaeson();
+        return;
+    }
+    
+    var aktuel = G.saesonKalender[G.saesonKalenderIdx];
+    
+    if (aktuel.type === "endags") {
+        G.erEndagsloeb = true;
+        G.aktuelEndagsIdx = G.valgteEndagsloeb.indexOf(aktuel.id);
+        startNaesteEndagsloeb();
+    } else if (aktuel.type === "gt") {
+        G.erEndagsloeb = false;
+        G.aktuelGT = aktuel.id;
+        // Find GT-index
+        G.aktuelGTIdx = G.valgteGT.indexOf(aktuel.id);
+        startGrandTour();
+    }
+}
+
+function gaaVidereIKalender() {
+    G.saesonKalenderIdx++;
+    koerNaesteIKalender();
+}
+
 function endagsLoebKort(loeb, valgt) {
     var brostTxt = loeb.brosten > 0 ? '<div style="color:#a86;font-size:8px">🧱 ' + Math.round(loeb.brosten * 100) + '%</div>' : '';
     var starTxt = loeb.monument ? ' ⭐' : '';
-    return '<div style="border:2px solid ' + (valgt ? '#0f0' : '#444') + ';padding:8px;border-radius:6px;cursor:pointer;text-align:center;min-width:80px;background:' + (valgt ? '#020' : '#111') + '" onclick="toggleEndagsValg(\'' + loeb.id + '\')">' +
+    
+    // Tjek om klassiker er disabled (max 5)
+    var disabled = false;
+    if (!valgt && !loeb.monument) {
+        var antalKlassikere = 0;
+        for (var i = 0; i < G.valgteEndagsloeb.length; i++) {
+            var l = findEndagsLoeb(G.valgteEndagsloeb[i]);
+            if (l && !l.monument) antalKlassikere++;
+        }
+        if (antalKlassikere >= 5) disabled = true;
+    }
+    
+    var borderClr = valgt ? '#0f0' : disabled ? '#333' : '#444';
+    var bgClr = valgt ? '#020' : '#111';
+    var opacity = disabled ? 'opacity:0.3;' : '';
+    
+    return '<div style="border:2px solid ' + borderClr + ';padding:8px;border-radius:6px;cursor:' + (disabled ? 'not-allowed' : 'pointer') + ';text-align:center;min-width:80px;background:' + bgClr + ';' + opacity + '" onclick="' + (disabled ? '' : 'toggleEndagsValg(\'' + loeb.id + '\')') + '">' +
         '<div style="font-size:14px">' + loeb.emoji + starTxt + '</div>' +
         '<div style="color:#0a0;font-size:11px;font-weight:bold">' + loeb.kort + '</div>' +
         '<div style="color:#888;font-size:9px">' + loeb.dist + ' km</div>' +
@@ -2777,15 +2902,18 @@ function toggleEndagsValg(loebId) {
     if (idx >= 0) {
         G.valgteEndagsloeb.splice(idx, 1);
     } else {
+        // Tjek om det er en klassiker og om max er nået
+        var loeb = findEndagsLoeb(loebId);
+        if (loeb && !loeb.monument) {
+            var antalKlassikere = 0;
+            for (var i = 0; i < G.valgteEndagsloeb.length; i++) {
+                var l = findEndagsLoeb(G.valgteEndagsloeb[i]);
+                if (l && !l.monument) antalKlassikere++;
+            }
+            if (antalKlassikere >= 5) return; // Max 5 klassikere
+        }
         G.valgteEndagsloeb.push(loebId);
     }
-    // Sortér kronologisk
-    var ordre = [];
-    for (var i = 0; i < ENDAGSLOEB.monumenter.length; i++) ordre.push(ENDAGSLOEB.monumenter[i].id);
-    for (var i = 0; i < ENDAGSLOEB.klassikere.length; i++) ordre.push(ENDAGSLOEB.klassikere[i].id);
-    // Interleave i kronologisk rækkefølge
-    var kronologisk = ["omloop","kbk","strade","msr","e3","gw","ddv","flandern","roubaix","agr","fleche","lbl","sanseb","bretagne","lombardia"];
-    G.valgteEndagsloeb.sort(function(a,b) { return kronologisk.indexOf(a) - kronologisk.indexOf(b); });
     visEndagsValg();
 }
 
@@ -2793,22 +2921,17 @@ function skipEndagsloeb() {
     G.valgteEndagsloeb = [];
     G.endagsTraethed = 0;
     G.erEndagsloeb = false;
-    visSaesonValg();
-}
-
-function startEndagsloeb() {
-    if (G.valgteEndagsloeb.length === 0) return;
-    G.aktuelEndagsIdx = 0;
-    G.endagsResultater = [];
-    G.endagsTraethed = 0;
-    G.erEndagsloeb = true;
-    startNaesteEndagsloeb();
+    // Gå direkte til GT-valg hvis ingen endagsløb
+    if (G.valgteGT.length > 0) {
+        startSaesonKalender();
+    }
 }
 
 function startNaesteEndagsloeb() {
-    var loebId = G.valgteEndagsloeb[G.aktuelEndagsIdx];
+    var aktuel = G.saesonKalender[G.saesonKalenderIdx];
+    var loebId = aktuel.id;
     var loeb = findEndagsLoeb(loebId);
-    if (!loeb) { skipEndagsloeb(); return; }
+    if (!loeb) { gaaVidereIKalender(); return; }
     
     setEndagsTema();
     G.erEndagsloeb = true;
@@ -3058,38 +3181,31 @@ function visEndagsResultat(res, loeb, spiPlads, bonus) {
         '</div>';
     }
     
-    var harFlere = G.aktuelEndagsIdx < G.valgteEndagsloeb.length - 1;
-    html += '<div class="ctrls">';
-    if (harFlere) {
-        var naesteLoeb = findEndagsLoeb(G.valgteEndagsloeb[G.aktuelEndagsIdx + 1]);
-        html += '<button class="btn btn-big" style="border-color:#0f0;color:#0f0" onclick="naesteEndagsloebStart()">NÆSTE: ' + naesteLoeb.kort.toUpperCase() + '</button>';
-    } else {
-        html += '<button class="btn btn-big btn-y" onclick="afslutAlleEndagsloeb()">VÆLG GRAND TOURS</button>';
+    // Find næste i kalenderen
+    var naesteIdx = G.saesonKalenderIdx + 1;
+    var naesteTekst = "AFSLUT SÆSON";
+    var naesteOnclick = "gaaVidereIKalender()";
+    
+    if (naesteIdx < G.saesonKalender.length) {
+        var naeste = G.saesonKalender[naesteIdx];
+        if (naeste.type === "endags") {
+            var naesteLoeb = findEndagsLoeb(naeste.id);
+            naesteTekst = naesteLoeb ? naesteLoeb.kort.toUpperCase() : "NÆSTE";
+        } else {
+            naesteTekst = GT_CONFIG[naeste.id].kort.toUpperCase();
+        }
     }
-    html += '</div>';
+    
+    html += '<div class="ctrls">' +
+        '<button class="btn btn-big" style="border-color:#0f0;color:#0f0" onclick="' + naesteOnclick + '">' + naesteTekst + '</button>' +
+    '</div>';
     
     R(html);
 }
 
-function naesteEndagsloebStart() {
-    G.aktuelEndagsIdx++;
-    startNaesteEndagsloeb();
-}
-
 function afslutAlleEndagsloeb() {
     G.erEndagsloeb = false;
-    
-    // Nulstil Lombardia-træthed (den er efter GT'erne)
-    // Men behold forårs-træthed for GT'erne
-    var foraarTraethed = 0;
-    for (var i = 0; i < G.endagsResultater.length; i++) {
-        if (G.endagsResultater[i].loebId !== "lombardia") {
-            foraarTraethed += ENDAGS_TRAETHED.perLoeb;
-        }
-    }
-    G.endagsTraethed = Math.min(foraarTraethed, ENDAGS_TRAETHED.maxAkkumuleret);
-    
-    visSaesonValg();
+    gaaVidereIKalender();
 }
 
 // ========== SEKTION 4: GEM/HENT, SIMULERINGSMOTOR-TILPASNINGER ==========
