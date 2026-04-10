@@ -3164,7 +3164,7 @@ function startNaesteEndagsloeb() {
         '<div style="font-size:40px">' + loeb.emoji + '</div>' +
         '<h1 style="color:#0f0">' + loeb.navn.toUpperCase() + '</h1>' +
         '<div style="color:#0a0">' + typeTekst + ' · ' + loeb.dist + ' km</div>' +
-        '<div style="color:#888;font-size:12px;margin-top:5px">Løb ' + (G.aktuelEndagsIdx + 1) + ' af ' + G.valgteEndagsloeb.length + '</div>' +
+        '<div style="color:#888;font-size:12px;margin-top:5px">Løb ' + (G.saesonKalender.filter(function(k,idx) { return k.type !== "reset" && idx <= G.saesonKalenderIdx; }).length) + ' af ' + G.saesonKalender.filter(function(k) { return k.type !== "reset"; }).length + '</div>' +
     '</div>';
     
     if (G.endagsTraethed > 0) {
@@ -3504,7 +3504,7 @@ function sletGemtSpil() {
 }
 
 function harGemtSpil() {
-    return localStorage.getItem('grandToursSave') !== null;
+    return localStorage.getItem('domestiqueSave') !== null;
 }
 
 function indlaesGemtSpil() {
