@@ -2613,7 +2613,7 @@ function visEndagsValg() {
     var html = '<div style="text-align:center;padding:15px 0">' +
         '<h1 style="color:#0a0">SÆSON ' + G.saeson + ' (' + (2025 + G.saeson) + ')</h1>' +
         '<p style="color:#888">Sammensæt din sæson</p>' +
-        '<p style="color:#666;font-size:11px">Vælg endagsløb og 1-2 Grand Tours</p>' +
+        '<p style="color:#666;font-size:11px">Vælg monumenter, op til 5 klassikere og 1-2 Grand Tours</p>' +
     '</div>';
     
     // Hjælpefunktion
@@ -2662,9 +2662,9 @@ function visEndagsValg() {
     }
     
     // ===== GIRO (maj) =====
-    var giroValgt = G.valgteGT.indexOf("giro") >= 0;
+	var giroValgt = G.valgteGT.indexOf("giro") >= 0;
     var giroDisabled = !giroValgt && G.valgteGT.length >= 2;
-    html += '<div class="box" style="border-color:#ff69b4">' +
+    html += '<div class="box" style="border-color:' + (giroDisabled ? '#333' : '#ff69b4') + ';' + (giroDisabled ? 'opacity:0.3' : '') + '">' +
         '<div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="' + (giroDisabled ? '' : 'toggleGTValg(\'giro\');visEndagsValg()') + '">' +
             '<h3 style="color:#ff69b4;margin:0">🇮🇹 Giro d\'Italia · Maj</h3>' +
             '<span style="color:' + (giroValgt ? '#0f0' : '#666') + ';font-size:20px">' + (giroValgt ? '✓' : '○') + '</span>' +
@@ -2675,7 +2675,7 @@ function visEndagsValg() {
     // ===== TOUR (juli) =====
     var tourValgt = G.valgteGT.indexOf("tdf") >= 0;
     var tourDisabled = !tourValgt && G.valgteGT.length >= 2;
-    html += '<div class="box" style="border-color:#ff0">' +
+    html += '<div class="box" style="border-color:' + (tourDisabled ? '#333' : '#ff0') + ';' + (tourDisabled ? 'opacity:0.3' : '') + '">' +
         '<div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="' + (tourDisabled ? '' : 'toggleGTValg(\'tdf\');visEndagsValg()') + '">' +
             '<h3 style="color:#ff0;margin:0">🇫🇷 Tour de France · Juli</h3>' +
             '<span style="color:' + (tourValgt ? '#0f0' : '#666') + ';font-size:20px">' + (tourValgt ? '✓' : '○') + '</span>' +
@@ -2697,7 +2697,7 @@ function visEndagsValg() {
     // ===== VUELTA (aug-sep) =====
     var vueltaValgt = G.valgteGT.indexOf("vuelta") >= 0;
     var vueltaDisabled = !vueltaValgt && G.valgteGT.length >= 2;
-    html += '<div class="box" style="border-color:#f44">' +
+    html += '<div class="box" style="border-color:' + (vueltaDisabled ? '#333' : '#f44') + ';' + (vueltaDisabled ? 'opacity:0.3' : '') + '">' +
         '<div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="' + (vueltaDisabled ? '' : 'toggleGTValg(\'vuelta\');visEndagsValg()') + '">' +
             '<h3 style="color:#f44;margin:0">🇪🇸 Vuelta a España · Aug-Sep</h3>' +
             '<span style="color:' + (vueltaValgt ? '#0f0' : '#666') + ';font-size:20px">' + (vueltaValgt ? '✓' : '○') + '</span>' +
@@ -2726,35 +2726,100 @@ function visEndagsValg() {
         html += '<div style="text-align:center;color:#888;font-size:11px;margin:5px 0">Klassikere: ' + antalKlassikere + '/5</div>';
     }
 	
-    // ===== OPSUMMERING =====
+// ===== OPSUMMERING =====
     var antalEndags = G.valgteEndagsloeb.length;
     var antalGT = G.valgteGT.length;
     var antalTotal = antalEndags + antalGT;
     
+    // Klassiker-tæller
+    var antalKlassikere = 0;
+    for (var i = 0; i < G.valgteEndagsloeb.length; i++) {
+        var l = findEndagsLoeb(G.valgteEndagsloeb[i]);
+        if (l && !l.monument) antalKlassikere++;
+    }
+    if (antalKlassikere > 0) {
+        html += '<div style="text-align:center;color:#888;font-size:11px;margin:5px 0">Klassikere: ' + antalKlassikere + '/5</div>';
+    }
+    
     if (antalTotal > 0) {
-        // Beregn forårs-træthed til GT
+        // Tæl løb per periode
         var foraarLoeb = 0;
+        var sommerLoeb = 0;
+        var harLombardia = false;
         for (var i = 0; i < G.valgteEndagsloeb.length; i++) {
             var l = findEndagsLoeb(G.valgteEndagsloeb[i]);
-            if (l && (l.maaned === "Februar" || l.maaned === "Marts" || l.maaned === "April")) foraarLoeb++;
+            if (!l) continue;
+            if (l.maaned === "Februar" || l.maaned === "Marts" || l.maaned === "April") foraarLoeb++;
+            else if (l.maaned === "Juli" || l.maaned === "August") sommerLoeb++;
+            else if (l.maaned === "Oktober") harLombardia = true;
         }
+        
+        var harGiro = G.valgteGT.indexOf("giro") >= 0;
+        var harTour = G.valgteGT.indexOf("tdf") >= 0;
+        var harVuelta = G.valgteGT.indexOf("vuelta") >= 0;
         
         html += '<div class="box" style="border-color:#0ff;text-align:center">' +
-            '<p style="color:#0ff">' + antalEndags + ' endagsløb + ' + antalGT + ' Grand Tour' + (antalGT !== 1 ? 's' : '') + '</p>';
+            '<p style="color:#0ff;font-weight:bold">' + antalEndags + ' endagsløb + ' + antalGT + ' Grand Tour' + (antalGT !== 1 ? 's' : '') + '</p>';
         
-        if (foraarLoeb > 0 && antalGT > 0) {
-            var traethedPct = Math.min(foraarLoeb * 10, 30);
-            html += '<p style="color:#f80;font-size:11px">⚠️ ' + foraarLoeb + ' forårsløb: -' + traethedPct + '% energi til Giro/Tour</p>';
+        // Beregn og vis træthed kronologisk
+        var traethedLinjer = [];
+        
+        // Forårsløb → Giro/Tour
+        if (foraarLoeb > 0) {
+            var foraarPct = Math.min(foraarLoeb * 10, 30);
+            if (harGiro) {
+                traethedLinjer.push('<span style="color:#f80">' + foraarLoeb + ' forårsløb: -' + foraarPct + '% energi til Giro</span>');
+            } else if (harTour) {
+                traethedLinjer.push('<span style="color:#f80">' + foraarLoeb + ' forårsløb: -' + foraarPct + '% energi til Tour</span>');
+            }
         }
         
-        // GT træthed
-        if (antalGT >= 2) {
-            var key = G.valgteGT[0] + "_" + G.valgteGT[1];
-            var traethed = GT_TRAETHED[key];
-            if (traethed) {
-                var gt2Navn = GT_CONFIG[G.valgteGT[1]].kort;
-                html += '<p style="color:#f80;font-size:11px">⚠️ ' + gt2Navn + ' starter med ' + Math.round(traethed.energiStart * 100) + '% energi</p>';
+        // Giro → Tour
+        if (harGiro && harTour) {
+            traethedLinjer.push('<span style="color:#f80">Giro → Tour: 80% energi, 92% restitution</span>');
+        }
+        
+        // Giro → sommerløb
+        if (harGiro && sommerLoeb > 0 && !harTour) {
+            traethedLinjer.push('<span style="color:#f80">Giro → sommerløb: 80% energi</span>');
+        }
+        
+        // Tour → sommerløb
+        if (harTour && sommerLoeb > 0) {
+            traethedLinjer.push('<span style="color:#f80">Tour → sommerløb: 80% energi</span>');
+        }
+        
+        // Sommerløb → Vuelta
+        if (sommerLoeb > 0 && harVuelta) {
+            var sommerPct = Math.min(sommerLoeb * 10, 30);
+            traethedLinjer.push('<span style="color:#f80">' + sommerLoeb + ' sommerløb: -' + sommerPct + '% ekstra til Vuelta</span>');
+        }
+        
+        // Giro → Vuelta (uden Tour)
+        if (harGiro && harVuelta && !harTour) {
+            traethedLinjer.push('<span style="color:#0f0">Giro → Vuelta: 90% energi, 97% restitution</span>');
+        }
+        
+        // Tour → Vuelta
+        if (harTour && harVuelta) {
+            traethedLinjer.push('<span style="color:#f44">Tour → Vuelta: 75% energi, 90% restitution</span>');
+        }
+        
+        // GT → Lombardia
+        if (harLombardia) {
+            if (harVuelta) {
+                traethedLinjer.push('<span style="color:#f80">Vuelta → Lombardia: 80% energi</span>');
+            } else if (harTour) {
+                traethedLinjer.push('<span style="color:#f80">Tour → Lombardia: 80% energi</span>');
             }
+        }
+        
+        if (traethedLinjer.length > 0) {
+            html += '<div style="margin-top:8px;font-size:11px;line-height:1.6">';
+            for (var i = 0; i < traethedLinjer.length; i++) {
+                html += '<div>⚠️ ' + traethedLinjer[i] + '</div>';
+            }
+            html += '</div>';
         }
         
         html += '</div>';
