@@ -310,7 +310,11 @@
         .plot-tabs .tab:first-child { flex: 0 0 100%; margin-bottom: 4px; }
         .plot-tabs .tab:not(:first-child) { flex: 1 1 30%; }
     }
-
+.instr { color: #ccc; }
+.instr li { color: #ccc; }
+.instr td { color: #ccc; }
+.instr th { color: #888; }
+.instr p { color: #ccc; }
     button, .btn { touch-action: manipulation; }
     html, body { touch-action: pan-y; }
     </style>
@@ -1138,18 +1142,19 @@ var G = {
 
 function visInstruktioner() {
     R(
+    '<div class="instr">' +
     '<h2>Instruktioner</h2>' +
     '<div class="box">' +
         '<h3>Grundidé</h3>' +
         '<p>Du kører op til 10 sæsoner som professionel cykelrytter. Hver sæson kan du køre endagsløb (monumenter og klassikere) og 1-2 Grand Tours.</p>' +
     '</div>' +
 
-    '<div class="box">' +
+'<div class="box">' +
         '<h3>Sæsonstruktur</h3>' +
         '<ul style="margin-left:18px;list-style:disc;font-size:14px;line-height:1.6">' +
-            '<li>Vælg endagsløb (valgfrit, feb-okt)</li>' +
-            '<li>Vælg 1 eller 2 Grand Tours</li>' +
-            '<li>Hvert endagsløb koster 10% startenergi til næste løb</li>' +
+            '<li>Vælg alle monumenter, op til 5 klassikere og 1-2 Grand Tours</li>' +
+            '<li>Løbene køres i kronologisk rækkefølge (feb-okt)</li>' +
+            '<li>Endagsløb akkumulerer -10% energi per løb (max -30%) til næste GT</li>' +
             '<li>Kører du 2 GT\'er, starter den anden med reduceret energi</li>' +
             '<li>Bonuspoint fordeles samlet efter sæsonen</li>' +
         '</ul>' +
@@ -1194,11 +1199,7 @@ function visInstruktioner() {
             '</tr>' +
         '</table>' +
         '<ul style="margin-left:18px;list-style:disc;font-size:13px;line-height:1.5;margin-top:8px;color:#ccc">' +
-            '<li>Hårdere end normale etaper (højere energiforbrug)</li>' +
-            '<li>🧱 Brosten/grus koster ekstra energi</li>' +
-            '<li>Mere angrebsivrige ryttere</li>' +
-            '<li>Ryttere står af når 30+ min bagud</li>' +
-            '<li>Ingen trøjer eller indlagte spurter</li>' +
+            '<li>Hårdere end normale etaper (højere energiforbrug) - 🧱 Brosten/grus koster ekstra energi</li>' +
         '</ul>' +
     '</div>' +
 
@@ -1310,6 +1311,7 @@ function visInstruktioner() {
         '</table>' +
     '</div>' +
 
+	'</div>' +
     '<div class="ctrls">' +
         '<button class="btn btn-big btn-y" onclick="intro()">Tilbage</button>' +
     '</div>');
@@ -2773,7 +2775,10 @@ function visEndagsValg() {
                 traethedLinjer.push('<span style="color:#f80">' + foraarLoeb + ' forårsløb: -' + foraarPct + '% energi til Tour</span>');
             }
         }
-        
+        // Endagsløb → endagsløb træthed
+        if (foraarLoeb > 1) {
+            traethedLinjer.push('<span style="color:#888">Endagsløb akkumulerer: -10% energi per løb (max -30%)</span>');
+        }
         // Giro → Tour
         if (harGiro && harTour) {
             traethedLinjer.push('<span style="color:#f80">Giro → Tour: 80% energi, 92% restitution</span>');
