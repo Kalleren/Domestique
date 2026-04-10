@@ -2739,28 +2739,24 @@ function visEndagsValg() {
 	var giroValgt = G.valgteGT.indexOf("giro") >= 0;
     var giroDisabled = !giroValgt && G.valgteGT.length >= 2;
     html += '<div class="box" style="border-color:' + (giroDisabled ? '#333' : '#ff69b4') + ';' + (giroDisabled ? 'opacity:0.3' : '') + '">' +
-        '<div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="' + (giroDisabled ? '' : 'toggleGTValg(\'giro\');visEndagsValg()') + '">' +
-            '<h3 style="color:' + (giroDisabled ? '#333' : '#ff69b4') + ';margin:0">🇮🇹 Giro d\'Italia · Maj</h3>' +
-            '<span style="color:' + (giroValgt ? '#0f0' : '#666') + ';font-size:20px">' + (giroValgt ? '✓' : '○') + '</span>' +
-        '</div>' +
-        (giroDisabled ? '<div style="color:#666;font-size:10px">Max 2 Grand Tours</div>' : '') +
+        '<div style="text-align:center;cursor:pointer" onclick="' + (giroDisabled ? '' : 'toggleGTValg(\'giro\');visEndagsValg()') + '">' +
+    '<h3 style="color:' + (giroDisabled ? '#333' : '#ff69b4') + ';margin:0">🇮🇹 Giro d\'Italia · Maj ' + (giroValgt ? '<span style="color:#0f0">✓</span>' : '') + '</h3>' +
+	'</div>' +
     '</div>';
     
     // ===== TOUR (juli) =====
     var tourValgt = G.valgteGT.indexOf("tdf") >= 0;
     var tourDisabled = !tourValgt && G.valgteGT.length >= 2;
     html += '<div class="box" style="border-color:' + (tourDisabled ? '#333' : '#ff0') + ';' + (tourDisabled ? 'opacity:0.3' : '') + '">' +
-        '<div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="' + (tourDisabled ? '' : 'toggleGTValg(\'tdf\');visEndagsValg()') + '">' +
-            '<h3 style="color:' + (tourDisabled ? '#333' : '#ff0') + ';margin:0">🇫🇷 Tour de France · Juli</h3>' +
-            '<span style="color:' + (tourValgt ? '#0f0' : '#666') + ';font-size:20px">' + (tourValgt ? '✓' : '○') + '</span>' +
-        '</div>' +
-        (tourDisabled ? '<div style="color:#666;font-size:10px">Max 2 Grand Tours</div>' : '') +
+        '<div style="text-align:center;cursor:pointer" onclick="' + (tourDisabled ? '' : 'toggleGTValg(\'tdf\');visEndagsValg()') + '">' +
+    '<h3 style="color:' + (tourDisabled ? '#333' : '#ff0') + ';margin:0">🇫🇷 Tour de France · Juli ' + (tourValgt ? '<span style="color:#0f0">✓</span>' : '') + '</h3>' +
+	'</div>' +
     '</div>';
     
     // ===== SOMMER (juli-aug) =====
     var sommerLoeb = loebIMaaned(["Juli", "August"]);
     if (sommerLoeb.length > 0) {
-        html += '<div class="box" style="border-color:#070"><h3 style="color:#0a0">☀️ Sommer</h3>';
+        html += '<div class="box" style="border-color:#070"><h3 style="color:#0a0">☀️ Juli-August</h3>';
         html += '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
         for (var i = 0; i < sommerLoeb.length; i++) {
             html += endagsLoebKort(sommerLoeb[i], G.valgteEndagsloeb.indexOf(sommerLoeb[i].id) >= 0);
@@ -2772,11 +2768,9 @@ function visEndagsValg() {
     var vueltaValgt = G.valgteGT.indexOf("vuelta") >= 0;
     var vueltaDisabled = !vueltaValgt && G.valgteGT.length >= 2;
     html += '<div class="box" style="border-color:' + (vueltaDisabled ? '#333' : '#f44') + ';' + (vueltaDisabled ? 'opacity:0.3' : '') + '">' +
-        '<div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="' + (vueltaDisabled ? '' : 'toggleGTValg(\'vuelta\');visEndagsValg()') + '">' +
-            '<h3 style="color:' + (vueltaDisabled ? '#333' : '#f44') + ';margin:0">🇪🇸 Vuelta a España · Aug-Sep</h3>' +
-            '<span style="color:' + (vueltaValgt ? '#0f0' : '#666') + ';font-size:20px">' + (vueltaValgt ? '✓' : '○') + '</span>' +
-        '</div>' +
-        (vueltaDisabled ? '<div style="color:#666;font-size:10px">Max 2 Grand Tours</div>' : '') +
+        '<div style="text-align:center;cursor:pointer" onclick="' + (vueltaDisabled ? '' : 'toggleGTValg(\'vuelta\');visEndagsValg()') + '">' +
+    '<h3 style="color:' + (vueltaDisabled ? '#333' : '#f44') + ';margin:0">🇪🇸 Vuelta a España · Aug-Sep ' + (vueltaValgt ? '<span style="color:#0f0">✓</span>' : '') + '</h3>' +
+	'</div>' +
     '</div>';
     
     // ===== LOMBARDIA (oktober) =====
