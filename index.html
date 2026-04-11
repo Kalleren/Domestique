@@ -5266,7 +5266,7 @@ if (G.lastMpResult) {
     // KNAPPER ØVERST
 	'<div style="background:' + (G.erEndagsloeb ? '#010' : '#110') + ';padding:8px;margin-bottom:8px;border:1px solid ' + (G.erEndagsloeb ? '#0a0' : '#aa0') + ';border-radius:4px;text-align:center">' +
         '<button class="btn btn-big" style="border-color:' + (G.erEndagsloeb ? '#f80' : 'var(--gt-primary)') + ';color:' + (G.erEndagsloeb ? '#f80' : 'var(--gt-primary)') + ';min-width:140px" onclick="accel()"' + aDis + '>[A] ACCELERER</button>' +
-        '<button class="btn btn-big" onclick="pause()" style="min-width:140px"' + pDis + '>[P] ' + pBtn + '</button>' +
+        '<button class="btn btn-big" onclick="pause()" style="border-color:#3399ff;color:#3399ff;min-width:140px"' + pDis + '>[P] ' + pBtn + '</button>' +
     '</div>' + // ETAPE INFO
 // -- Desktop Version --
 '<div class="top-bar-desktop" style="display:flex;align-items:center;padding:8px;background:#110;border:1px solid #aa0;border-radius:4px;margin-bottom:8px">' +
@@ -8842,7 +8842,7 @@ function rendTT() {
     R(
     // KNAP ØVERST
     '<div style="background:#000;padding:8px;margin-bottom:8px;border:1px solid #0aa;border-radius:4px;text-align:center">' +
-        '<button class="btn btn-big" style="border-color:#3399ff;color:#3399ff;min-width:200px" onclick="accTT()"' + (r.energi < 3 ? ' disabled' : '') + '>[A] FULD GAS!</button>' +
+        '<button class="btn btn-big" style="border-color:#0f0;color:#0f0;min-width:200px" onclick="accTT()"' + (r.energi < 3 ? ' disabled' : '') + '>[A] FULD GAS!</button>' +
     '</div>' +
     '<div style="padding:8px;background:#011;border:1px solid #0aa;border-radius:4px;margin-bottom:8px">' +
         '<strong>Etape ' + e.nr + ':</strong> ' + e.start + ' | ENKELTSTART ⏱️ ' + e.dist + ' km</div>' +
