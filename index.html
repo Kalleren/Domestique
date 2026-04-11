@@ -3833,7 +3833,9 @@ function fortsaetSpil() {
             gaaVidereIKalender();
         }
     } else if (result) {
-        if (G.erEndagsloeb && G.gemtRes) {
+        if (G.spiller && G.spiller.ude) {
+            spillerUdgaaet();
+        } else if (G.erEndagsloeb && G.gemtRes) {
             setEndagsTema();
             var loeb = findEndagsLoeb(G.valgteEndagsloeb[G.aktuelEndagsIdx]);
             if (loeb) {
@@ -3850,6 +3852,7 @@ function fortsaetSpil() {
         intro();
     }
 }
+
 	// ========== TILPASSET startEtape() ==========
 // Erstatter den originale. Tilføjer GT-tema og træthedsjusteret energi.
 
