@@ -1715,9 +1715,9 @@ function visSaesonKalender() {
                         var plads = G.endagsResultater[ei].plads;
                         if (plads <= 3) {
                             var medalje = plads === 1 ? "🥇" : plads === 2 ? "🥈" : "🥉";
-                            placering = '<span style="color:#0f0;font-weight:bold">' + medalje + ' ' + plads + '.</span>';
+                            placering = '<span style="color:#0f0;font-size:11px">' + medalje + ' ' + plads + '.</span>';
                         } else {
-                            placering = '<span style="color:#888">' + plads + '. plads</span>';
+                            placering = '<span style="color:#888;font-size:11px">' + plads + '. plads</span>';
                         }
                         break;
                     }
@@ -1737,12 +1737,12 @@ function visSaesonKalender() {
                     if (G.saesonResultater[gi].gtId === k.id) {
                         var res = G.saesonResultater[gi];
                         if (res.udgaaet) {
-                            placering = '<span style="color:#f44">💀 DNF</span>';
+                            placering = '<span style="color:#f44;font-size:11px">💀 DNF</span>';
                         } else if (res.gcPlads <= 3) {
                             var medalje = res.gcPlads === 1 ? "🥇" : res.gcPlads === 2 ? "🥈" : "🥉";
-                            placering = '<span style="color:' + gt.primary + ';font-weight:bold">' + medalje + ' ' + res.gcPlads + '.</span>';
+                            placering = '<span style="color:' + gt.primary + ';font-size:11px">' + medalje + ' ' + res.gcPlads + '.</span>';
                         } else {
-                            placering = '<span style="color:#888">' + res.gcPlads + '. plads</span>';
+                            placering = '<span style="color:#888;font-size:11px">' + res.gcPlads + '. plads</span>';
                         }
                         break;
                     }
@@ -1836,6 +1836,7 @@ function startGrandTour() {
     // Generer etaper
     G.etaper = genEForGT(gtId);
     G.enr = 0;
+	G.gemtRes = null;
     G.stilTab = "gc";
     ETAPE_HISTORIK = [];
     HOEJDEPUNKTER = [];
@@ -3349,6 +3350,7 @@ function startNaesteEndagsloeb() {
         G.etaper[0].brostenSektioner = renset;    }
 	
     G.enr = 0;
+	G.gemtRes = null;
 	G.stilTab = "gc";
     ETAPE_HISTORIK = [];
     HOEJDEPUNKTER = [];
