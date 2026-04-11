@@ -2711,7 +2711,8 @@ function intro() {
             var endagsLoeb = findEndagsLoeb(endagsId);
             loebNavn = endagsLoeb ? endagsLoeb.kort : "Endagsløb";
         } else {
-            loebNavn = saved.aktuelGT ? (GT_CONFIG[saved.aktuelGT] ? GT_CONFIG[saved.aktuelGT].kort : "?") : "TdF";
+            var gtKort = saved.aktuelGT ? (GT_CONFIG[saved.aktuelGT] ? GT_CONFIG[saved.aktuelGT].kort : "?") : "TdF";
+            loebNavn = gtKort + ', etape ' + ((saved.enr || 0) + 1);
         }
         fortsaetKnap =
             '<button class="btn btn-big btn-y" onclick="fortsaetSpil()" style="margin-bottom:6px">' +
