@@ -1715,7 +1715,7 @@ function visSaesonKalender() {
                         var plads = G.endagsResultater[ei].plads;
                         if (plads <= 3) {
                             var medalje = plads === 1 ? "🥇" : plads === 2 ? "🥈" : "🥉";
-                            placering = '<span style="color:#0f0;font-size:11px">' + medalje + ' ' + plads + '.</span>';
+                            placering = '<span style="color:#0f0;font-size:11px">' + medalje + ' ' + plads + '. plads</span>';
                         } else {
                             placering = '<span style="color:#888;font-size:11px">' + plads + '. plads</span>';
                         }
@@ -1740,7 +1740,7 @@ function visSaesonKalender() {
                             placering = '<span style="color:#f44;font-size:11px">💀 DNF</span>';
                         } else if (res.gcPlads <= 3) {
                             var medalje = res.gcPlads === 1 ? "🥇" : res.gcPlads === 2 ? "🥈" : "🥉";
-                            placering = '<span style="color:' + gt.primary + ';font-size:11px">' + medalje + ' ' + res.gcPlads + '.</span>';
+                            placering = '<span style="color:' + gt.primary + ';font-size:11px">' + medalje + ' ' + res.gcPlads + '. plads</span>';
                         } else {
                             placering = '<span style="color:#888;font-size:11px">' + res.gcPlads + '. plads</span>';
                         }
@@ -5256,14 +5256,13 @@ if (G.lastMpResult) {
     
     R(mod + pmod +
     // KNAPPER ØVERST
-    '<div style="background:#110;padding:8px;margin-bottom:8px;border:1px solid #aa0;border-radius:4px;text-align:center">' +
-        '<button class="btn btn-big btn-y" onclick="accel()" style="min-width:140px"' + aDis + '>[A] ACCELERER</button>' +
+	'<div style="background:' + (G.erEndagsloeb ? '#010' : '#110') + ';padding:8px;margin-bottom:8px;border:1px solid ' + (G.erEndagsloeb ? '#0a0' : '#aa0') + ';border-radius:4px;text-align:center">' +
+        '<button class="btn btn-big" style="border-color:' + (G.erEndagsloeb ? '#f80' : 'var(--gt-primary)') + ';color:' + (G.erEndagsloeb ? '#f80' : 'var(--gt-primary)') + ';min-width:140px" onclick="accel()"' + aDis + '>[A] ACCELERER</button>' +
         '<button class="btn btn-big" onclick="pause()" style="min-width:140px"' + pDis + '>[P] ' + pBtn + '</button>' +
-    '</div>' +
- // ETAPE INFO
+    '</div>' + // ETAPE INFO
 // -- Desktop Version --
 '<div class="top-bar-desktop" style="display:flex;align-items:center;padding:8px;background:#110;border:1px solid #aa0;border-radius:4px;margin-bottom:8px">' +
-    '<div style="flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><strong>' + (G.erEndagsloeb ? '' : 'Etape ' + e.nr + ': ') + '</strong> ' + (G.erEndagsloeb ? e.slut : e.start + ' → ' + e.slut) + '</div>' +
+    '<div style="flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><strong>' + (G.erEndagsloeb ? e.start + ': ' : 'Etape ' + e.nr + ': ') + '</strong>' + (G.erEndagsloeb ? e.slut : e.start + ' → ' + e.slut) + '</div>' +
     '<div style="display:flex;align-items:center;justify-content:center;gap:15px">' +
         '<span style="padding:4px 10px;border:2px solid ' + typeClr + ';color:' + typeClr + ';border-radius:10px;font-size:12px;width:70px;text-align:center">' + info.n.toUpperCase() + '</span>' +
         '<span class="cyan" style="font-size:20px;font-weight:bold;width:145px;text-align:center">Km ' + G.km + '/' + e.dist + '</span>' +
@@ -5278,7 +5277,7 @@ if (G.lastMpResult) {
 // -- Mobil Version --
 '<div class="top-bar-mobile" style="background:#110;border:1px solid #aa0;border-radius:4px;margin-bottom:8px;padding:8px;text-align:center;">' +
     // Række 1: Etape Info
-    '<div style="font-size:14px;margin-bottom:8px;"><strong>' + (G.erEndagsloeb ? '' : 'Etape ' + e.nr + ': ') + '</strong>' + (G.erEndagsloeb ? e.slut : e.start + ' → ' + e.slut) + '</div>' +
+    '<div style="font-size:14px;margin-bottom:8px;"><strong>' + (G.erEndagsloeb ? e.start + ': ' : 'Etape ' + e.nr + ': ') + '</strong>' + (G.erEndagsloeb ? e.slut : e.start + ' → ' + e.slut) + '</div>' +
     // Række 2 (NU): Type og KM
     '<div style="display:flex;justify-content:space-around;align-items:center;margin-bottom:8px;">' +
         '<span style="padding:4px 10px;border:2px solid ' + typeClr + ';color:' + typeClr + ';border-radius:10px;font-size:12px;width:70px;text-align:center">' + info.n.toUpperCase() + '</span>' +
