@@ -2489,18 +2489,6 @@ function visEndagsAlleResultater() {
         }
     }
     html += '</div>';
-        // Udgåede ryttere (DNF)
-    var dnfRyttere = [];
-    for (var i = 0; i < res.length; i++) {
-        if (res[i].r.ude) dnfRyttere.push(res[i].r);
-    }
-	if (dnfRyttere.length > 0) {
-        html += '<div class="box" style="border-color:#f44;max-height:200px;overflow-y:auto"><h3 style="color:#f44">🚶 Udgået (' + dnfRyttere.length + ')</h3>';
-        for (var i = 0; i < dnfRyttere.length; i++) {
-            html += '<div class="row" style="color:#666"><span>' + dnfRyttere[i].navn + ' <span style="color:#444">' + dnfRyttere[i].holdAbbr + '</span></span><span style="color:#f44">DNF</span></div>';
-        }
-        html += '</div>';
-    }
     html += '<div class="ctrls"><button class="btn btn-big" style="border-color:#0a0;color:#0a0" onclick="visEndagsResultat(G.gemtRes, findEndagsLoeb(G.valgteEndagsloeb[G.aktuelEndagsIdx]), G.gemtSpiPlads, G.gemtBonus)">← TILBAGE</button></div>';
     
     R(html);
