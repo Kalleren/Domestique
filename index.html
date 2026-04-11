@@ -7073,7 +7073,7 @@ if (e.type === "bjerg" && G.km > e.dist - favSlutDist) {
 if (e.type === "kuperet" && G.km > e.dist * favKupStart) {
     favoritAngrebKuperet();
 }
-
+if (G.erEndagsloeb) aiAngrebFraUdbrud();
 // Styrt-check
     if (Math.random() < 0.001 && !G.etapeSlut && G.km > 50 && G.km < e.dist - 2) {
         var felt = findInArr(G.grp, function(g) { return g.type === "felt"; });
@@ -7167,6 +7167,101 @@ if (Math.random() < udbChance && udbCount < 5) aiUdb();
     rend();
 }
 
+function aiAngrebFraUdbrud() {
+    var e = G.etaper[G.enr];
+    
+    for (var gi = 0; gi < G.grp.length; gi++) {
+        var g = G.grp[gi];
+        if (g.type !== "udbrud" || g.ryt.length < 4) continue;
+        
+        var kmTilMaal = e.dist - g.pos;
+        
+        var angrebChance = 0.01;
+        if (kmTilMaal < 120) angrebChance = 0.015;
+        if (kmTilMaal < 80) angrebChance = 0.03;
+        if (kmTilMaal < 60) angrebChance = 0.05;
+        if (kmTilMaal < 40) angrebChance = 0.07;
+        if (kmTilMaal < 25) angrebChance = 0.10;
+        if (kmTilMaal < 15) angrebChance = 0.14;
+        if (kmTilMaal < 8) angrebChance = 0.18;        
+        var ki = Math.min(Math.floor(g.pos), G.profil.length - 2);
+        var stig = G.profil[Math.min(ki + 1, G.profil.length - 1)] - G.profil[ki];
+        var erPaaStig = stig > 8;
+        
+        var erPaaBrosten = false;
+        if (e.brostenSektioner) {
+            for (var bsi = 0; bsi < e.brostenSektioner.length; bsi++) {
+                var bs = e.brostenSektioner[bsi];
+                if (g.pos >= bs.start && g.pos <= bs.slut) {
+                    erPaaBrosten = true;
+                    break;
+                }
+            }
+        }
+        
+        if (!erPaaStig && !erPaaBrosten && kmTilMaal > 10) continue;
+        
+        if (Math.random() > angrebChance) continue;
+        
+        var kand = [];
+        var grpGennemsnit = 0;
+        for (var gi2 = 0; gi2 < g.ryt.length; gi2++) {
+            var r2 = g.ryt[gi2];
+            if (erPaaStig) grpGennemsnit += r2.bj * 0.5 + r2.energi * 0.3 + r2.ud * 0.2;
+            else if (erPaaBrosten) grpGennemsnit += r2.fl * 0.5 + r2.energi * 0.3 + r2.ud * 0.2;
+            else grpGennemsnit += r2.spr * 0.4 + r2.energi * 0.3 + r2.fl * 0.3;
+        }
+        grpGennemsnit /= g.ryt.length;
+        
+        for (var ri2 = 0; ri2 < g.ryt.length; ri2++) {
+            var r = g.ryt[ri2];
+            if (r.sp || r.ude || r.energi < 25) continue;
+            
+            var styrke;
+            if (erPaaStig) styrke = r.bj * 0.5 + r.energi * 0.3 + r.ud * 0.2;
+            else if (erPaaBrosten) styrke = r.fl * 0.5 + r.energi * 0.3 + r.ud * 0.2;
+            else styrke = r.spr * 0.4 + r.energi * 0.3 + r.fl * 0.3;
+            
+            if (styrke > grpGennemsnit * 1.05) {
+                kand.push({ r: r, styrke: styrke });
+            }
+        }
+        
+        if (kand.length === 0) continue;
+        
+        kand.sort(function(a, b) { return b.styrke - a.styrke; });
+        
+        var antalAngribere = Math.min(ri(1, 3), kand.length);
+        if (kmTilMaal < 10) antalAngribere = Math.min(ri(1, 2), kand.length);
+        if (kmTilMaal < 5) antalAngribere = 1;
+        
+        var angribere = [];
+        for (var ai = 0; ai < antalAngribere; ai++) {
+            angribere.push(kand[ai].r);
+        }
+        
+        for (var ai = 0; ai < angribere.length; ai++) {
+            g.ryt = g.ryt.filter(function(x) { return x !== angribere[ai]; });
+            angribere[ai].energi -= (erPaaStig ? 7 : 5);
+        }
+        
+        var nyNavn = angribere.length === 1 ? angribere[0].navn.split(" ").pop() : "Angreb (" + angribere.length + ")";
+        G.grp.push({
+            type: "udbrud",
+            navn: nyNavn,
+            ryt: angribere,
+            pos: g.pos + 0.25,
+            tf: 0
+        });
+        
+        var angrebType = erPaaBrosten ? "🧱" : "⚡";
+        G.msg = angrebType + " " + angribere[0].navn.split(" ").pop() + " angriber fra gruppen!";
+        logHoejdepunkt("angreb", { rytter: angribere[0].navn, km: Math.round(g.pos), type: "fra_udbrud" });
+        
+        return;
+    }
+}
+	
 function aiAngrebKuperet() {
     var felt = findInArr(G.grp, function(g) { return g.type === "felt"; });
     if (!felt || felt.ryt.length < 10) return;
@@ -7772,7 +7867,11 @@ function fusionGrupper() {
             
             // Hvis to grupper er tæt nok på hinanden (< 0.15 km)
             var afstand = g1.pos - g2.pos;
-            if (afstand >= 0 && afstand < 0.08) {
+            var fusionsAfstand = 0.08;
+			if (G.erEndagsloeb && g1.type === "udbrud" && g2.type === "udbrud") {
+    			fusionsAfstand = 0.02;
+			}
+			if (afstand >= 0 && afstand < fusionsAfstand) {
 
             // TJEK: hvis g2 kun er én helt færdig rytter, så kør bare forbi
             if (g2.ryt.length === 1 && g2.ryt[0].heltFærdig) {
