@@ -317,7 +317,7 @@
 .instr p { color: #ccc; }
     .btn[style*="border-color:#0f0"]:hover { background: #030; color: #0f0; }
 	.btn[style*="border-color:#0a0"]:hover { background: #020; color: #0a0; }
-	.btn[style*="border-color:#f80"]:hover { background: #f80; color: #000; }
+	.btn[style*="border-color:#f80"]:hover { background: #420; color: #f80; }
 	button, .btn { touch-action: manipulation; }
     html, body { touch-action: pan-y; }
     </style>
@@ -2459,6 +2459,9 @@ function afslutGrandTour() {
     
 // Tjek om der er mere i kalenderen
     var naesteIdx = G.saesonKalenderIdx + 1;
+    while (naesteIdx < G.saesonKalender.length && G.saesonKalender[naesteIdx].type === "reset") {
+        naesteIdx++;
+    }
     if (naesteIdx < G.saesonKalender.length) {
         visGTResultatOgGaaVidere(resultat);
     } else {
@@ -2720,6 +2723,9 @@ function fordelPointFaerdig() {
 function gtSlutKnapper() {
     var gt = getGT();
     var naesteIdx = G.saesonKalenderIdx + 1;
+    while (naesteIdx < G.saesonKalender.length && G.saesonKalender[naesteIdx].type === "reset") {
+        naesteIdx++;
+    }
     var naesteTekst = "AFSLUT SÆSON";
     
     if (naesteIdx < G.saesonKalender.length) {
@@ -3651,6 +3657,9 @@ function visEndagsResultat(res, loeb, spiPlads, bonus) {
     
     // Find næste i kalenderen
     var naesteIdx = G.saesonKalenderIdx + 1;
+    while (naesteIdx < G.saesonKalender.length && G.saesonKalender[naesteIdx].type === "reset") {
+        naesteIdx++;
+    }
     var naesteTekst = "AFSLUT SÆSON";
     var naesteOnclick = "gaaVidereIKalender()";
     
