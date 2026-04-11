@@ -1,7 +1,7 @@
 {
-    "name": "GrandTours - Giro · Tour · Vuelta",
-    "short_name": "GrandTours",
-    "description": "Kør Giro d'Italia, Tour de France og Vuelta a España",
+    "name": "Domestique",
+    "short_name": "Domestique",
+    "description": "Kør endagsløb og Grand Tours",
     "start_url": "./index.html",
     "display": "standalone",
     "orientation": "portrait",
