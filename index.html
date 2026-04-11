@@ -2712,7 +2712,12 @@ function intro() {
             loebNavn = endagsLoeb ? endagsLoeb.kort : "Endagsløb";
         } else {
             var gtKort = saved.aktuelGT ? (GT_CONFIG[saved.aktuelGT] ? GT_CONFIG[saved.aktuelGT].kort : "?") : "TdF";
-            loebNavn = gtKort + ', etape ' + ((saved.enr || 0) + 1);
+            var etapeNr = (saved.enr || 0) + (saved.etapeFaerdig ? 2 : 1);
+            if (etapeNr > 21) {
+                loebNavn = gtKort + ', afsluttet';
+            } else {
+                loebNavn = gtKort + ', etape ' + etapeNr;
+            }
         }
         fortsaetKnap =
             '<button class="btn btn-big btn-y" onclick="fortsaetSpil()" style="margin-bottom:6px">' +
