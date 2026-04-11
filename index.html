@@ -2542,7 +2542,7 @@ function visGTResultatOgGaaVidere(resultat) {
             if (GT_TRAETHED[traethedKey]) {
                 html += '<div class="box" style="border-color:' + naesteGTConfig.primary + ';text-align:center">' +
                     '<h3 style="color:' + naesteGTConfig.primary + '">' + naesteGTConfig.emoji + ' Næste op: ' + naesteGTConfig.navn + '</h3>' +
-                    '<p style="color:#888">Træthed: Startenergi ' + Math.round(GT_TRAETHED[traethedKey].energiStart * 100) + '%</p>' +
+					'<p style="color:#888">Træthed: Startenergi: ' + Math.round(GT_TRAETHED[traethedKey].energiStart * 100) + '% · Restitution: ' + Math.round(GT_TRAETHED[traethedKey].restitutionMult * 100) + '%</p>' +
                 '</div>';
             }
         }
