@@ -2767,7 +2767,8 @@ function intro() {
 		    	'▶️ FORTSÆT SPIL' +
 			'</button>' +
 			'<div style="color:#888;font-size:11px;margin-bottom:10px">' +
-                'Sæson ' + (saved.saeson || 1) + ', ' + loebNavn +
+                'Sæson ' + (saved.saeson || 1) + ', ' + loebNavn + 
+                (saved.svaerhed ? ' · ' + (saved.svaerhed === 'let' ? 'Den trehjulede' : saved.svaerhed === 'svaer' ? 'Raceren' : 'Havelågen') : '') +
             '</div>';
     }
     
