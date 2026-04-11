@@ -3349,7 +3349,7 @@ function startNaesteEndagsloeb() {
         G.etaper[0].brostenSektioner = renset;    }
 	
     G.enr = 0;
-    G.stilTab = "gc";
+	G.stilTab = "gc";
     ETAPE_HISTORIK = [];
     HOEJDEPUNKTER = [];
     
@@ -3665,7 +3665,10 @@ function gemSpil(etapeFaerdig) {
         },
         // Ryttere i nuværende GT
         ryttere: [],
-        etaper: G.etaper
+        etaper: G.etaper,
+        gemtRes: G.gemtRes,
+        gemtSpiPlads: G.gemtSpiPlads,
+        gemtBonus: G.gemtBonus
     };
     
     for (var i = 0; i < G.ryttere.length; i++) {
@@ -3737,6 +3740,9 @@ function indlaesGemtSpil() {
     G.svaerhed = saveData.svaerhed || "normal";
     ETAPE_HISTORIK = saveData.etapeHistorik || [];
     G.bonusPoint = saveData.bonusPoint || 0;
+	G.gemtRes = saveData.gemtRes || null;
+    G.gemtSpiPlads = saveData.gemtSpiPlads || 0;
+    G.gemtBonus = saveData.gemtBonus || 0;
     
     // GT-system
     G.valgteGT = saveData.valgteGT || ["tdf"];
@@ -3786,15 +3792,16 @@ function indlaesGemtSpil() {
         if (r.energi < 0) r.energi = 0;
     }
     
-    if (saveData.etapeFaerdig) {
-        if (G.enr >= 20) {
+	if (saveData.etapeFaerdig) {
+        if (G.erEndagsloeb) {
+            return 'endagsFaerdig';
+        } else if (G.enr >= 20) {
             G.enr = 20;
             return 'slut';
         } else {
             G.enr++;
         }
-    }
-    
+    }    
     return true;
 }
 
@@ -3802,27 +3809,49 @@ function fortsaetSpil() {
     var result = indlaesGemtSpil();
     if (result === 'slut') {
         slut();
-    } else if (result) {
-        if (G.erEndagsloeb) {
-            setEndagsTema();
+    } else if (result === 'endagsFaerdig') {
+        setEndagsTema();
+        if (G.gemtRes) {
+            var loeb = findEndagsLoeb(G.valgteEndagsloeb[G.aktuelEndagsIdx]);
+            if (loeb) {
+                visEndagsResultat(G.gemtRes, loeb, G.gemtSpiPlads, G.gemtBonus);
+            } else {
+                gaaVidereIKalender();
+            }
+        } else {
+            gaaVidereIKalender();
         }
-        startEtape();
+    } else if (result) {
+        if (G.erEndagsloeb && G.gemtRes) {
+            setEndagsTema();
+            var loeb = findEndagsLoeb(G.valgteEndagsloeb[G.aktuelEndagsIdx]);
+            if (loeb) {
+                visEndagsResultat(G.gemtRes, loeb, G.gemtSpiPlads, G.gemtBonus);
+            } else {
+                gaaVidereIKalender();
+            }
+        } else {
+            if (G.erEndagsloeb) setEndagsTema();
+            startEtape();
+        }
     } else {
         alert('Kunne ikke indlæse gemt spil');
         intro();
     }
 }
-
-// ========== TILPASSET startEtape() ==========
+	// ========== TILPASSET startEtape() ==========
 // Erstatter den originale. Tilføjer GT-tema og træthedsjusteret energi.
 
 function startEtape() {
     requestWakeLock();
     G.etapeSlut = false;
     
-    // Sørg for korrekt GT-tema
-    setGTTema(G.aktuelGT);
-    
+// Sørg for korrekt tema
+    if (G.erEndagsloeb) {
+        setEndagsTema();
+    } else {
+        setGTTema(G.aktuelGT);
+    }    
     var e = G.etaper[G.enr];
     G.km = 0; G.tid = 0; G.msg = ""; G.vent = false; G.udata = null; G.lastMpResult = null;
     HOEJDEPUNKTER = [];
@@ -3831,6 +3860,7 @@ function startEtape() {
     
     // Første etape i GT: sæt energi
     if (G.enr === 0) {
+        G.energiSat = true;
         var maxE = getMaxEnergi(G.spiller);
         
         // Endagsløb sætter sin egen energi
@@ -5231,7 +5261,7 @@ if (G.lastMpResult) {
  // ETAPE INFO
 // -- Desktop Version --
 '<div class="top-bar-desktop" style="display:flex;align-items:center;padding:8px;background:#110;border:1px solid #aa0;border-radius:4px;margin-bottom:8px">' +
-    '<div style="flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><strong>Etape ' + e.nr + ':</strong> ' + e.start + ' → ' + e.slut + '</div>' +
+    '<div style="flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><strong>' + (G.erEndagsloeb ? '' : 'Etape ' + e.nr + ': ') + '</strong> ' + (G.erEndagsloeb ? e.slut : e.start + ' → ' + e.slut) + '</div>' +
     '<div style="display:flex;align-items:center;justify-content:center;gap:15px">' +
         '<span style="padding:4px 10px;border:2px solid ' + typeClr + ';color:' + typeClr + ';border-radius:10px;font-size:12px;width:70px;text-align:center">' + info.n.toUpperCase() + '</span>' +
         '<span class="cyan" style="font-size:20px;font-weight:bold;width:145px;text-align:center">Km ' + G.km + '/' + e.dist + '</span>' +
@@ -5246,7 +5276,7 @@ if (G.lastMpResult) {
 // -- Mobil Version --
 '<div class="top-bar-mobile" style="background:#110;border:1px solid #aa0;border-radius:4px;margin-bottom:8px;padding:8px;text-align:center;">' +
     // Række 1: Etape Info
-    '<div style="font-size:14px;margin-bottom:8px;"><strong>Etape ' + e.nr + ':</strong> ' + e.start + ' → ' + e.slut + '</div>' +
+    '<div style="font-size:14px;margin-bottom:8px;"><strong>' + (G.erEndagsloeb ? '' : 'Etape ' + e.nr + ': ') + '</strong>' + (G.erEndagsloeb ? e.slut : e.start + ' → ' + e.slut) + '</div>' +
     // Række 2 (NU): Type og KM
     '<div style="display:flex;justify-content:space-around;align-items:center;margin-bottom:8px;">' +
         '<span style="padding:4px 10px;border:2px solid ' + typeClr + ';color:' + typeClr + ';border-radius:10px;font-size:12px;width:70px;text-align:center">' + info.n.toUpperCase() + '</span>' +
