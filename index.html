@@ -317,6 +317,7 @@
 .instr p { color: #ccc; }
     .btn[style*="border-color:#0f0"]:hover { background: #030; color: #0f0; }
 	.btn[style*="border-color:#0a0"]:hover { background: #020; color: #0a0; }
+	.btn[style*="border-color:#f80"]:hover { background: #210; color: #f80; }
 	button, .btn { touch-action: manipulation; }
     html, body { touch-action: pan-y; }
     </style>
@@ -5265,7 +5266,7 @@ if (G.lastMpResult) {
     R(mod + pmod +
     // KNAPPER ØVERST
 	'<div style="background:' + (G.erEndagsloeb ? '#010' : '#110') + ';padding:8px;margin-bottom:8px;border:1px solid ' + (G.erEndagsloeb ? '#0a0' : '#aa0') + ';border-radius:4px;text-align:center">' +
-        '<button class="btn btn-big" style="border-color:' + (G.erEndagsloeb ? '#f80' : 'var(--gt-primary)') + ';color:' + (G.erEndagsloeb ? '#f80' : 'var(--gt-primary)') + ';min-width:140px" onclick="accel()"' + aDis + '>[A] ACCELERER</button>' +
+        '<button class="btn btn-big" style="border-color:#f80;color:#f80;min-width:140px" onclick="accel()"' + aDis + '>[A] ACCELERER</button>' +
         '<button class="btn btn-big" onclick="pause()" style="border-color:#3399ff;color:#3399ff;min-width:140px"' + pDis + '>[P] ' + pBtn + '</button>' +
     '</div>' + // ETAPE INFO
 // -- Desktop Version --
