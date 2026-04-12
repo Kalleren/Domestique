@@ -3143,18 +3143,18 @@ function visEndagsValg() {
         
 // 7. Sommerløb → Vuelta (ekstra oven i GT-træthed)
         if (sommerLoeb > 0 && harVuelta) {
-            var sommerPct = Math.min(sommerLoeb * 10, 30);
+            var sommerPct = Math.min(sommerLoeb * 5, 30);
             var yderligere = (harTour || harGiro) ? 'yderligere ' : '';
             traethedLinjer.push('<span style="color:#f80">' + sommerLoeb + ' sommerløb: ' + yderligere + '-' + sommerPct + '% startenergi til Vuelta (max -30% samlet)</span>');
         }
         
         // 8. Sidste GT → Lombardia
-        if (harLombardia) {
+		if (harLombardia) {
             if (harVuelta) {
                 traethedLinjer.push('<span style="color:#f80">Vuelta → Lombardia: -20% startenergi</span>');
             } else if (harTour) {
                 traethedLinjer.push('<span style="color:#f80">Tour → Lombardia: -20% startenergi</span>');
-            } else if (harGiro) {
+            } else if (harGiro && !harTour && !harVuelta) {
                 traethedLinjer.push('<span style="color:#f80">Giro → Lombardia: -20% startenergi</span>');
             }
         }
