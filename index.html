@@ -11,7 +11,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Domestique">
-    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">ff
     <meta name="format-detection" content="telephone=no">
 
     <style>
@@ -570,7 +570,7 @@ var ENDAGSLOEB = {
             bonus: [3, 2, 1],
             monument: true,
             favoritStat: "bj",
-            energiMult: 1.4,
+            energiMult: 1,
             angrebMult: 2.5
         },
         {
@@ -585,7 +585,7 @@ var ENDAGSLOEB = {
             bonus: [3, 2, 1],
             monument: true,
             favoritStat: "bj",
-            energiMult: 1.6,
+            energiMult: 1,
             angrebMult: 2.0
         }
     ],
@@ -677,7 +677,7 @@ var ENDAGSLOEB = {
             bonus: [1],
             monument: false,
             favoritStat: "bj",
-            energiMult: 1.4,
+            energiMult: 1,
             angrebMult: 2.5
         },
 		{
@@ -722,7 +722,7 @@ var ENDAGSLOEB = {
             bonus: [1],
             monument: false,
             favoritStat: "bj",
-            energiMult: 1.4,
+            energiMult: 1,
             angrebMult: 2.0
         },
         {
@@ -3992,7 +3992,7 @@ function startEtape() {
         G.profil = genP(e);
         e.type = origType;
         var endagsLoeb = findEndagsLoeb(G.valgteEndagsloeb[G.aktuelEndagsIdx]);
-        var mult = (endagsLoeb && endagsLoeb.type === "kuperet_bjerg") ? 2 : 3;
+        var mult = (endagsLoeb && endagsLoeb.type === "kuperet_bjerg") ? 1.5 : 2;
         for (var pi = 0; pi < G.profil.length; pi++) {
             G.profil[pi] = Math.round(G.profil[pi] * mult);
         }
@@ -7012,7 +7012,7 @@ function loop() {
                 var ekstra = baseTab * (endagsLoeb.energiMult - 1);
 				// Spilleren bruger mere energi i endagsløb (sværere at vinde)
                 if (r.sp) {
-                    ekstra *= 1.15;
+                    ekstra *= 1.4;
                 }
                 // Brosten-sektioner: tjek om rytterens gruppe er på brosten
                 var etape = G.etaper[G.enr];
