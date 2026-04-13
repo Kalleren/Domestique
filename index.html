@@ -5370,7 +5370,7 @@ if (g.ryt.length > 5) {
             'padding:8px;margin:4px;border-radius:4px;font-size:12px;display:inline-block;vertical-align:top;min-width:200px';
         
         var visAntal = (g.type !== "udbrud" || grpNavn.indexOf("(") === -1) ? ' (' + g.ryt.length + ')' : '';
-gh += '<div style="' + boxStyle + '">' +
+gh += '<div style="' + boxStyle + ';cursor:pointer" onclick="visGruppe(' + i + ')">' +
 '<div style="display:flex;justify-content:space-between;align-items:center;color:' + farve.text + '">' +
 '<span>' + emo + ' ' + grpNavn + visAntal + (her ? ' ◄' : '') + '</span>' +
 '<span style="margin-left:10px">Km ' + Math.floor(g.pos) + '</span></div>' +
@@ -8925,6 +8925,46 @@ logHoejdepunkt("angreb", { rytter: G.spiller.navn, km: G.km, type: "solo_udbrud"
     rend();
 }
 
+function visGruppe(grpIdx) {
+    if (G.iv) { clearInterval(G.iv); G.iv = null; }
+    
+    var g = G.grp[grpIdx];
+    if (!g) return;
+    
+    var sorteretRyt = g.ryt.slice().sort(function(a, b) { return a.stid - b.stid; });
+    
+    var html = '<div class="modal"><div class="mbox" style="border-color:#3399ff;max-width:600px;max-height:80vh;overflow-y:auto;text-align:left">' +
+        '<h2 style="color:#3399ff">' + g.navn + ' (' + g.ryt.length + ' ryttere)</h2>';
+    
+    for (var i = 0; i < sorteretRyt.length; i++) {
+        var r = sorteretRyt[i];
+        var navnFarve = r.sp ? '#fff' : r.holdClr;
+        var weight = r.sp ? 'font-weight:bold;' : '';
+        var energiPct = Math.round((r.energi / getMaxEnergi(r)) * 100);
+        var energiFarve = energiPct < 25 ? '#f44' : energiPct < 50 ? '#f80' : '#0f0';
+        
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #222">' +
+            '<span style="color:' + navnFarve + ';' + weight + 'font-size:13px">' + (i + 1) + '. ' + r.navn + ' <span style="color:#444;font-size:10px">' + r.holdAbbr + '</span></span>' +
+            '<span style="color:' + energiFarve + ';font-size:11px">' + energiPct + '%</span>' +
+        '</div>';
+    }
+    
+    html += '<div style="text-align:center;margin-top:15px">' +
+        '<button class="btn btn-big" style="border-color:#3399ff;color:#3399ff" onclick="lukGruppe()">[P] FORTSÆT</button>' +
+    '</div>' +
+    '</div></div>';
+    
+    document.getElementById("game").insertAdjacentHTML('beforeend', html);
+}
+
+function lukGruppe() {
+    var modal = document.querySelector('.modal');
+    if (modal) modal.remove();
+    if (!G.iv && !G.vent && !G.etapeSlut) {
+        G.iv = setInterval(loop, 400);
+    }
+}
+	
 function pause() {
     if (G.vent || G.etapeSlut) return;   // ← tilføj G.etapeSlut
     if (G.iv) { clearInterval(G.iv); G.iv = null; G.msg = "⏸️ PAUSE"; }
