@@ -8925,6 +8925,48 @@ logHoejdepunkt("angreb", { rytter: G.spiller.navn, km: G.km, type: "solo_udbrud"
     rend();
 }
 
+function getGruppeVisNavn(g) {
+    var feltGrp = findInArr(G.grp, function(gg) { return gg.type === "felt"; });
+    
+    if (g.type === "felt") return "Feltet";
+    if (g.ryt.length === 1) return g.ryt[0].navn;
+    
+    var erForrest = true;
+    for (var i = 0; i < G.grp.length; i++) {
+        if (G.grp[i].pos > g.pos) { erForrest = false; break; }
+    }
+    
+    if (G.erEndagsloeb) {
+        if (feltGrp && g.pos > feltGrp.pos) {
+            return erForrest ? "Udbrud" : "Forfølgere";
+        } else if (feltGrp && g.pos < feltGrp.pos) {
+            if (g.ryt.length > 15) return "Bageste felt";
+            var erBagerst = true;
+            for (var i = 0; i < G.grp.length; i++) {
+                if (G.grp[i].pos < g.pos) { erBagerst = false; break; }
+            }
+            return erBagerst ? "Gruppetto" : "Bagud";
+        }
+        return "Bagud";
+    } else {
+        if (erForrest) {
+            return g.type === "felt" ? "Feltet" : g.type === "udbrud" ? "Udbrud" : "Førende gruppe";
+        } else if (feltGrp && g.type === "udbrud" && g.pos > feltGrp.pos) {
+            return "Forfølgere";
+        } else if (feltGrp && g.type === "udbrud" && g.pos < feltGrp.pos) {
+            return "Bagud";
+        } else if (g.type === "gruppetto") {
+            if (feltGrp && g.pos > feltGrp.pos) return "Forfølgere";
+            var erBagerst = true;
+            for (var i = 0; i < G.grp.length; i++) {
+                if (G.grp[i].pos < g.pos) { erBagerst = false; break; }
+            }
+            return erBagerst ? "Gruppetto" : "Bagud";
+        }
+        return "Bagud";
+    }
+}
+	
 function visGruppe(grpIdx) {
     if (G.iv) { clearInterval(G.iv); G.iv = null; }
     
@@ -8935,7 +8977,7 @@ function visGruppe(grpIdx) {
     
     var html = '<div class="modal" style="flex-direction:column;padding:20px">' +
         '<div style="border:3px solid #3399ff;background:#111;border-radius:12px;max-width:600px;width:100%;max-height:70vh;display:flex;flex-direction:column">' +
-            '<h2 style="color:#3399ff;padding:15px;margin:0;text-align:center;border-bottom:1px solid #333">' + g.navn + ' (' + g.ryt.length + ')</h2>' +
+            '<h2 style="color:#3399ff;padding:15px;margin:0;text-align:center;border-bottom:1px solid #333">' + getGruppeVisNavn(g) + ' (' + g.ryt.length + ')</h2>' +
             '<div style="overflow-y:auto;padding:10px">';
     
     for (var i = 0; i < sorteretRyt.length; i++) {
