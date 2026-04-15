@@ -2980,9 +2980,9 @@ function visEndagsValg() {
     setEndagsTema();
     
     var html = '<div style="text-align:center;padding:15px 0">' +
-        '<h1 style="color:#0a0">SÆSON ' + G.saeson + ' (' + (2025 + G.saeson) + ')</h1>' +
-        '<p style="color:#888">Sammensæt din sæson</p>' +
-        '<p style="color:#666;font-size:11px">Vælg monumenter, op til 5 klassikere og op til 2 Grand Tours</p>' +
+        '<h1 style="color:#0f0">SÆSON ' + G.saeson + ' (' + (2025 + G.saeson) + ')</h1>' +
+        '<p style="color:#ccc">Sammensæt din sæson</p>' +
+        '<p style="color:#ccc;font-size:11px">Vælg monumenter, op til 5 klassikere og op til 2 Grand Tours</p>' +
     '</div>';
     
     // Hjælpefunktion
@@ -3000,7 +3000,7 @@ function visEndagsValg() {
     // ===== FEBRUAR =====
     var febLoeb = loebIMaaned(["Februar"]);
     if (febLoeb.length > 0) {
-        html += '<div class="box" style="border-color:#070"><h3 style="color:#0a0">❄️ Februar</h3>';
+        html += '<div class="box" style="border-color:#0a0"><h3 style="color:#0f0">❄️ Februar</h3>';
         html += '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
         for (var i = 0; i < febLoeb.length; i++) {
             html += endagsLoebKort(febLoeb[i], G.valgteEndagsloeb.indexOf(febLoeb[i].id) >= 0);
@@ -3011,7 +3011,7 @@ function visEndagsValg() {
     // ===== MARTS =====
     var marsLoeb = loebIMaaned(["Marts"]);
     if (marsLoeb.length > 0) {
-        html += '<div class="box" style="border-color:#0a0"><h3 style="color:#0a0">🌸 Marts</h3>';
+        html += '<div class="box" style="border-color:#0a0"><h3 style="color:#0f0">🌸 Marts</h3>';
         html += '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
         for (var i = 0; i < marsLoeb.length; i++) {
             html += endagsLoebKort(marsLoeb[i], G.valgteEndagsloeb.indexOf(marsLoeb[i].id) >= 0);
@@ -3022,7 +3022,7 @@ function visEndagsValg() {
     // ===== APRIL =====
     var aprilLoeb = loebIMaaned(["April"]);
     if (aprilLoeb.length > 0) {
-        html += '<div class="box" style="border-color:#0a0"><h3 style="color:#0a0">🏛️ April</h3>';
+        html += '<div class="box" style="border-color:#0a0"><h3 style="color:#0f0">🏛️ April</h3>';
         html += '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
         for (var i = 0; i < aprilLoeb.length; i++) {
             html += endagsLoebKort(aprilLoeb[i], G.valgteEndagsloeb.indexOf(aprilLoeb[i].id) >= 0);
@@ -3063,7 +3063,7 @@ function visEndagsValg() {
     // ===== SOMMER (juli-aug) =====
     var sommerLoeb = loebIMaaned(["Juli", "August"]);
     if (sommerLoeb.length > 0) {
-        html += '<div class="box" style="border-color:#070"><h3 style="color:#0a0">☀️ Juli-August</h3>';
+        html += '<div class="box" style="border-color:#0a0"><h3 style="color:#0f0">☀️ Juli-August</h3>';
         html += '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
         for (var i = 0; i < sommerLoeb.length; i++) {
             html += endagsLoebKort(sommerLoeb[i], G.valgteEndagsloeb.indexOf(sommerLoeb[i].id) >= 0);
@@ -3089,7 +3089,7 @@ function visEndagsValg() {
     // ===== LOMBARDIA (oktober) =====
     var oktLoeb = loebIMaaned(["Oktober"]);
     if (oktLoeb.length > 0) {
-        html += '<div class="box" style="border-color:#0a0"><h3 style="color:#0a0">🍂 Oktober</h3>';
+        html += '<div class="box" style="border-color:#0a0"><h3 style="color:#0f0">🍂 Oktober</h3>';
         html += '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
         for (var i = 0; i < oktLoeb.length; i++) {
             html += endagsLoebKort(oktLoeb[i], G.valgteEndagsloeb.indexOf(oktLoeb[i].id) >= 0);
@@ -3211,7 +3211,7 @@ function visEndagsValg() {
         } else {
             anbefaling = "Holdet giver dig frit valg";
         }
-        html += '<div style="text-align:center;color:#888;font-size:12px;margin:10px 0">🏢 ' + anbefaling + '</div>';
+        html += '<div style="text-align:center;color:#ccc;font-size:12px;margin:10px 0">🏢 ' + anbefaling + '</div>';
     }
     
     html += '<div class="ctrls" style="margin-top:15px">' +
