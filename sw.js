@@ -1,4 +1,5 @@
-var CACHE_NAME = 'domistique-v1';
+var CACHE_VERSION = 'v2';
+var CACHE_NAME = 'domestique-' + CACHE_VERSION;
 var urlsToCache = [
     './',
     './index.html',
@@ -22,7 +23,6 @@ self.addEventListener('activate', function(event) {
             return Promise.all(
                 cacheNames.map(function(cacheName) {
                     if (cacheName !== CACHE_NAME) {
-                        console.log('Sletter gammel cache:', cacheName);
                         return caches.delete(cacheName);
                     }
                 })
@@ -34,8 +34,14 @@ self.addEventListener('activate', function(event) {
 
 self.addEventListener('fetch', function(event) {
     event.respondWith(
-        caches.match(event.request).then(function(response) {
-            return response || fetch(event.request);
+        fetch(event.request).then(function(response) {
+            var clone = response.clone();
+            caches.open(CACHE_NAME).then(function(cache) {
+                cache.put(event.request, clone);
+            });
+            return response;
+        }).catch(function() {
+            return caches.match(event.request);
         })
     );
 });
