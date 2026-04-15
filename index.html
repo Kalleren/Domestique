@@ -3027,14 +3027,14 @@ function visEndagsValg() {
     // ===== GIRO (maj) =====
 	var giroValgt = G.valgteGT.indexOf("giro") >= 0;
     var giroDisabled = !giroValgt && G.valgteGT.length >= 2;
-    var giroClr = giroDisabled ? '#333' : giroValgt ? '#ff69b4' : '#664455';
+    var giroClr = giroDisabled ? '#333' : giroValgt ? '#ff69b4' : '#884466';
     html += '<div class="box" style="border-color:' + giroClr + ';' + (giroDisabled ? 'opacity:0.3' : '') + (giroValgt ? ';border-width:3px;background:#200015;box-shadow:0 0 10px #ff69b44' : '') + '">' +
         '<div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="' + (giroDisabled ? '' : 'toggleGTValg(\'giro\');visEndagsValg()') + '">' +
             '<div style="display:flex;align-items:center;gap:6px;min-width:70px">' +
                 '<span>🇮🇹</span>' +
-                '<span style="color:#888;font-size:11px">Maj</span>' +
+                '<span style="color:' + (giroDisabled ? '#333' : '#ff69b4') + ';font-size:14px">Maj</span>' +
             '</div>' +
-            '<span style="color:' + (giroDisabled ? '#333' : '#ff69b4') + ';font-size:15px">' +
+            '<span style="color:' + (giroDisabled ? '#333' : '#ff69b4') + ';font-size:14px">' +
                 'Giro d\'Italia ' + (giroValgt ? '<span style="color:#0f0">✓</span>' : '') +
             '</span>' +
             '<div style="text-align:right;min-width:70px">' +
@@ -3047,14 +3047,14 @@ function visEndagsValg() {
     // ===== TOUR (juli) =====
     var tourValgt = G.valgteGT.indexOf("tdf") >= 0;
     var tourDisabled = !tourValgt && G.valgteGT.length >= 2;
-    var tourClr = tourDisabled ? '#333' : tourValgt ? '#ff0' : '#665500';
+    var tourClr = tourDisabled ? '#333' : tourValgt ? '#ff0' : '#887700';
     html += '<div class="box" style="border-color:' + tourClr + ';' + (tourDisabled ? 'opacity:0.3' : '') + (tourValgt ? ';border-width:3px;background:#330;box-shadow:0 0 10px #ff04' : '') + '">' +
         '<div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="' + (tourDisabled ? '' : 'toggleGTValg(\'tdf\');visEndagsValg()') + '">' +
             '<div style="display:flex;align-items:center;gap:6px;min-width:70px">' +
                 '<span>🇫🇷</span>' +
-                '<span style="color:#888;font-size:11px">Juli</span>' +
+                '<span style="color:' + (tourDisabled ? '#333' : '#ff0') + ';font-size:14px">Juli</span>' +
             '</div>' +
-            '<span style="color:' + (tourDisabled ? '#333' : '#ff0') + ';font-size:15px">' +
+            '<span style="color:' + (tourDisabled ? '#333' : '#ff0') + ';font-size:14px">' +
                 'Tour de France ' + (tourValgt ? '<span style="color:#0f0">✓</span>' : '') +
             '</span>' +
             '<div style="text-align:right;min-width:70px">' +
@@ -3078,14 +3078,14 @@ function visEndagsValg() {
     // ===== VUELTA (aug-sep) =====
     var vueltaValgt = G.valgteGT.indexOf("vuelta") >= 0;
     var vueltaDisabled = !vueltaValgt && G.valgteGT.length >= 2;
-    var vueltaClr = vueltaDisabled ? '#333' : vueltaValgt ? '#f44' : '#553333';
+    var vueltaClr = vueltaDisabled ? '#333' : vueltaValgt ? '#f44' : '#884444';
     html += '<div class="box" style="border-color:' + vueltaClr + ';' + (vueltaDisabled ? 'opacity:0.3' : '') + (vueltaValgt ? ';border-width:3px;background:#200;box-shadow:0 0 10px #f444' : '') + '">' +
         '<div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="' + (vueltaDisabled ? '' : 'toggleGTValg(\'vuelta\');visEndagsValg()') + '">' +
             '<div style="display:flex;align-items:center;gap:6px;min-width:70px">' +
                 '<span>🇪🇸</span>' +
-                '<span style="color:#888;font-size:11px">Aug-Sep</span>' +
+                '<span style="color:' + (vueltaDisabled ? '#333' : '#f44') + ';font-size:14px">Aug-Sep</span>' +
             '</div>' +
-            '<span style="color:' + (vueltaDisabled ? '#333' : '#f44') + ';font-size:15px">' +
+            '<span style="color:' + (vueltaDisabled ? '#333' : '#f44') + ';font-size:14px">' +
                 'Vuelta a España ' + (vueltaValgt ? '<span style="color:#0f0">✓</span>' : '') +
             '</span>' +
             '<div style="text-align:right;min-width:70px">' +
@@ -4000,8 +4000,15 @@ function fortsaetSpil() {
                 gaaVidereIKalender();
             }
         } else {
-            if (G.erEndagsloeb) setEndagsTema();
-            startEtape();
+            if (G.saeson > 10) {
+                sletGemtSpil();
+                intro();
+            } else if (!G.saesonKalender || G.saesonKalender.length === 0 || G.saesonKalenderIdx >= G.saesonKalender.length) {
+                visEndagsValg();
+            } else {
+                if (G.erEndagsloeb) setEndagsTema();
+                startEtape();
+            }
         }
     } else {
         alert('Kunne ikke indlæse gemt spil');
