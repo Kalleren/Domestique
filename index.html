@@ -2822,12 +2822,16 @@ function intro() {
             var endagsLoeb = findEndagsLoeb(endagsId);
             loebNavn = endagsLoeb ? endagsLoeb.kort : "Endagsløb";
         } else {
-            var gtKort = saved.aktuelGT ? (GT_CONFIG[saved.aktuelGT] ? GT_CONFIG[saved.aktuelGT].kort : "?") : "TdF";
-            var etapeNr = (saved.enr || 0) + (saved.etapeFaerdig ? 2 : 1);
-            if (etapeNr > 21) {
-                loebNavn = gtKort + ', afsluttet';
+            if (!saved.saesonKalender || saved.saesonKalender.length === 0 || saved.saesonKalenderIdx >= saved.saesonKalender.length) {
+                loebNavn = 'sæsonvalg';
             } else {
-                loebNavn = gtKort + ', etape ' + etapeNr;
+                var gtKort = saved.aktuelGT ? (GT_CONFIG[saved.aktuelGT] ? GT_CONFIG[saved.aktuelGT].kort : "?") : "TdF";
+                var etapeNr = (saved.enr || 0) + (saved.etapeFaerdig ? 2 : 1);
+                if (etapeNr > 21) {
+                    loebNavn = gtKort + ', afsluttet';
+                } else {
+                    loebNavn = gtKort + ', etape ' + etapeNr;
+                }
             }
         }
         fortsaetKnap =
