@@ -525,7 +525,7 @@ var ENDAGSLOEB = {
             bonus: [3, 2, 1],
             monument: true,
             favoritStat: "spr",
-            energiMult: 2.5,
+            energiMult: 2.4,
             angrebMult: 1.5
         },
         {
@@ -540,7 +540,7 @@ var ENDAGSLOEB = {
             bonus: [3, 2, 1],
             monument: true,
             favoritStat: "fl",
-            energiMult: 2.0,
+            energiMult: 1.9,
             angrebMult: 2.5
         },
         {
@@ -555,7 +555,7 @@ var ENDAGSLOEB = {
             bonus: [3, 2, 1],
             monument: true,
             favoritStat: "fl",
-            energiMult: 2.8,
+            energiMult: 2.7,
             angrebMult: 2.0
         },
         {
@@ -585,7 +585,7 @@ var ENDAGSLOEB = {
             bonus: [3, 2, 1],
             monument: true,
             favoritStat: "bj",
-            energiMult: 1.0,
+            energiMult: 0.75,
             angrebMult: 2.0
         }
     ],
@@ -1621,9 +1621,9 @@ function genEForGT(gtId) {
         }
     }
 
-	// Undgå mere end 4 bjergetaper i træk
-    for (var i = 4; i < 21; i++) {
-        if (endelig[i] === "bjerg" && endelig[i-1] === "bjerg" && endelig[i-2] === "bjerg" && endelig[i-3] === "bjerg" && endelig[i-4] === "bjerg") {
+	// Undgå mere end 3 bjergetaper i træk
+    for (var i = 3; i < 21; i++) {
+        if (endelig[i] === "bjerg" && endelig[i-1] === "bjerg" && endelig[i-2] === "bjerg" && endelig[i-3] === "bjerg") {
             for (var j = i + 1; j < 21; j++) {
                 if (endelig[j] && endelig[j] !== "bjerg" && endelig[j] !== "tt") {
                     var tmp = endelig[i];
@@ -1855,7 +1855,12 @@ function startGrandTour() {
     G.ryttere = felt.ryttere;
     G.sprPts = felt.sprPts;
     G.bjgPts = felt.bjgPts;
-	G.spiller.energi = getMaxEnergi(G.spiller);
+	var maxE = getMaxEnergi(G.spiller);
+    if (G.endagsTraethed > 0 && G.aktuelGTIdx === 0) {
+        G.spiller.energi = Math.round(maxE * (1 - G.endagsTraethed));
+    } else {
+        G.spiller.energi = maxE;
+    }
     
     // Generer etaper
     G.etaper = genEForGT(gtId);
@@ -8104,7 +8109,7 @@ function fusionGrupper() {
             var afstand = g1.pos - g2.pos;
             var fusionsAfstand = 0.08;
 			if (G.erEndagsloeb && g1.type === "udbrud" && g2.type === "udbrud") {
-    			fusionsAfstand = 0.04;
+    			fusionsAfstand = 0.06;
 			}
 			if (afstand >= 0 && afstand < fusionsAfstand) {
 
@@ -8998,9 +9003,18 @@ function visGruppe(grpIdx) {
         var navnFarve = r.sp ? '#fff' : r.holdClr;
         var weight = r.sp ? 'font-weight:bold;' : '';
         
+	var tidTxt = '';
+        if (!G.erEndagsloeb && G.enr > 0) {
+            var gcLederTid = sorteretRyt[0].stid;
+            if (r.stid === gcLederTid) {
+                tidTxt = '<span style="color:#888;font-size:10px">' + ft(r.stid) + '</span>';
+            } else {
+                tidTxt = '<span style="color:#888;font-size:10px">+' + ft(r.stid - gcLederTid) + '</span>';
+            }
+        }
         html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px;border-bottom:1px solid #222">' +
-            '<span style="color:' + navnFarve + ';' + weight + 'font-size:13px">' + r.navn + '</span>' +
-            '<span style="color:#444;font-size:10px">' + r.holdAbbr + '</span>' +
+            '<span style="color:' + navnFarve + ';' + weight + 'font-size:13px">' + r.navn + ' <span style="color:#444;font-size:10px">' + r.holdAbbr + '</span></span>' +
+            tidTxt +
         '</div>';
     }
     
