@@ -5002,7 +5002,10 @@ function tilbageTilResultat() {
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
         navigator.serviceWorker.register('./sw.js')
-            .then(function(reg) { console.log('SW registreret:', reg.scope); })
+            .then(function(reg) {
+                console.log('SW registreret:', reg.scope);
+                reg.update();
+            })
             .catch(function(err) { console.log('SW fejl:', err); });
     });
 }
