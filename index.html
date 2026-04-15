@@ -2823,7 +2823,7 @@ function intro() {
             loebNavn = endagsLoeb ? endagsLoeb.kort : "Endagsløb";
         } else {
             if (!saved.saesonKalender || saved.saesonKalender.length === 0 || saved.saesonKalenderIdx >= saved.saesonKalender.length) {
-                loebNavn = 'sæsonvalg';
+                loebNavn = 'Sæsonvalg';
             } else {
                 var gtKort = saved.aktuelGT ? (GT_CONFIG[saved.aktuelGT] ? GT_CONFIG[saved.aktuelGT].kort : "?") : "TdF";
                 var etapeNr = (saved.enr || 0) + (saved.etapeFaerdig ? 2 : 1);
