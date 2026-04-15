@@ -3035,9 +3035,9 @@ function visEndagsValg() {
     var giroDisabled = !giroValgt && G.valgteGT.length >= 2;
     var giroClr = giroDisabled ? '#333' : giroValgt ? '#ff69b4' : '#884466';
     html += '<div class="box" style="border-color:' + giroClr + ';' + (giroDisabled ? 'opacity:0.3' : '') + (giroValgt ? ';border-width:3px;background:#200015;box-shadow:0 0 10px #ff69b44' : '') + '">' +
-        '<div style="display:flex;align-items:center;cursor:pointer" onclick="' + (giroDisabled ? '' : 'toggleGTValg(\'giro\');visEndagsValg()') + '">' +
-            '<div style="color:' + (giroDisabled ? '#333' : '#ff69b4') + ';font-size:18px;font-family:inherit;white-space:nowrap;min-width:80px">🩷 Maj</div>' +
-            '<div style="flex:1;text-align:center">' +
+        '<div style="position:relative;cursor:pointer;padding:4px 0" onclick="' + (giroDisabled ? '' : 'toggleGTValg(\'giro\');visEndagsValg()') + '">' +
+            '<div style="color:' + (giroDisabled ? '#333' : '#ff69b4') + ';font-size:18px;font-family:inherit">🩷 Maj</div>' +
+            '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none">' +
                 '<div style="color:' + (giroDisabled ? '#333' : '#ff69b4') + ';font-size:16px;font-family:inherit">Giro d\'Italia ' + (giroValgt ? '<span style="color:#0f0">✓</span>' : '') + '</div>' +
                 '<div style="color:#888;font-size:11px">🇮🇹 21 etaper · <span style="color:' + (giroDisabled ? '#333' : '#ff69b4') + '">★★☆</span></div>' +
             '</div>' +
@@ -3049,9 +3049,9 @@ function visEndagsValg() {
     var tourDisabled = !tourValgt && G.valgteGT.length >= 2;
     var tourClr = tourDisabled ? '#333' : tourValgt ? '#ff0' : '#887700';
     html += '<div class="box" style="border-color:' + tourClr + ';' + (tourDisabled ? 'opacity:0.3' : '') + (tourValgt ? ';border-width:3px;background:#330;box-shadow:0 0 10px #ff04' : '') + '">' +
-        '<div style="display:flex;align-items:center;cursor:pointer" onclick="' + (tourDisabled ? '' : 'toggleGTValg(\'tdf\');visEndagsValg()') + '">' +
-            '<div style="color:' + (tourDisabled ? '#333' : '#ff0') + ';font-size:18px;font-family:inherit;white-space:nowrap;min-width:80px">🟡 Juli</div>' +
-            '<div style="flex:1;text-align:center">' +
+        '<div style="position:relative;cursor:pointer;padding:4px 0" onclick="' + (tourDisabled ? '' : 'toggleGTValg(\'tdf\');visEndagsValg()') + '">' +
+            '<div style="color:' + (tourDisabled ? '#333' : '#ff0') + ';font-size:18px;font-family:inherit">🟡 Juli</div>' +
+            '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none">' +
                 '<div style="color:' + (tourDisabled ? '#333' : '#ff0') + ';font-size:16px;font-family:inherit">Tour de France ' + (tourValgt ? '<span style="color:#0f0">✓</span>' : '') + '</div>' +
                 '<div style="color:#888;font-size:11px">🇫🇷 21 etaper · <span style="color:' + (tourDisabled ? '#333' : '#ff0') + '">★★★</span></div>' +
             '</div>' +
@@ -3074,9 +3074,9 @@ function visEndagsValg() {
     var vueltaDisabled = !vueltaValgt && G.valgteGT.length >= 2;
     var vueltaClr = vueltaDisabled ? '#333' : vueltaValgt ? '#f44' : '#884444';
     html += '<div class="box" style="border-color:' + vueltaClr + ';' + (vueltaDisabled ? 'opacity:0.3' : '') + (vueltaValgt ? ';border-width:3px;background:#200;box-shadow:0 0 10px #f444' : '') + '">' +
-        '<div style="display:flex;align-items:center;cursor:pointer" onclick="' + (vueltaDisabled ? '' : 'toggleGTValg(\'vuelta\');visEndagsValg()') + '">' +
-            '<div style="color:' + (vueltaDisabled ? '#333' : '#f44') + ';font-size:18px;font-family:inherit;white-space:nowrap;min-width:80px">🔴 Aug-Sep</div>' +
-            '<div style="flex:1;text-align:center">' +
+        '<div style="position:relative;cursor:pointer;padding:4px 0" onclick="' + (vueltaDisabled ? '' : 'toggleGTValg(\'vuelta\');visEndagsValg()') + '">' +
+            '<div style="color:' + (vueltaDisabled ? '#333' : '#f44') + ';font-size:18px;font-family:inherit">🔴 Aug-Sep</div>' +
+            '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none">' +
                 '<div style="color:' + (vueltaDisabled ? '#333' : '#f44') + ';font-size:16px;font-family:inherit">Vuelta a España ' + (vueltaValgt ? '<span style="color:#0f0">✓</span>' : '') + '</div>' +
                 '<div style="color:#888;font-size:11px">🇪🇸 21 etaper · <span style="color:' + (vueltaDisabled ? '#333' : '#f44') + '">★☆☆</span></div>' +
             '</div>' +
