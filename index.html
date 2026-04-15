@@ -9007,8 +9007,21 @@ function visGruppe(grpIdx) {
         var weight = r.sp ? 'font-weight:bold;' : '';
         
 	var tidTxt = '';
+        var gcPlads = '';
         if (!G.erEndagsloeb && G.enr > 0) {
-            var gcLederTid = sorteretRyt[0].stid;
+            // Find GC-lederens tid fra hele løbet
+            var aktive = G.ryttere.filter(function(rr) { return !rr.ude; });
+            var gcLederTid = aktive.slice().sort(function(a, b) { return a.stid - b.stid; })[0].stid;
+            
+            // Find rytterens GC-placering
+            var gcSorteret = aktive.slice().sort(function(a, b) { return a.stid - b.stid; });
+            for (var gi3 = 0; gi3 < gcSorteret.length; gi3++) {
+                if (gcSorteret[gi3] === r) {
+                    gcPlads = '<span style="color:#888;font-size:10px">' + (gi3 + 1) + '.</span> ';
+                    break;
+                }
+            }
+            
             if (r.stid === gcLederTid) {
                 tidTxt = '<span style="color:#888;font-size:10px">' + ft(r.stid) + '</span>';
             } else {
@@ -9016,7 +9029,7 @@ function visGruppe(grpIdx) {
             }
         }
         html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px;border-bottom:1px solid #222">' +
-            '<span style="color:' + navnFarve + ';' + weight + 'font-size:13px">' + r.navn + ' <span style="color:#444;font-size:10px">' + r.holdAbbr + '</span></span>' +
+            '<span style="color:' + navnFarve + ';' + weight + 'font-size:13px">' + gcPlads + r.navn + ' <span style="color:#444;font-size:10px">' + r.holdAbbr + '</span></span>' +
             tidTxt +
         '</div>';
     }
