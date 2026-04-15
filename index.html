@@ -5513,12 +5513,12 @@ function tegnP() {
         var y = t + h - ((p[i] - minH) / rng) * h;
         if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     }
-    ctx.strokeStyle = gt.primary;
+    ctx.strokeStyle = G.erEndagsloeb ? '#0f0' : gt.primary;
     ctx.lineWidth = 3;
     ctx.stroke();
     ctx.lineTo(l + w, t + h);
     ctx.lineTo(l, t + h);
-    ctx.fillStyle = "rgba(100,100,0,0.3)";
+    ctx.fillStyle = G.erEndagsloeb ? "rgba(0,100,0,0.3)" : "rgba(100,100,0,0.3)";
     ctx.fill();
 
 	// Brosten-sektioner (endagsløb)
