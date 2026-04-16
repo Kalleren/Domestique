@@ -506,9 +506,9 @@ var GT_CONFIG = {
 
 // Træthed mellem Grand Tours
 var GT_TRAETHED = {
-    "giro_tdf":    { energiStart: 0.80, restitutionMult: 0.92 },
-    "giro_vuelta": { energiStart: 0.90, restitutionMult: 0.97 },
-    "tdf_vuelta":  { energiStart: 0.75, restitutionMult: 0.90 }
+    "giro_tdf":    { energiStart: 0.80, restitutionMult: 0.90 },
+    "giro_vuelta": { energiStart: 1.00, restitutionMult: 0.95 },
+    "tdf_vuelta":  { energiStart: 0.75, restitutionMult: 0.88 }
 };
 
 var ENDAGSLOEB = {
@@ -744,8 +744,8 @@ var ENDAGSLOEB = {
 };
 
 var ENDAGS_TRAETHED = {
-    perMonument: 0.10,
-    perKlassiker: 0.05,
+    perMonument: 0.06,
+    perKlassiker: 0.03,
     maxAkkumuleret: 0.30,
     efterGT: 0.80
 };
@@ -1299,11 +1299,11 @@ function visInstruktioner() {
             '</tr>' +
             '<tr style="border-bottom:1px solid #222">' +
                 '<td style="padding:4px">Per monument</td>' +
-                '<td style="text-align:center;padding:4px;color:#f80">-10% startenergi</td>' +
+                '<td style="text-align:center;padding:4px;color:#f80">-6% startenergi</td>' +
             '</tr>' +
             '<tr style="border-bottom:1px solid #222">' +
                 '<td style="padding:4px">Per klassiker</td>' +
-                '<td style="text-align:center;padding:4px;color:#f80">-5% startenergi</td>' +
+                '<td style="text-align:center;padding:4px;color:#f80">-3% startenergi</td>' +
             '</tr>' +
             '<tr style="border-bottom:1px solid #222">' +
                 '<td style="padding:4px">Max endagsløb-træthed</td>' +
@@ -1311,15 +1311,15 @@ function visInstruktioner() {
             '</tr>' +
             '<tr style="border-bottom:1px solid #222">' +
                 '<td style="padding:4px">Giro → Tour</td>' +
-                '<td style="text-align:center;padding:4px;color:#f80">-20% startenergi, -8% restitution</td>' +
+                '<td style="text-align:center;padding:4px;color:#f80">-20% startenergi, -10% restitution</td>' +
             '</tr>' +
             '<tr style="border-bottom:1px solid #222">' +
                 '<td style="padding:4px">Giro → Vuelta</td>' +
-                '<td style="text-align:center;padding:4px;color:#0f0">-10% startenergi, -3% restitution</td>' +
+                '<td style="text-align:center;padding:4px;color:#0f0">-5% restitution</td>' +
             '</tr>' +
             '<tr>' +
                 '<td style="padding:4px">Tour → Vuelta</td>' +
-                '<td style="text-align:center;padding:4px;color:#f44">-25% startenergi, -10% restitution</td>' +
+                '<td style="text-align:center;padding:4px;color:#f44">-25% startenergi, -12% restitution</td>' +
             '</tr>' +
         '</table>' +
         '<p style="font-size:10px;margin-top:6px">Endagsløb-træthed og GT-træthed lægges sammen</p>' +
@@ -2612,7 +2612,7 @@ function visGTResultatOgGaaVidere(resultat) {
         '<button class="btn btn-big btn-y" onclick="gaaVidereIKalender()">' + naesteTekst + '</button>' +
     '</div>';
     
-    R(html);
+    document.getElementById("game").innerHTML = html;
 }
 
 // ========== SÆSONAFSLUTNING ==========
@@ -3132,7 +3132,7 @@ function visEndagsValg() {
         
         // 1. Endagsløb akkumulering (altid først hvis flere end 1)
         if (foraarLoeb + sommerLoeb + (harLombardia ? 1 : 0) > 1) {
-		traethedLinjer.push('<span style="color:#888">Endagsløb: -10% per monument, -5% per klassiker (max -30%)</span>');
+		traethedLinjer.push('<span style="color:#888">Endagsløb: -6% per monument, -3% per klassiker (max -30%)</span>');
         }
         
         // 2. Forårsløb → første GT
@@ -3141,7 +3141,7 @@ function visEndagsValg() {
             for (var fi2 = 0; fi2 < G.valgteEndagsloeb.length; fi2++) {
                 var fl2 = findEndagsLoeb(G.valgteEndagsloeb[fi2]);
                 if (fl2 && (fl2.maaned === "Februar" || fl2.maaned === "Marts" || fl2.maaned === "April")) {
-                    foraarPct += fl2.monument ? 10 : 5;
+                    foraarPct += fl2.monument ? 6 : 3;
                 }
             }
             foraarPct = Math.min(foraarPct, 30);
@@ -3154,7 +3154,7 @@ function visEndagsValg() {
         
         // 3. Giro → Tour
         if (harGiro && harTour) {
-            traethedLinjer.push('<span style="color:#f80">Giro → Tour: -20% startenergi, -8% restitution</span>');
+            traethedLinjer.push('<span style="color:#f80">Giro → Tour: -20% startenergi, -10% restitution</span>');
         }
         
         // 4. Tour → sommerløb (kun hvis Tour køres)
@@ -3164,17 +3164,17 @@ function visEndagsValg() {
         
         // 5. Giro → Vuelta (uden Tour)
         if (harGiro && harVuelta && !harTour) {
-            traethedLinjer.push('<span style="color:#0f0">Giro → Vuelta: -10% startenergi, -3% restitution</span>');
+            traethedLinjer.push('<span style="color:#0f0">Giro → Vuelta: -5% restitution</span>');
         }
         
         // 6. Tour → Vuelta
         if (harTour && harVuelta) {
-            traethedLinjer.push('<span style="color:#f44">Tour → Vuelta: -25% startenergi, -10% restitution</span>');
+            traethedLinjer.push('<span style="color:#f44">Tour → Vuelta: -25% startenergi, -12% restitution</span>');
         }
         
 // 7. Sommerløb → Vuelta (ekstra oven i GT-træthed)
         if (sommerLoeb > 0 && harVuelta) {
-            var sommerPct = Math.min(sommerLoeb * 5, 30);
+            var sommerPct = Math.min(sommerLoeb * 3, 30);
             var yderligere = (harTour || harGiro) ? 'yderligere ' : '';
             traethedLinjer.push('<span style="color:#f80">' + sommerLoeb + ' sommerløb: ' + yderligere + '-' + sommerPct + '% startenergi til Vuelta (max -30% samlet)</span>');
         }
@@ -5115,7 +5115,7 @@ function findIdx(arr, fn) { for (var i = 0; i < arr.length; i++) { if (fn(arr[i]
 
 function getSvaerhedMultiplier() {
     if (G.svaerhed === "let") return 1.3;
-    if (G.svaerhed === "svaer") return 0.85;
+    if (G.svaerhed === "svaer") return 0.9;
     return 1.0;
 }
 function getMaxEnergi(rytter) {
@@ -7069,7 +7069,7 @@ function loop() {
                 var ekstra = baseTab * (endagsLoeb.energiMult - 1);
 				// Spilleren bruger mere energi i endagsløb (sværere at vinde)
                 if (r.sp) {
-                    ekstra *= 1.2;
+                    ekstra *= 1.1;
                 }
                 // Brosten-sektioner: tjek om rytterens gruppe er på brosten
                 var etape = G.etaper[G.enr];
