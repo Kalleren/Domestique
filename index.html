@@ -5475,7 +5475,20 @@ if (G.lastMpResult) {
     '<div style="flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><strong>' + (G.erEndagsloeb ? e.start + ': ' : 'Etape ' + e.nr + ': ') + '</strong>' + (G.erEndagsloeb ? e.slut : e.start + ' → ' + e.slut) + '</div>' +
     '<div style="display:flex;align-items:center;justify-content:center;gap:15px">' +
         '<span style="padding:4px 10px;border:2px solid ' + typeClr + ';color:' + typeClr + ';border-radius:10px;font-size:12px;width:70px;text-align:center">' + info.n.toUpperCase() + '</span>' +
-        '<span class="cyan" style="font-size:20px;font-weight:bold;width:145px;text-align:center">Km ' + G.km + '/' + e.dist + '</span>' +
+        '<span style="width:175px;text-align:center">' +
+            '<span style="color:#0ff;font-size:16px">Km ' + G.km + '</span>' +
+            (function() {
+                if (!G.mps || G.erEndagsloeb) return '';
+                var naesteMp = null;
+                for (var mpi = 0; mpi < G.mps.length; mpi++) {
+                    if (!G.mps[mpi].done) { naesteMp = G.mps[mpi]; break; }
+                }
+                if (!naesteMp) return '';
+                var mpFarve = naesteMp.type === "sprint" ? getGT().spColor : getGT().bjColor;
+                return '<span style="color:' + mpFarve + ';font-size:16px">/' + naesteMp.km + '</span>';
+            })() +
+            '<span style="color:' + (G.erEndagsloeb ? '#0f0' : getGT().primary) + ';font-size:16px">/' + e.dist + '</span>' +
+        '</span>' +
         '<span style="width:100px;text-align:center">' + getStigningVis() + '</span>' +
     '</div>' +
     '<div style="flex:1;text-align:right;">' +
@@ -5491,7 +5504,20 @@ if (G.lastMpResult) {
     // Række 2 (NU): Type og KM
     '<div style="display:flex;justify-content:space-around;align-items:center;margin-bottom:8px;">' +
         '<span style="padding:4px 10px;border:2px solid ' + typeClr + ';color:' + typeClr + ';border-radius:10px;font-size:12px;width:70px;text-align:center">' + info.n.toUpperCase() + '</span>' +
-        '<span class="cyan" style="font-size:18px;font-weight:bold;">Km ' + G.km + '/' + e.dist + '</span>' +
+        '<span>' +
+            '<span style="color:#0ff;font-size:14px">Km ' + G.km + '</span>' +
+            (function() {
+                if (!G.mps || G.erEndagsloeb) return '';
+                var naesteMp = null;
+                for (var mpi = 0; mpi < G.mps.length; mpi++) {
+                    if (!G.mps[mpi].done) { naesteMp = G.mps[mpi]; break; }
+                }
+                if (!naesteMp) return '';
+                var mpFarve = naesteMp.type === "sprint" ? getGT().spColor : getGT().bjColor;
+                return '<span style="color:' + mpFarve + ';font-size:14px">/' + naesteMp.km + '</span>';
+            })() +
+            '<span style="color:' + (G.erEndagsloeb ? '#0f0' : getGT().primary) + ';font-size:14px">/' + e.dist + '</span>' +
+        '</span>' +
     '</div>' +
     // Række 3 (NU): Stigning og Tid
     '<div style="display:flex;justify-content:space-around;align-items:center;">' +
