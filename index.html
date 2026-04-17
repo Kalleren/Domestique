@@ -7095,7 +7095,7 @@ function loop() {
                 var ekstra = baseTab * (endagsLoeb.energiMult - 1);
 				// Spilleren bruger mere energi i endagsløb (sværere at vinde)
                 if (r.sp) {
-                    ekstra *= 1.1;
+                    ekstra *= 1.08;
                 }
                 // Brosten-sektioner: tjek om rytterens gruppe er på brosten
                 var etape = G.etaper[G.enr];
@@ -7295,8 +7295,9 @@ for (var gi = 0; gi < G.grp.length; gi++) {
                 if (r.gc >= 82 && r.bj >= 80) {
                     // På bjergetaper: fuldt beskyttet i første halvdel
                     if (e.type === "bjerg" && G.km < e.dist * 0.5) continue;
-                    // På kuperede etaper: fuldt beskyttet i første 35%
-                    if (e.type === "kuperet" && G.km < e.dist * 0.35) continue;
+                    // På kuperede etaper: fuldt beskyttet i første 60%
+                    if (e.type === "kuperet" && G.km < e.dist * 0.6) continue;
+					if (r.bj >= 95 && r.energi > 25) continue;
                 }
     
                 // Risiko baseret på klatreevne, energi og stigningens stejlhed
