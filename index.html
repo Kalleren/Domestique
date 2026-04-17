@@ -744,9 +744,9 @@ var ENDAGSLOEB = {
 };
 
 var ENDAGS_TRAETHED = {
-    perMonument: 0.06,
+    perMonument: 0.05,
     perKlassiker: 0.03,
-    maxAkkumuleret: 0.30,
+    maxAkkumuleret: 0.25,
     efterGT: 0.80
 };
 
@@ -1299,7 +1299,7 @@ function visInstruktioner() {
             '</tr>' +
             '<tr style="border-bottom:1px solid #222">' +
                 '<td style="padding:4px">Per monument</td>' +
-                '<td style="text-align:center;padding:4px;color:#f80">-6% startenergi</td>' +
+                '<td style="text-align:center;padding:4px;color:#f80">-5% startenergi</td>' +
             '</tr>' +
             '<tr style="border-bottom:1px solid #222">' +
                 '<td style="padding:4px">Per klassiker</td>' +
@@ -1307,7 +1307,7 @@ function visInstruktioner() {
             '</tr>' +
             '<tr style="border-bottom:1px solid #222">' +
                 '<td style="padding:4px">Max endagsløb-træthed</td>' +
-                '<td style="text-align:center;padding:4px;color:#f44">-30% startenergi</td>' +
+                '<td style="text-align:center;padding:4px;color:#f44">-25% startenergi</td>' +
             '</tr>' +
             '<tr style="border-bottom:1px solid #222">' +
                 '<td style="padding:4px">Giro → Tour</td>' +
@@ -3132,7 +3132,7 @@ function visEndagsValg() {
         
         // 1. Endagsløb akkumulering (altid først hvis flere end 1)
         if (foraarLoeb + sommerLoeb + (harLombardia ? 1 : 0) > 1) {
-		traethedLinjer.push('<span style="color:#888">Endagsløb: -6% per monument, -3% per klassiker (max -30%)</span>');
+		traethedLinjer.push('<span style="color:#888">Endagsløb: -5% per monument, -3% per klassiker (max -25%)</span>');
         }
         
         // 2. Forårsløb → første GT
@@ -3141,7 +3141,7 @@ function visEndagsValg() {
             for (var fi2 = 0; fi2 < G.valgteEndagsloeb.length; fi2++) {
                 var fl2 = findEndagsLoeb(G.valgteEndagsloeb[fi2]);
                 if (fl2 && (fl2.maaned === "Februar" || fl2.maaned === "Marts" || fl2.maaned === "April")) {
-                    foraarPct += fl2.monument ? 6 : 3;
+                    foraarPct += fl2.monument ? 5 : 3;
                 }
             }
             foraarPct = Math.min(foraarPct, 30);
@@ -3174,7 +3174,7 @@ function visEndagsValg() {
         
 // 7. Sommerløb → Vuelta (ekstra oven i GT-træthed)
         if (sommerLoeb > 0 && harVuelta) {
-            var sommerPct = Math.min(sommerLoeb * 3, 30);
+            var sommerPct = Math.min(sommerLoeb * 3, 25);
             var yderligere = (harTour || harGiro) ? 'yderligere ' : '';
             traethedLinjer.push('<span style="color:#f80">' + sommerLoeb + ' sommerløb: ' + yderligere + '-' + sommerPct + '% startenergi til Vuelta (max -30% samlet)</span>');
         }
@@ -3702,8 +3702,8 @@ function visEndagsResultat(res, loeb, spiPlads, bonus) {
     var typeTekst = loeb.monument ? "⭐ MONUMENT" : "🏆 KLASSIKER";
     
     var html = '<div style="text-align:center;padding:15px 0">' +
-        '<h1 style="color:#0a0">' + loeb.kort.toUpperCase() + ' SLUT</h1>' +
-        '<div style="color:#888">' + typeTekst + '</div>' +
+        '<h1 style="color:#0f0">' + loeb.kort.toUpperCase() + ' SLUT</h1>' +
+        '<div style="color:#0f0">' + typeTekst + '</div>' +
     '</div>';
     
     // Spillerens resultat
@@ -3724,7 +3724,7 @@ function visEndagsResultat(res, loeb, spiPlads, bonus) {
         var cls = x.r.sp ? "row pl" : "row";
         var med = pos === 1 ? "🥇 " : pos === 2 ? "🥈 " : pos === 3 ? "🥉 " : pos + ". ";
         var diff = x.tid - vTid;
-        var tidTxt = pos === 1 ? "" : (diff === 0 ? " s.t." : " +" + ft(diff));
+        var tidTxt = pos === 1 ? ft(x.tid) : (diff === 0 ? " s.t." : " +" + ft(diff));
         html += '<div class="' + cls + '"><span>' + med + x.r.navn + ' <span style="color:#666">' + x.r.holdAbbr + '</span></span><span style="color:#888">' + tidTxt + '</span></div>';
     }
     if (spiPlads > 10) {
