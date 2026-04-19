@@ -1624,7 +1624,7 @@ function genEForGT(gtId) {
 	// Undgå mere end 3 bjergetaper i træk
     for (var i = 3; i < 21; i++) {
         if (endelig[i] === "bjerg" && endelig[i-1] === "bjerg" && endelig[i-2] === "bjerg" && endelig[i-3] === "bjerg") {
-            for (var j = i + 1; j < 21; j++) {
+            for (var j = i + 1; j < (gtId === "tdf" ? 20 : 21); j++) {
                 if (endelig[j] && endelig[j] !== "bjerg" && endelig[j] !== "tt") {
                     var tmp = endelig[i];
                     endelig[i] = endelig[j];
@@ -1634,7 +1634,12 @@ function genEForGT(gtId) {
             }
         }
     }
-    
+
+	// Tour: Sidste etape SKAL være flad
+    if (gtId === "tdf") {
+        endelig[20] = "flad";
+    }
+	
     // Byer fra GT-konfiguration
     var byer = sh(gt.normaleByer.slice());
     var bjergT = sh(gt.bjergToppe.slice());
@@ -5115,8 +5120,8 @@ function findIdx(arr, fn) { for (var i = 0; i < arr.length; i++) { if (fn(arr[i]
 
 function getSvaerhedMultiplier() {
     if (G.svaerhed === "let") return 1.3;
-    if (G.svaerhed === "svaer") return 0.9;
-    return 1.05;
+    if (G.svaerhed === "svaer") return 0.85;
+    return 1.00;
 }
 function getMaxEnergi(rytter) {
     if (rytter && rytter.sp) return 100 * getSvaerhedMultiplier();
@@ -6748,15 +6753,15 @@ var overskrift = "";
 	// 2) Etapesejr
     else if (spiPlads === 1) {
         if (erGcLeder && varGcLeder && totalGuleDage > 2) {
-            spiTekst = "Det er " + spiEfternavn + "s " + totaleSejre + ". etapesejr i denne Tour.";
+            spiTekst = "Det er " + spiEfternavn + "s " + totaleSejre + ". etapesejr i dette års " + gt.kort + ".";
         } else if (erGcLeder && !varGcLeder) {
             if (totaleSejre === 1) {
-                spiTekst = "En drømmedag for " + spiEfternavn + ", der vinder sin første etapesejr i dette års Tour!";
+                spiTekst = "En drømmedag for " + spiEfternavn + ", der vinder sin første etapesejr i dette års " + gt.kort + "!";
             } else {
-                spiTekst = "Det er " + spiEfternavn + "s " + totaleSejre + ". etapesejr i denne Tour. En drømmedag!";
+                spiTekst = "Det er " + spiEfternavn + "s " + totaleSejre + ". etapesejr i dette års " + gt.kort + ". En drømmedag!";
             }
         } else if (totaleSejre > 1) {
-            spiTekst = "Det er " + spiEfternavn + "s " + totaleSejre + ". etapesejr i denne Tour!";
+            spiTekst = "Det er " + spiEfternavn + "s " + totaleSejre + ". etapesejr i dette års " + gt.kort + "!";
         } else if (gcGabPaalidelig && gcGabAendring <= -60) {
             spiTekst = "En vigtig dag for " + spiEfternavn + " der hentede " + fmtTidstab(gcGabAendring) + " i klassementet.";
         } else {
@@ -7095,7 +7100,7 @@ function loop() {
                 var ekstra = baseTab * (endagsLoeb.energiMult - 1);
 				// Spilleren bruger mere energi i endagsløb (sværere at vinde)
                 if (r.sp) {
-                    ekstra *= 1.08;
+                    ekstra *= 1.04;
                 }
                 // Brosten-sektioner: tjek om rytterens gruppe er på brosten
                 var etape = G.etaper[G.enr];
@@ -7356,7 +7361,7 @@ if (e.type === "bjerg" && Math.random() < 0.05 * angrebBoost) {
 
 // Favoritter angriber fra favoritgruppe (fra halvvejs)
 var favMidtStart = G.erEndagsloeb ? 0.35 : 0.5;
-var favSlutDist = G.erEndagsloeb ? 25 : 15;
+var favSlutDist = G.erEndagsloeb ? 35 : 25;
 var favKupStart = G.erEndagsloeb ? 0.6 : 0.75;
 
 if ((e.type === "bjerg" || e.type === "kuperet") && G.km > e.dist * favMidtStart) {
