@@ -5716,7 +5716,18 @@ function tegnP() {
     ctx.fillStyle = "#fff";
     ctx.font = "20px sans-serif";
     ctx.fillText("🏁", l + w, t + 16);
-    
+
+	// Spol-indikator
+    if (fastForwardActive) {
+        var blinkOn = Math.floor(Date.now() / 500) % 2 === 0;
+        if (blinkOn) {
+            ctx.fillStyle = "#0f0";
+            ctx.font = "bold 20px monospace";
+            ctx.textAlign = "right";
+            ctx.fillText("▶▶", c.width - 15, 30);
+        }
+    }
+	
     // Labels
     ctx.fillStyle = "#888";
     ctx.font = "11px monospace";
@@ -9395,30 +9406,35 @@ function tegnTTP() {
 
 var fastForwardActive = false;
 var fastForwardTimer = null;
-var touchOnCanvas = false;
+var fastForwardTimeout = null;
 
 function stopFastForward() {
     if (fastForwardTimer) { clearTimeout(fastForwardTimer); fastForwardTimer = null; }
+    if (fastForwardTimeout) { clearTimeout(fastForwardTimeout); fastForwardTimeout = null; }
     if (fastForwardActive) {
         if (G.iv && !G.etapeSlut) {
             clearInterval(G.iv);
-            G.iv = setInterval(loop, 400);
+            var loopFn = G.etaper[G.enr] && G.etaper[G.enr].type === "tt" ? loopTT : loop;
+            G.iv = setInterval(loopFn, 400);
         }
         fastForwardActive = false;
     }
-    touchOnCanvas = false;
+}
+
+function startFastForward() {
+    var et = G.etaper[G.enr];
+    if (et && G.km < et.dist - 10) {
+        clearInterval(G.iv);
+        G.iv = setInterval(loop, 200);
+        fastForwardActive = true;
+        // Sikkerhedsstop efter 30 sekunder
+        fastForwardTimeout = setTimeout(stopFastForward, 30000);
+    }
 }
 
 document.getElementById("game").addEventListener("mousedown", function(e) {
     if (e.target.tagName === "CANVAS" && G.iv && !G.vent && !G.etapeSlut) {
-        fastForwardTimer = setTimeout(function() {
-            var et = G.etaper[G.enr];
-            if (et && G.km < et.dist - 10) {
-                clearInterval(G.iv);
-                G.iv = setInterval(loop, 200);
-                fastForwardActive = true;
-            }
-        }, 2000);
+        fastForwardTimer = setTimeout(startFastForward, 2000);
     }
 });
 document.getElementById("game").addEventListener("mouseup", stopFastForward);
@@ -9426,15 +9442,7 @@ document.getElementById("game").addEventListener("mouseleave", stopFastForward);
 
 document.addEventListener("touchstart", function(e) {
     if (e.target.tagName === "CANVAS" && G.iv && !G.vent && !G.etapeSlut) {
-        touchOnCanvas = true;
-        fastForwardTimer = setTimeout(function() {
-            var et = G.etaper[G.enr];
-            if (et && G.km < et.dist - 10) {
-                clearInterval(G.iv);
-                G.iv = setInterval(loop, 200);
-                fastForwardActive = true;
-            }
-        }, 2000);
+        fastForwardTimer = setTimeout(startFastForward, 2000);
     }
 }, { passive: true });
 document.addEventListener("touchend", stopFastForward);
