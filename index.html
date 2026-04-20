@@ -136,6 +136,8 @@
         display: block; 
         margin: 10px 0; 
         border-radius: 5px; 
+		user-select: none;
+        -webkit-user-select: none;
     }
 
     .ebar { 
@@ -875,7 +877,7 @@ var TEAMS = {
         { n: "Luke Lamperti", gc: 48, bj: 44, sp: 82, tt: 70, ud: 80, re: 82, fl: 82, pri: "giro", pref: ["giro","tdf"] }
     ]},
     "Lidl-Trek": { abbr: "TRK", clr: "#ed1c24", r: [
-        { n: "Mads Pedersen", gc: 60, bj: 70, sp: 90, tt: 82, ud: 88, re: 86, fl: 92, pri: "tdf", pref: ["tdf","giro"] },
+        { n: "Mads Pedersen", gc: 60, bj: 69, sp: 91, tt: 82, ud: 88, re: 86, fl: 92, pri: "tdf", pref: ["tdf","giro"] },
         { n: "Giulio Ciccone", gc: 72, bj: 88, sp: 50, tt: 68, ud: 78, re: 74, fl: 66, pri: "giro", pref: ["giro","tdf"] },
         { n: "Tao Geoghegan Hart", gc: 78, bj: 82, sp: 48, tt: 80, ud: 82, re: 78, fl: 72, pri: "vuelta", pref: ["vuelta","giro"] },
         { n: "Juan Ayuso", gc: 88, bj: 86, sp: 62, tt: 88, ud: 84, re: 82, fl: 78, pri: "tdf", pref: ["tdf","vuelta"] },
@@ -1431,16 +1433,24 @@ function bestemAIGTdeltagelse(saesonNr) {
                 }
             }
 			
-            // Wildcard: 10% chance for at Pogačar/Vingegaard
-            // dukker op i en uventet GT
-            if (r.gc >= 95 && Math.random() < 0.50) {
-                var alleGT = ["giro", "tdf", "vuelta"];
-                var tilfaeldig = alleGT[ri(0, 2)];
-                if (gts.indexOf(tilfaeldig) < 0) {
-                    gts.push(tilfaeldig);
+// Topstjerner: chance for sekundær GT
+            if (r.gc >= 95 && Math.random() < 0.40) {
+                // Pogačar og Vingegaard må ikke køre samme sekundære GT
+                var muligeGT = ["giro", "vuelta"];
+                var valgtGT = muligeGT[ri(0, 1)];
+                
+                // Tjek om den anden superstjerne allerede har valgt denne GT
+                var andenStjerne = (r.n === "Tadej Pogačar") ? "Jonas Vingegaard" : 
+                                   (r.n === "Jonas Vingegaard") ? "Tadej Pogačar" : null;
+                if (andenStjerne && aiGT[andenStjerne] && aiGT[andenStjerne].indexOf(valgtGT) >= 0) {
+                    // Tag den anden GT i stedet
+                    valgtGT = (valgtGT === "giro") ? "vuelta" : "giro";
                 }
-            }
-            
+                
+                if (gts.indexOf(valgtGT) < 0) {
+                    gts.push(valgtGT);
+                }
+            }            
             // Ingen rytter kører alle 3
             if (gts.length > 2) gts = gts.slice(0, 2);
             
@@ -5270,6 +5280,32 @@ function genMP(e) {
     return mps;
 }
 
+function getTroejeBaerere() {
+    var aktive = G.ryttere.filter(function(r) { return !r.ude; });
+    var gcS = aktive.slice().sort(function(a,b) { return a.stid - b.stid; });
+    var spS = aktive.slice().sort(function(a,b) { return (G.sprPts[b.navn]||0) - (G.sprPts[a.navn]||0); });
+    var bjS = aktive.slice().sort(function(a,b) { return (G.bjgPts[b.navn]||0) - (G.bjgPts[a.navn]||0); });
+    
+    var gt = getGT();
+    var result = {};
+    
+    if (G.enr > 0 && gcS[0]) {
+        result[gcS[0].navn] = { farve: gt.gcColor, emoji: gt.gcEmoji };
+    }
+    if (spS[0] && (G.sprPts[spS[0].navn] || 0) > 0) {
+        if (!result[spS[0].navn]) {
+            result[spS[0].navn] = { farve: gt.spColor, emoji: gt.spEmoji };
+        }
+    }
+    if (bjS[0] && (G.bjgPts[bjS[0].navn] || 0) > 0) {
+        if (!result[bjS[0].navn]) {
+            result[bjS[0].navn] = { farve: gt.bjColor, emoji: gt.bjEmoji };
+        }
+    }
+    
+    return result;
+}
+
 function rend() {
     var e = G.etaper[G.enr];
     var info = ETYPER[e.type];
@@ -5311,7 +5347,8 @@ function rend() {
     var bjLeder = aktiveRyttere.slice().sort(function(a,b) { return (G.bjgPts[b.navn]||0) - (G.bjgPts[a.navn]||0); })[0];
 
     var gh = '<div style="display:flex;flex-wrap:wrap;gap:4px">';
-    for (var i = 0; i < G.grp.length; i++) {
+    var troejeBaerere = G.erEndagsloeb ? {} : getTroejeBaerere();
+	for (var i = 0; i < G.grp.length; i++) {
         var g = G.grp[i];
         var her = g.ryt.indexOf(r) >= 0;
         var farve = getGruppeFarve(g, r, gcLeder, spLeder, bjLeder);
@@ -5414,10 +5451,14 @@ for (var j = 0; j < vis; j++) {
     var kort = rr.navn.split(" ").pop();
     var rFarve = rr.sp ? "#fff" : rr.holdClr;
     var rWeight = rr.sp ? ";font-weight:bold" : "";
+    if (!G.erEndagsloeb && troejeBaerere[rr.navn]) {
+        rFarve = troejeBaerere[rr.navn].farve;
+        rWeight = ";font-weight:bold";
+    }
     navne += '<span style="color:' + rFarve + rWeight + '">' + kort + '</span>';
     if (j < vis - 1) navne += ", ";
 }
-if (g.ryt.length > 5) {
+	if (g.ryt.length > 5) {
     navne += ' <span style="color:#666">+' + (g.ryt.length - 5) + '</span>';
 }
         
@@ -5444,10 +5485,23 @@ if (G.lastMpResult) {
     var gt2 = getGT();
 	var icon = mpr.type === "sprint" ? gt2.spEmoji : gt2.bjEmoji;
     var items = "";
+    var mpTroeje = G.erEndagsloeb ? {} : getTroejeBaerere();
     for (var i = 0; i < mpr.top10.length; i++) {
         var x = mpr.top10[i];
-        var farve = x.sp ? 'style="color:#fff;font-weight:bold"' : '';
-        items += '<span ' + farve + '>' + (i+1) + '. ' + x.navn.split(" ").pop() + ' (+' + x.pts + ')</span>';
+        var mpFarveStr = '';
+        if (x.sp) {
+            mpFarveStr = 'style="color:#fff;font-weight:bold"';
+        } else if (mpTroeje[x.navn]) {
+            // Marker kun trøjebærer der matcher spurt-typen
+            var troeje = mpTroeje[x.navn];
+            var gt3 = getGT();
+            if ((mpr.type === "sprint" && troeje.farve === gt3.spColor) || 
+                (mpr.type === "bjerg" && troeje.farve === gt3.bjColor) ||
+                troeje.farve === gt3.gcColor) {
+                mpFarveStr = 'style="color:' + troeje.farve + ';font-weight:bold"';
+            }
+        }
+        items += '<span ' + mpFarveStr + '>' + (i+1) + '. ' + x.navn.split(" ").pop() + ' (+' + x.pts + ')</span>';
         if (i < mpr.top10.length - 1) items += " | ";
     }
     mpRes = '<div class="mp-result"><h4>' + icon + ' ' + (mpr.type === "sprint" ? "SPRINT" : "BJERG") + '</h4>' +
@@ -9065,11 +9119,15 @@ function visGruppe(grpIdx) {
         '<div style="border:3px solid #3399ff;background:#111;border-radius:12px;max-width:600px;width:100%;max-height:70vh;display:flex;flex-direction:column">' +
             '<h2 style="color:#3399ff;padding:15px;margin:0;text-align:center;border-bottom:1px solid #333">' + getGruppeVisNavn(g) + ' (' + g.ryt.length + ')</h2>' +
             '<div style="overflow-y:auto;padding:10px">';
-    
+    var troejeBaerere = G.erEndagsloeb ? {} : getTroejeBaerere();
     for (var i = 0; i < sorteretRyt.length; i++) {
         var r = sorteretRyt[i];
         var navnFarve = r.sp ? '#fff' : r.holdClr;
         var weight = r.sp ? 'font-weight:bold;' : '';
+        if (!G.erEndagsloeb && troejeBaerere[r.navn]) {
+            navnFarve = troejeBaerere[r.navn].farve;
+            weight = 'font-weight:bold;';
+        }
         
 	var tidTxt = '';
         var gcPlads = '';
@@ -9329,6 +9387,43 @@ function tegnTTP() {
     ctx.fillText(Math.round(minH) + "m", 8, t + h - 2);
 }
 
+var fastForwardActive = false;
+
+document.getElementById("game").addEventListener("mousedown", function(e) {
+    if (e.target.tagName === "CANVAS" && G.iv && !G.vent && !G.etapeSlut) {
+        clearInterval(G.iv);
+        G.iv = setInterval(loop, 200);
+        fastForwardActive = true;
+    }
+});
+document.getElementById("game").addEventListener("mouseup", function() {
+    if (fastForwardActive) {
+        clearInterval(G.iv);
+        G.iv = setInterval(loop, 400);
+        fastForwardActive = false;
+    }
+});
+document.getElementById("game").addEventListener("mouseleave", function() {
+    if (fastForwardActive) {
+        clearInterval(G.iv);
+        G.iv = setInterval(loop, 400);
+        fastForwardActive = false;
+    }
+});
+document.getElementById("game").addEventListener("touchstart", function(e) {
+    if (e.target.tagName === "CANVAS" && G.iv && !G.vent && !G.etapeSlut) {
+        clearInterval(G.iv);
+        G.iv = setInterval(loop, 200);
+        fastForwardActive = true;
+    }
+}, { passive: true });
+document.getElementById("game").addEventListener("touchend", function() {
+    if (fastForwardActive) {
+        clearInterval(G.iv);
+        G.iv = setInterval(loop, 400);
+        fastForwardActive = false;
+    }
+});
 
 intro();
 
