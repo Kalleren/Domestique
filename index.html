@@ -9414,8 +9414,7 @@ function stopFastForward() {
     if (fastForwardActive) {
         if (G.iv && !G.etapeSlut) {
             clearInterval(G.iv);
-            var loopFn = G.etaper[G.enr] && G.etaper[G.enr].type === "tt" ? loopTT : loop;
-            G.iv = setInterval(loopFn, 400);
+            G.iv = setInterval(loop, 400);
         }
         fastForwardActive = false;
     }
@@ -9427,26 +9426,42 @@ function startFastForward() {
         clearInterval(G.iv);
         G.iv = setInterval(loop, 200);
         fastForwardActive = true;
-        // Sikkerhedsstop efter 30 sekunder
-        fastForwardTimeout = setTimeout(stopFastForward, 30000);
+        fastForwardTimeout = setTimeout(stopFastForward, 10000);
     }
 }
 
 document.getElementById("game").addEventListener("mousedown", function(e) {
     if (e.target.tagName === "CANVAS" && G.iv && !G.vent && !G.etapeSlut) {
-        fastForwardTimer = setTimeout(startFastForward, 2000);
+        fastForwardTimer = setTimeout(startFastForward, 1000);
     }
 });
 document.getElementById("game").addEventListener("mouseup", stopFastForward);
 document.getElementById("game").addEventListener("mouseleave", stopFastForward);
 
 document.addEventListener("touchstart", function(e) {
-    if (e.target.tagName === "CANVAS" && G.iv && !G.vent && !G.etapeSlut) {
-        fastForwardTimer = setTimeout(startFastForward, 2000);
+    var t = e.touches ? e.touches[0] : e;
+    var el = document.elementFromPoint(t.clientX, t.clientY);
+    if (el && el.tagName === "CANVAS" && G.iv && !G.vent && !G.etapeSlut) {
+        fastForwardTimer = setTimeout(startFastForward, 1000);
     }
 }, { passive: true });
 document.addEventListener("touchend", stopFastForward);
 document.addEventListener("touchcancel", stopFastForward);
+document.addEventListener("touchmove", function(e) {
+    if (fastForwardTimer || fastForwardActive) {
+        stopFastForward();
+    }
+}, { passive: true });
+
+// Ekstra sikkerhed: tjek hvert sekund om der stadig er touch
+setInterval(function() {
+    if (fastForwardActive && !navigator.maxTouchPoints) return;
+    if (fastForwardActive) {
+        var dominated = false;
+        try { dominated = document.hasFocus(); } catch(e) {}
+    }
+}, 1000);
+	
 intro();
 
 </script>
