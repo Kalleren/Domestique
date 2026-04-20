@@ -7515,8 +7515,13 @@ if (Math.random() < udbChance && udbCount < 5) aiUdb();
             }
         }
     }
-    
-    // Mål?
+
+	// Stop spol ved 10 km til mål
+    if (fastForwardActive && G.km >= e.dist - 10) {
+        clearInterval(G.iv);
+        G.iv = setInterval(loop, 400);
+        fastForwardActive = false;
+    }
   
     // Mål?
     if (G.grp[0] && G.grp[0].pos >= e.dist) { afslut(); return; }
@@ -9389,39 +9394,69 @@ function tegnTTP() {
 }
 
 var fastForwardActive = false;
+var fastForwardTimer = null;
 
 document.getElementById("game").addEventListener("mousedown", function(e) {
     if (e.target.tagName === "CANVAS" && G.iv && !G.vent && !G.etapeSlut) {
-        clearInterval(G.iv);
-        G.iv = setInterval(loop, 200);
-        fastForwardActive = true;
+        fastForwardTimer = setTimeout(function() {
+            var et = G.etaper[G.enr];
+            if (et && G.km < et.dist - 10) {
+                clearInterval(G.iv);
+                G.iv = setInterval(loop, 200);
+                fastForwardActive = true;
+            }
+        }, 2000);
     }
 });
 document.getElementById("game").addEventListener("mouseup", function() {
+    if (fastForwardTimer) { clearTimeout(fastForwardTimer); fastForwardTimer = null; }
     if (fastForwardActive) {
-        clearInterval(G.iv);
-        G.iv = setInterval(loop, 400);
+        if (G.iv && !G.etapeSlut) {
+            clearInterval(G.iv);
+            G.iv = setInterval(loop, 400);
+        }
         fastForwardActive = false;
     }
 });
 document.getElementById("game").addEventListener("mouseleave", function() {
+    if (fastForwardTimer) { clearTimeout(fastForwardTimer); fastForwardTimer = null; }
     if (fastForwardActive) {
-        clearInterval(G.iv);
-        G.iv = setInterval(loop, 400);
+        if (G.iv && !G.etapeSlut) {
+            clearInterval(G.iv);
+            G.iv = setInterval(loop, 400);
+        }
         fastForwardActive = false;
     }
 });
 document.getElementById("game").addEventListener("touchstart", function(e) {
     if (e.target.tagName === "CANVAS" && G.iv && !G.vent && !G.etapeSlut) {
-        clearInterval(G.iv);
-        G.iv = setInterval(loop, 200);
-        fastForwardActive = true;
+        fastForwardTimer = setTimeout(function() {
+            var et = G.etaper[G.enr];
+            if (et && G.km < et.dist - 10) {
+                clearInterval(G.iv);
+                G.iv = setInterval(loop, 200);
+                fastForwardActive = true;
+            }
+        }, 2000);
     }
 }, { passive: true });
 document.getElementById("game").addEventListener("touchend", function() {
+    if (fastForwardTimer) { clearTimeout(fastForwardTimer); fastForwardTimer = null; }
     if (fastForwardActive) {
-        clearInterval(G.iv);
-        G.iv = setInterval(loop, 400);
+        if (G.iv && !G.etapeSlut) {
+            clearInterval(G.iv);
+            G.iv = setInterval(loop, 400);
+        }
+        fastForwardActive = false;
+    }
+});
+document.getElementById("game").addEventListener("touchcancel", function() {
+    if (fastForwardTimer) { clearTimeout(fastForwardTimer); fastForwardTimer = null; }
+    if (fastForwardActive) {
+        if (G.iv && !G.etapeSlut) {
+            clearInterval(G.iv);
+            G.iv = setInterval(loop, 400);
+        }
         fastForwardActive = false;
     }
 });
