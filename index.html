@@ -9395,6 +9395,19 @@ function tegnTTP() {
 
 var fastForwardActive = false;
 var fastForwardTimer = null;
+var touchOnCanvas = false;
+
+function stopFastForward() {
+    if (fastForwardTimer) { clearTimeout(fastForwardTimer); fastForwardTimer = null; }
+    if (fastForwardActive) {
+        if (G.iv && !G.etapeSlut) {
+            clearInterval(G.iv);
+            G.iv = setInterval(loop, 400);
+        }
+        fastForwardActive = false;
+    }
+    touchOnCanvas = false;
+}
 
 document.getElementById("game").addEventListener("mousedown", function(e) {
     if (e.target.tagName === "CANVAS" && G.iv && !G.vent && !G.etapeSlut) {
@@ -9408,28 +9421,12 @@ document.getElementById("game").addEventListener("mousedown", function(e) {
         }, 2000);
     }
 });
-document.getElementById("game").addEventListener("mouseup", function() {
-    if (fastForwardTimer) { clearTimeout(fastForwardTimer); fastForwardTimer = null; }
-    if (fastForwardActive) {
-        if (G.iv && !G.etapeSlut) {
-            clearInterval(G.iv);
-            G.iv = setInterval(loop, 400);
-        }
-        fastForwardActive = false;
-    }
-});
-document.getElementById("game").addEventListener("mouseleave", function() {
-    if (fastForwardTimer) { clearTimeout(fastForwardTimer); fastForwardTimer = null; }
-    if (fastForwardActive) {
-        if (G.iv && !G.etapeSlut) {
-            clearInterval(G.iv);
-            G.iv = setInterval(loop, 400);
-        }
-        fastForwardActive = false;
-    }
-});
-document.getElementById("game").addEventListener("touchstart", function(e) {
+document.getElementById("game").addEventListener("mouseup", stopFastForward);
+document.getElementById("game").addEventListener("mouseleave", stopFastForward);
+
+document.addEventListener("touchstart", function(e) {
     if (e.target.tagName === "CANVAS" && G.iv && !G.vent && !G.etapeSlut) {
+        touchOnCanvas = true;
         fastForwardTimer = setTimeout(function() {
             var et = G.etaper[G.enr];
             if (et && G.km < et.dist - 10) {
@@ -9440,27 +9437,8 @@ document.getElementById("game").addEventListener("touchstart", function(e) {
         }, 2000);
     }
 }, { passive: true });
-document.getElementById("game").addEventListener("touchend", function() {
-    if (fastForwardTimer) { clearTimeout(fastForwardTimer); fastForwardTimer = null; }
-    if (fastForwardActive) {
-        if (G.iv && !G.etapeSlut) {
-            clearInterval(G.iv);
-            G.iv = setInterval(loop, 400);
-        }
-        fastForwardActive = false;
-    }
-});
-document.getElementById("game").addEventListener("touchcancel", function() {
-    if (fastForwardTimer) { clearTimeout(fastForwardTimer); fastForwardTimer = null; }
-    if (fastForwardActive) {
-        if (G.iv && !G.etapeSlut) {
-            clearInterval(G.iv);
-            G.iv = setInterval(loop, 400);
-        }
-        fastForwardActive = false;
-    }
-});
-
+document.addEventListener("touchend", stopFastForward);
+document.addEventListener("touchcancel", stopFastForward);
 intro();
 
 </script>
