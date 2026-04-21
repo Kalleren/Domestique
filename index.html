@@ -13,6 +13,8 @@
     <meta name="apple-mobile-web-app-title" content="Domestique">
     <link rel="apple-touch-icon" href="icon-192.png">
     <meta name="format-detection" content="telephone=no">
+	<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
     <style>
     /* ========== CSS CUSTOM PROPERTIES FOR GT THEMING ========== */
@@ -329,6 +331,231 @@
 <div id="game"></div>
 <script>
 
+// ========== FIREBASE SCOREBOARD ==========
+
+var firebaseConfig = {
+    apiKey: "AIzaSyAKQX-FoTU7p95tdaMcbgJ3HCJ4FB4Mrto",
+    authDomain: "domestique-scoreboard.firebaseapp.com",
+    databaseURL: "https://domestique-scoreboard-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "domestique-scoreboard",
+    storageBucket: "domestique-scoreboard.firebasestorage.app",
+    messagingSenderId: "780294590884",
+    appId: "1:780294590884:web:1148e9eb986047037eb131"
+};
+
+var firebaseKlar = false;
+try {
+    firebase.initializeApp(firebaseConfig);
+    var db = firebase.database();
+    firebaseKlar = true;
+} catch (e) {
+    console.log('Firebase ikke tilgængelig:', e);
+}
+
+function gemScoreTilFirebase(data) {
+    if (!firebaseKlar) return;
+    try {
+        // Gem karriere-score
+        db.ref('scores/' + data.svaerhed).push().set(data);
+
+        // Gem bedste sæson
+        db.ref('bedsteSaeson/' + data.svaerhed).push().set({
+            navn: data.navn,
+            point: data.bedsteSaesonPoint,
+            saesonNr: data.bedsteSaesonNr,
+            dato: data.dato
+        });
+
+    } catch (e) {
+        console.log('Fejl ved gem af score:', e);
+    }
+}
+
+function gemFoersteSaesonTilFirebase(navn, svaerhed, point) {
+    if (!firebaseKlar) return;
+    try {
+        db.ref('foersteSaeson/' + svaerhed).push().set({
+            navn: navn,
+            point: point,
+            dato: new Date().toISOString()
+        });
+    } catch (e) {
+        console.log('Fejl ved gem af første sæson:', e);
+    }
+}
+
+function hentScoreboard(svaerhed, type, callback) {
+    if (!firebaseKlar) { callback([]); return; }
+    try {
+        var ref;
+        var sortKey;
+
+        if (type === "karriere") {
+            ref = db.ref('scores/' + svaerhed);
+            sortKey = 'samletPoint';
+        } else if (type === "saeson") {
+            ref = db.ref('bedsteSaeson/' + svaerhed);
+            sortKey = 'point';
+        } else if (type === "foerste") {
+            ref = db.ref('foersteSaeson/' + svaerhed);
+            sortKey = 'point';
+        }
+
+        ref.orderByChild(sortKey).limitToLast(25).once('value', function(snapshot) {
+            var scores = [];
+            snapshot.forEach(function(child) { scores.push(child.val()); });
+            scores.sort(function(a, b) {
+                return (b[sortKey] || b.samletPoint || 0) - (a[sortKey] || a.samletPoint || 0);
+            });
+            callback(scores);
+        });
+    } catch (e) {
+        console.log('Fejl ved hentning:', e);
+        callback([]);
+    }
+}
+
+var scoreboardTab = "karriere";
+var scoreboardSvaerhed = "normal";
+
+function visScoreboard() {
+    setGTTema("tdf");
+
+    var svaerhedFarve = scoreboardSvaerhed === "let" ? "#0f0" :
+                        scoreboardSvaerhed === "svaer" ? "#f44" : "#ff0";
+    var svaerhedNavn = scoreboardSvaerhed === "let" ? "Den trehjulede" :
+                       scoreboardSvaerhed === "svaer" ? "Raceren" : "Havelågen";
+
+    var html = '<div style="text-align:center;padding:15px 0">' +
+        '<div style="font-size:36px">🏆</div>' +
+        '<h1>SCOREBOARD</h1>' +
+    '</div>';
+
+    // Sværhedsvalg
+    html += '<div class="tabs" style="margin-bottom:8px">' +
+        '<div class="tab ' + (scoreboardSvaerhed === "let" ? "active" : "") + '" ' +
+            'style="border-color:#0f0;' + (scoreboardSvaerhed === "let" ? "background:#0f0;color:#000" : "color:#0f0") + '" ' +
+            'onclick="scoreboardSvaerhed=\'let\';visScoreboard()">Den trehjulede</div>' +
+        '<div class="tab ' + (scoreboardSvaerhed === "normal" ? "active" : "") + '" ' +
+            'style="border-color:#ff0;' + (scoreboardSvaerhed === "normal" ? "background:#ff0;color:#000" : "color:#ff0") + '" ' +
+            'onclick="scoreboardSvaerhed=\'normal\';visScoreboard()">Havelågen</div>' +
+        '<div class="tab ' + (scoreboardSvaerhed === "svaer" ? "active" : "") + '" ' +
+            'style="border-color:#f44;' + (scoreboardSvaerhed === "svaer" ? "background:#f44;color:#000" : "color:#f44") + '" ' +
+            'onclick="scoreboardSvaerhed=\'svaer\';visScoreboard()">Raceren</div>' +
+    '</div>';
+
+    // Type-valg
+    html += '<div class="tabs">' +
+        '<div class="tab ' + (scoreboardTab === "karriere" ? "active" : "") + '" ' +
+            'onclick="scoreboardTab=\'karriere\';visScoreboard()">🎖️ Karriere</div>' +
+        '<div class="tab ' + (scoreboardTab === "saeson" ? "active" : "") + '" ' +
+            'onclick="scoreboardTab=\'saeson\';visScoreboard()">⭐ Bedste sæson</div>' +
+        '<div class="tab ' + (scoreboardTab === "foerste" ? "active" : "") + '" ' +
+            'onclick="scoreboardTab=\'foerste\';visScoreboard()">🌱 Første sæson</div>' +
+    '</div>';
+
+    html += '<div id="scoreboardIndhold" class="box" style="min-height:200px">' +
+        '<div style="text-align:center;color:#888;padding:40px">⏳ Henter scores...</div>' +
+    '</div>';
+
+    if (!firebaseKlar) {
+        html += '<div style="text-align:center;color:#f80;font-size:11px;margin:8px 0">' +
+            '⚠️ Scoreboard ikke tilgængeligt (ingen forbindelse)' +
+        '</div>';
+    }
+
+    html += '<div class="ctrls">' +
+        '<button class="btn btn-big btn-y" onclick="intro()">← TILBAGE</button>' +
+    '</div>';
+
+    R(html);
+
+    // Hent data
+    hentScoreboard(scoreboardSvaerhed, scoreboardTab, function(scores) {
+        var indhold = document.getElementById('scoreboardIndhold');
+        if (!indhold) return;
+
+        if (scores.length === 0) {
+            var tomTekst = scoreboardTab === "karriere" ? "Gennemfør 10 sæsoner" :
+                           scoreboardTab === "foerste" ? "Gennemfør din første sæson" :
+                           "Gennemfør mindst én sæson";
+            indhold.innerHTML = '<div style="text-align:center;color:#888;padding:40px">' +
+                '<div style="font-size:30px;margin-bottom:10px">🏜️</div>' +
+                'Ingen scores endnu for <strong>' + svaerhedNavn + '</strong>.<br><br>' +
+                '<span style="font-size:11px">' + tomTekst + ' for at komme på listen!</span>' +
+            '</div>';
+            return;
+        }
+
+        var typNavn = scoreboardTab === "karriere" ? "Karriere - 10 sæsoner" :
+                      scoreboardTab === "foerste" ? "Bedste første sæson" :
+                      "Bedste enkelt-sæson";
+
+        var h = '<h3 style="color:' + svaerhedFarve + '">' + typNavn + '</h3>';
+
+        for (var i = 0; i < scores.length; i++) {
+            var s = scores[i];
+            var pos = i + 1;
+            var medalje = pos === 1 ? "🥇" : pos === 2 ? "🥈" : pos === 3 ? "🥉" : "";
+            var farve = pos === 1 ? "#ff0" : pos === 2 ? "#ccc" : pos === 3 ? "#cd7f32" : "#888";
+            var bgClr = pos <= 3 ? "background:rgba(255,255,255,0.03);" : "";
+            var numTxt = pos > 3 ? pos + ". " : "";
+
+            if (scoreboardTab === "karriere") {
+                var detaljer = "";
+                if (s.detaljer) {
+                    var dele = [];
+                    if (s.detaljer.gtSejre > 0) dele.push("🏆" + s.detaljer.gtSejre);
+                    if (s.detaljer.etapeSejre > 0) dele.push("🚩" + s.detaljer.etapeSejre);
+                    if (s.detaljer.monumentSejre > 0) dele.push("🏛️" + s.detaljer.monumentSejre);
+                    if (dele.length > 0) {
+                        detaljer = '<div style="font-size:9px;color:#666;margin-top:2px">' + dele.join(' ') + '</div>';
+                    }
+                }
+                var datoTxt = s.dato ? '<span style="color:#444;font-size:9px"> ' + s.dato.substring(0, 10) + '</span>' : '';
+
+                h += '<div class="row" style="border-color:#333;' + bgClr + 'padding:6px 8px">' +
+                    '<span style="display:flex;align-items:center;gap:6px">' +
+                        '<span style="color:' + farve + ';font-weight:bold;min-width:28px;font-size:14px">' + medalje + numTxt + '</span>' +
+                        '<span><span style="color:#fff">' + s.navn + '</span>' + datoTxt + '</span>' +
+                    '</span>' +
+                    '<span style="text-align:right">' +
+                        '<span style="color:' + farve + ';font-weight:bold;font-size:16px">' + s.samletPoint + '</span>' +
+                        '<span style="color:#888;font-size:10px"> pts</span>' +
+                        detaljer +
+                    '</span>' +
+                '</div>';
+
+            } else if (scoreboardTab === "saeson") {
+                h += '<div class="row" style="border-color:#333;' + bgClr + 'padding:6px 8px">' +
+                    '<span style="display:flex;align-items:center;gap:6px">' +
+                        '<span style="color:' + farve + ';font-weight:bold;min-width:28px;font-size:14px">' + medalje + numTxt + '</span>' +
+                        '<span style="color:#fff">' + s.navn + '</span>' +
+                        '<span style="color:#666;font-size:10px">(sæson ' + (s.saesonNr || '?') + ')</span>' +
+                    '</span>' +
+                    '<span>' +
+                        '<span style="color:' + farve + ';font-weight:bold;font-size:16px">' + s.point + '</span>' +
+                        '<span style="color:#888;font-size:10px"> pts</span>' +
+                    '</span>' +
+                '</div>';
+
+            } else if (scoreboardTab === "foerste") {
+                h += '<div class="row" style="border-color:#333;' + bgClr + 'padding:6px 8px">' +
+                    '<span style="display:flex;align-items:center;gap:6px">' +
+                        '<span style="color:' + farve + ';font-weight:bold;min-width:28px;font-size:14px">' + medalje + numTxt + '</span>' +
+                        '<span style="color:#fff">' + s.navn + '</span>' +
+                    '</span>' +
+                    '<span>' +
+                        '<span style="color:' + farve + ';font-weight:bold;font-size:16px">' + s.point + '</span>' +
+                        '<span style="color:#888;font-size:10px"> pts</span>' +
+                    '</span>' +
+                '</div>';
+            }
+        }
+
+        indhold.innerHTML = h;
+    });
+}
 
 // ========== GT-KONFIGURATION ==========
 
@@ -2650,11 +2877,17 @@ function afslutSaeson() {
     
     // Gem i karrierehistorik
     G.karriereHistorik.push({
-        saeson: G.saeson,
-        resultater: G.saesonResultater.slice(),
-        bonusPoint: samletBonus
-    });
-    
+    	saeson: G.saeson,
+    	resultater: G.saesonResultater.slice(),
+    	endagsResultater: G.endagsResultater ? G.endagsResultater.slice() : [],
+    	bonusPoint: samletBonus
+	});
+
+	// Gem første sæson til Firebase med det samme
+    if (G.saeson === 1) {
+        gemFoersteSaesonTilFirebase(G.navn, G.svaerhed || "normal", samletBonus);
+    }
+	
     visSaesonOversigt();
 }
 
@@ -2749,14 +2982,97 @@ function visSaesonOversigt() {
     
     // Knapper
     if (G.saeson >= 10) {
-        html += '<div class="box" style="text-align:center;border-color:#f80">' +
-            '<h3 style="color:#f80">🎖️ Karrieren er slut!</h3>' +
-            '<p>' + G.navn + ' trækker sig tilbage.</p>' +
+    // Beregn karriere-statistikker til scoreboard
+    var karriereSamletPoint = samletBonus;
+    var karriereGTSejre = 0;
+    var karriereEtapeSejre = 0;
+    var karriereMonumentSejre = 0;
+    var bedsteSaesonPoint = samletBonus;
+    var bedsteSaesonNr = G.saeson;
+    var foersteSaesonPoint = 0;
+
+    for (var ki = 0; ki < G.karriereHistorik.length; ki++) {
+        var kh = G.karriereHistorik[ki];
+        karriereSamletPoint += (kh.bonusPoint || 0);
+
+        // Track bedste sæson
+        if ((kh.bonusPoint || 0) > bedsteSaesonPoint) {
+            bedsteSaesonPoint = kh.bonusPoint || 0;
+            bedsteSaesonNr = kh.saeson || (ki + 1);
+        }
+
+        // Track første sæson
+        if ((kh.saeson || (ki + 1)) === 1) {
+            foersteSaesonPoint = kh.bonusPoint || 0;
+        }
+
+        // Tæl GT-sejre og etapesejre
+        if (kh.resultater) {
+            for (var ri5 = 0; ri5 < kh.resultater.length; ri5++) {
+                var kRes = kh.resultater[ri5];
+                if (!kRes.udgaaet && kRes.gcPlads === 1) karriereGTSejre++;
+                if (kRes.sejre) karriereEtapeSejre += kRes.sejre;
+            }
+        }
+
+        // Tæl monument-sejre
+        if (kh.endagsResultater) {
+            for (var ei2 = 0; ei2 < kh.endagsResultater.length; ei2++) {
+                if (kh.endagsResultater[ei2].monument && kh.endagsResultater[ei2].plads === 1) {
+                    karriereMonumentSejre++;
+                }
+            }
+        }
+    }
+
+    // Tæl også denne sæsons resultater (endnu ikke i karriereHistorik)
+    if (G.endagsResultater) {
+        for (var ei3 = 0; ei3 < G.endagsResultater.length; ei3++) {
+            if (G.endagsResultater[ei3].monument && G.endagsResultater[ei3].plads === 1) {
+                karriereMonumentSejre++;
+            }
+        }
+    }
+    for (var sri = 0; sri < G.saesonResultater.length; sri++) {
+        var sRes = G.saesonResultater[sri];
+        if (!sRes.udgaaet && sRes.gcPlads === 1) karriereGTSejre++;
+        if (sRes.sejre) karriereEtapeSejre += sRes.sejre;
+    }
+
+    // Gem til Firebase
+    gemScoreTilFirebase({
+        navn: G.navn,
+        svaerhed: G.svaerhed || "normal",
+        samletPoint: karriereSamletPoint,
+        saesoner: 10,
+        bedsteSaesonNr: bedsteSaesonNr,
+        bedsteSaesonPoint: bedsteSaesonPoint,
+        foersteSaesonPoint: foersteSaesonPoint,
+        dato: new Date().toISOString(),
+        detaljer: {
+            gtSejre: karriereGTSejre,
+            etapeSejre: karriereEtapeSejre,
+            monumentSejre: karriereMonumentSejre
+        }
+    });
+
+    sletGemtSpil();
+
+    html += '<div class="box" style="text-align:center;border-color:#f80">' +
+        '<h3 style="color:#f80">🎖️ Karrieren er slut!</h3>' +
+        '<p>' + G.navn + ' trækker sig tilbage efter 10 sæsoner.</p>' +
+        '<p style="color:#0f0;margin-top:8px;font-size:18px">📊 Samlet score: ' + karriereSamletPoint + ' point!</p>' +
+        '<div style="font-size:11px;color:#888;margin-top:5px">' +
+            (karriereGTSejre > 0 ? '🏆 ' + karriereGTSejre + ' GT-sejre ' : '') +
+            (karriereEtapeSejre > 0 ? '🚩 ' + karriereEtapeSejre + ' etapesejre ' : '') +
+            (karriereMonumentSejre > 0 ? '🏛️ ' + karriereMonumentSejre + ' monumenter' : '') +
         '</div>' +
-        '<div class="ctrls">' +
-            '<button class="btn btn-big btn-y" onclick="location.reload()">NY KARRIERE</button>' +
-        '</div>';
-    } else if (samletBonus > 0) {
+    '</div>' +
+    '<div class="ctrls">' +
+        '<button class="btn btn-big" onclick="visScoreboard()">🏆 SCOREBOARD</button>' +
+        '<button class="btn btn-big btn-y" onclick="location.reload()">NY KARRIERE</button>' +
+    '</div>';
+} else if (samletBonus > 0) {
         html += '<div class="ctrls">' +
             '<button class="btn btn-big btn-y" onclick="fordelPoint()">FORDEL POINT</button>' +
         '</div>';
@@ -2906,6 +3222,7 @@ R('<div style="text-align:center;padding:20px 0">' +
         '</div>' +
     '</div>' +
     '<div style="text-align:center;margin-top:15px">' +
+  		'<button class="btn" style="border-color:#ff0;color:#ff0" onclick="visScoreboard()">🏆 Scoreboard</button>' +
         '<button class="btn" style="border-color:#3399ff;color:#3399ff" onclick="visInstruktioner()">Instruktioner</button>' +
         '<br><br>' +
         '<div style="color:#666;font-size:10px">Af Kalleren</div>' +
