@@ -2195,8 +2195,8 @@ function genererGTResume() {
     var statTekst = "Gennem de 21 etaper opnåede " + spiEfternavn + " ";
     var stats = [];
     if (sejre > 0) stats.push(sejre + " etapesejr" + (sejre > 1 ? "e" : ""));
-    if (podier > sejre) stats.push((podier - sejre) + " yderligere podieplacering" + (podier - sejre > 1 ? "er" : ""));
-    if (top10 > podier) stats.push((top10 - podier) + " yderligere top-10 placering" + (top10 - podier > 1 ? "er" : ""));
+    if (podier > sejre) stats.push((podier - sejre) + (sejre > 0 ? " yderligere " : " ") + "podieplacering" + (podier - sejre > 1 ? "er" : ""));
+    if (top10 > podier) stats.push((top10 - podier) + (podier > 0 ? " yderligere " : " ") + "top-10 placering" + (top10 - podier > 1 ? "er" : ""));
     
     if (stats.length >= 1) {
         if (stats.length === 1) {
@@ -5452,7 +5452,7 @@ for (var j = 0; j < vis; j++) {
     var kort = rr.navn.split(" ").pop();
     var rFarve = rr.sp ? "#fff" : rr.holdClr;
     var rWeight = rr.sp ? ";font-weight:bold" : "";
-    if (!G.erEndagsloeb && troejeBaerere[rr.navn]) {
+    if (!G.erEndagsloeb && troejeBaerere[rr.navn] && !rr.sp) {
         rFarve = troejeBaerere[rr.navn].farve;
         rWeight = ";font-weight:bold";
     }
@@ -9141,7 +9141,7 @@ function visGruppe(grpIdx) {
         var r = sorteretRyt[i];
         var navnFarve = r.sp ? '#fff' : r.holdClr;
         var weight = r.sp ? 'font-weight:bold;' : '';
-        if (!G.erEndagsloeb && troejeBaerere[r.navn]) {
+        if (!G.erEndagsloeb && troejeBaerere[r.navn] && !r.sp) {
             navnFarve = troejeBaerere[r.navn].farve;
             weight = 'font-weight:bold;';
         }
