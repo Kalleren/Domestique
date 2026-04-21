@@ -407,6 +407,7 @@ function gemGTTilFirebase(navn, svaerhed, gtId, point, gcPlads, detaljer) {
             navn: navn,
             point: point,
             gcPlads: gcPlads,
+            saesonNr: G.saeson,
             dato: new Date().toISOString(),
             detaljer: detaljer || {}
         });
@@ -615,7 +616,7 @@ function visScoreboard() {
 
                 h += '<div class="row" style="border-color:#333;' + bgClr + 'padding:6px 8px">' +
                     '<span style="color:' + farve + ';font-weight:bold;min-width:24px;font-size:14px">' + medalje + numTxt + '</span>' +
-                    '<span style="flex:1;overflow:hidden"><span style="color:#fff">' + s.navn + '</span>' + detaljer + '</span>' +
+                    '<span style="flex:1;overflow:hidden"><span style="color:#fff">' + s.navn + '</span>' + (s.saesonNr ? ' <span style="color:#666;font-size:10px">S' + s.saesonNr + '</span>' : '') + detaljer + '</span>' +
                     '<span style="color:' + farve + ';font-weight:bold;font-size:16px;white-space:nowrap">' + pointVal + ' <span style="color:#888;font-size:10px">pts</span></span>' +
                 '</div>';
 
