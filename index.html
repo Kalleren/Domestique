@@ -196,8 +196,10 @@
     .tab { padding: 8px 15px; border: 2px solid var(--gt-secondary); cursor: pointer; border-radius: 4px; font-size: 14px; color: var(--gt-primary); }
     .tab.active { background: var(--gt-secondary); color: #000; }
     .tab:hover { background: #330; color: var(--gt-primary); }
+	.tab-blue { border-color: #3399ff !important; color: #3399ff; }
+	.tab-blue:hover { background: #3399ff !important; color: #000 !important; }
+	.tab-blue.active { background: #3399ff !important; color: #000 !important; }
     .tab.active:hover { background: var(--gt-secondary); color: #000; }
-
     .tab-gc { border-color: var(--gt-gc-color); }
     .tab-gc.active { background: var(--gt-gc-color); color: #000; }
     .tab-sp { border-color: var(--gt-sp-color); }
@@ -446,12 +448,12 @@ function visScoreboard() {
 
     // Type-valg
     html += '<div class="tabs">' +
-        '<div class="tab ' + (scoreboardTab === "karriere" ? "active" : "") + '" ' +
-            'onclick="scoreboardTab=\'karriere\';visScoreboard()">🎖️ Karriere</div>' +
-        '<div class="tab ' + (scoreboardTab === "saeson" ? "active" : "") + '" ' +
-            'onclick="scoreboardTab=\'saeson\';visScoreboard()">⭐ Bedste sæson</div>' +
-        '<div class="tab ' + (scoreboardTab === "foerste" ? "active" : "") + '" ' +
-            'onclick="scoreboardTab=\'foerste\';visScoreboard()">🌱 Første sæson</div>' +
+        '<div class="tab tab-blue ' + (scoreboardTab === "karriere" ? "active" : "") + '" ' +
+            'onclick="scoreboardTab=\'karriere\';visScoreboard()">Karriere</div>' +
+        '<div class="tab tab-blue ' + (scoreboardTab === "saeson" ? "active" : "") + '" ' +
+            'onclick="scoreboardTab=\'saeson\';visScoreboard()">Bedste sæson</div>' +
+        '<div class="tab tab-blue ' + (scoreboardTab === "foerste" ? "active" : "") + '" ' +
+            'onclick="scoreboardTab=\'foerste\';visScoreboard()">1. sæson</div>' +
     '</div>';
 
     html += '<div id="scoreboardIndhold" class="box" style="min-height:200px">' +
@@ -509,21 +511,14 @@ function visScoreboard() {
                     if (s.detaljer.etapeSejre > 0) dele.push("🚩" + s.detaljer.etapeSejre);
                     if (s.detaljer.monumentSejre > 0) dele.push("🏛️" + s.detaljer.monumentSejre);
                     if (dele.length > 0) {
-                        detaljer = '<div style="font-size:9px;color:#666;margin-top:2px">' + dele.join(' ') + '</div>';
+                        detaljer = ' <span style="color:#666;font-size:9px">' + dele.join(' ') + '</span>';
                     }
                 }
-                var datoTxt = s.dato ? '<span style="color:#444;font-size:9px"> ' + s.dato.substring(0, 10) + '</span>' : '';
 
                 h += '<div class="row" style="border-color:#333;' + bgClr + 'padding:6px 8px">' +
-                    '<span style="display:flex;align-items:center;gap:6px">' +
-                        '<span style="color:' + farve + ';font-weight:bold;min-width:28px;font-size:14px">' + medalje + numTxt + '</span>' +
-                        '<span><span style="color:#fff">' + s.navn + '</span>' + datoTxt + '</span>' +
-                    '</span>' +
-                    '<span style="text-align:right">' +
-                        '<span style="color:' + farve + ';font-weight:bold;font-size:16px">' + s.samletPoint + '</span>' +
-                        '<span style="color:#888;font-size:10px"> pts</span>' +
-                        detaljer +
-                    '</span>' +
+                    '<span style="color:' + farve + ';font-weight:bold;min-width:24px;font-size:14px">' + medalje + numTxt + '</span>' +
+                    '<span style="flex:1;overflow:hidden"><span style="color:#fff">' + s.navn + '</span>' + detaljer + '</span>' +
+                    '<span style="color:' + farve + ';font-weight:bold;font-size:16px;white-space:nowrap">' + s.samletPoint + ' <span style="color:#888;font-size:10px">pts</span></span>' +
                 '</div>';
 
             } else if (scoreboardTab === "saeson") {
