@@ -357,33 +357,72 @@ try {
 function gemScoreTilFirebase(data) {
     if (!firebaseKlar) return;
     try {
-        // Gem karriere-score
+        // Gem karriere-score (kun efter sæson 10)
         db.ref('scores/' + data.svaerhed).push().set(data);
 
-        // Gem bedste sæson
-        db.ref('bedsteSaeson/' + data.svaerhed).push().set({
-            navn: data.navn,
-            point: data.bedsteSaesonPoint,
-            saesonNr: data.bedsteSaesonNr,
-            dato: data.dato
-        });
-
+        // Bedste sæson gemmes separat via gemSaesonTilFirebase()
     } catch (e) {
         console.log('Fejl ved gem af score:', e);
     }
 }
 
-function gemFoersteSaesonTilFirebase(navn, svaerhed, point) {
+function gemSaesonTilFirebase(navn, svaerhed, point, saesonNr, detaljer) {
+    if (!firebaseKlar) return;
+    try {
+        db.ref('bedsteSaeson/' + svaerhed).push().set({
+            navn: navn,
+            point: point,
+            saesonNr: saesonNr,
+            dato: new Date().toISOString(),
+            detaljer: detaljer || {}
+        });
+    } catch (e) {
+        console.log('Fejl ved gem af sæson:', e);
+    }
+}
+
+function gemFoersteSaesonTilFirebase(navn, svaerhed, point, detaljer) {
     if (!firebaseKlar) return;
     try {
         db.ref('foersteSaeson/' + svaerhed).push().set({
             navn: navn,
             point: point,
-            dato: new Date().toISOString()
+            dato: new Date().toISOString(),
+            detaljer: detaljer || {}
         });
     } catch (e) {
         console.log('Fejl ved gem af første sæson:', e);
     }
+}
+
+function beregnSaesonDetaljer() {
+    var gtSejre = 0;
+    var etapeSejre = 0;
+    var monumentSejre = 0;
+    var klassikerSejre = 0;
+
+    for (var i = 0; i < G.saesonResultater.length; i++) {
+        var res = G.saesonResultater[i];
+        if (!res.udgaaet && res.gcPlads === 1) gtSejre++;
+        if (res.sejre) etapeSejre += res.sejre;
+    }
+
+    if (G.endagsResultater) {
+        for (var i = 0; i < G.endagsResultater.length; i++) {
+            var er = G.endagsResultater[i];
+            if (er.plads === 1) {
+                if (er.monument) monumentSejre++;
+                else klassikerSejre++;
+            }
+        }
+    }
+
+    return {
+        gtSejre: gtSejre,
+        etapeSejre: etapeSejre,
+        monumentSejre: monumentSejre,
+        klassikerSejre: klassikerSejre
+    };
 }
 
 function hentScoreboard(svaerhed, type, callback) {
@@ -417,7 +456,7 @@ function hentScoreboard(svaerhed, type, callback) {
     }
 }
 
-var scoreboardTab = "karriere";
+var scoreboardTab = "foerste";
 var scoreboardSvaerhed = "normal";
 
 function visScoreboard() {
@@ -448,12 +487,12 @@ function visScoreboard() {
 
     // Type-valg
     html += '<div class="tabs">' +
-        '<div class="tab tab-blue ' + (scoreboardTab === "karriere" ? "active" : "") + '" ' +
-            'onclick="scoreboardTab=\'karriere\';visScoreboard()">Karriere</div>' +
-        '<div class="tab tab-blue ' + (scoreboardTab === "saeson" ? "active" : "") + '" ' +
-            'onclick="scoreboardTab=\'saeson\';visScoreboard()">Bedste sæson</div>' +
         '<div class="tab tab-blue ' + (scoreboardTab === "foerste" ? "active" : "") + '" ' +
             'onclick="scoreboardTab=\'foerste\';visScoreboard()">1. sæson</div>' +
+        '<div class="tab tab-blue ' + (scoreboardTab === "saeson" ? "active" : "") + '" ' +
+            'onclick="scoreboardTab=\'saeson\';visScoreboard()">Bedste sæson</div>' +
+        '<div class="tab tab-blue ' + (scoreboardTab === "karriere" ? "active" : "") + '" ' +
+            'onclick="scoreboardTab=\'karriere\';visScoreboard()">Karriere</div>' +
     '</div>';
 
     html += '<div id="scoreboardIndhold" class="box" style="min-height:200px">' +
@@ -480,7 +519,7 @@ function visScoreboard() {
         if (scores.length === 0) {
             var tomTekst = scoreboardTab === "karriere" ? "Gennemfør 10 sæsoner" :
                            scoreboardTab === "foerste" ? "Gennemfør din første sæson" :
-                           "Gennemfør 10 sæsoner";
+                           "Gennemfør en sæson";
             indhold.innerHTML = '<div style="text-align:center;color:#888;padding:40px">' +
                 '<div style="font-size:30px;margin-bottom:10px">🏜️</div>' +
                 'Ingen scores endnu for <strong>' + svaerhedNavn + '</strong>.<br><br>' +
@@ -522,28 +561,41 @@ function visScoreboard() {
                 '</div>';
 
             } else if (scoreboardTab === "saeson") {
+                var detaljer = "";
+                if (s.detaljer) {
+                    var dele = [];
+                    if (s.detaljer.gtSejre > 0) dele.push("🏆" + s.detaljer.gtSejre);
+                    if (s.detaljer.etapeSejre > 0) dele.push("🚩" + s.detaljer.etapeSejre);
+                    if (s.detaljer.monumentSejre > 0) dele.push("🏛️" + s.detaljer.monumentSejre);
+                    if (s.detaljer.klassikerSejre > 0) dele.push("🏅" + s.detaljer.klassikerSejre);
+                    if (dele.length > 0) {
+                        detaljer = ' <span style="color:#666;font-size:9px">' + dele.join(' ') + '</span>';
+                    }
+                }
+
                 h += '<div class="row" style="border-color:#333;' + bgClr + 'padding:6px 8px">' +
-                    '<span style="display:flex;align-items:center;gap:6px">' +
-                        '<span style="color:' + farve + ';font-weight:bold;min-width:28px;font-size:14px">' + medalje + numTxt + '</span>' +
-                        '<span style="color:#fff">' + s.navn + '</span>' +
-                        '<span style="color:#666;font-size:10px">(sæson ' + (s.saesonNr || '?') + ')</span>' +
-                    '</span>' +
-                    '<span>' +
-                        '<span style="color:' + farve + ';font-weight:bold;font-size:16px">' + s.point + '</span>' +
-                        '<span style="color:#888;font-size:10px"> pts</span>' +
-                    '</span>' +
+                    '<span style="color:' + farve + ';font-weight:bold;min-width:24px;font-size:14px">' + medalje + numTxt + '</span>' +
+                    '<span style="flex:1;overflow:hidden"><span style="color:#fff">' + s.navn + '</span> <span style="color:#666;font-size:10px">S' + (s.saesonNr || '?') + '</span>' + detaljer + '</span>' +
+                    '<span style="color:' + farve + ';font-weight:bold;font-size:16px;white-space:nowrap">' + s.point + ' <span style="color:#888;font-size:10px">pts</span></span>' +
                 '</div>';
 
             } else if (scoreboardTab === "foerste") {
+                var detaljer = "";
+                if (s.detaljer) {
+                    var dele = [];
+                    if (s.detaljer.gtSejre > 0) dele.push("🏆" + s.detaljer.gtSejre);
+                    if (s.detaljer.etapeSejre > 0) dele.push("🚩" + s.detaljer.etapeSejre);
+                    if (s.detaljer.monumentSejre > 0) dele.push("🏛️" + s.detaljer.monumentSejre);
+                    if (s.detaljer.klassikerSejre > 0) dele.push("🏅" + s.detaljer.klassikerSejre);
+                    if (dele.length > 0) {
+                        detaljer = ' <span style="color:#666;font-size:9px">' + dele.join(' ') + '</span>';
+                    }
+                }
+
                 h += '<div class="row" style="border-color:#333;' + bgClr + 'padding:6px 8px">' +
-                    '<span style="display:flex;align-items:center;gap:6px">' +
-                        '<span style="color:' + farve + ';font-weight:bold;min-width:28px;font-size:14px">' + medalje + numTxt + '</span>' +
-                        '<span style="color:#fff">' + s.navn + '</span>' +
-                    '</span>' +
-                    '<span>' +
-                        '<span style="color:' + farve + ';font-weight:bold;font-size:16px">' + s.point + '</span>' +
-                        '<span style="color:#888;font-size:10px"> pts</span>' +
-                    '</span>' +
+                    '<span style="color:' + farve + ';font-weight:bold;min-width:24px;font-size:14px">' + medalje + numTxt + '</span>' +
+                    '<span style="flex:1;overflow:hidden"><span style="color:#fff">' + s.navn + '</span>' + detaljer + '</span>' +
+                    '<span style="color:' + farve + ';font-weight:bold;font-size:16px;white-space:nowrap">' + s.point + ' <span style="color:#888;font-size:10px">pts</span></span>' +
                 '</div>';
             }
         }
@@ -2878,10 +2930,14 @@ function afslutSaeson() {
     	bonusPoint: samletBonus
 	});
 
-	// Gem første sæson til Firebase med det samme
+	// Gem sæson-resultater til Firebase
+    var saesonDetaljer = beregnSaesonDetaljer();
+
     if (G.saeson === 1) {
-        gemFoersteSaesonTilFirebase(G.navn, G.svaerhed || "normal", samletBonus);
+        gemFoersteSaesonTilFirebase(G.navn, G.svaerhed || "normal", samletBonus, saesonDetaljer);
     }
+
+    gemSaesonTilFirebase(G.navn, G.svaerhed || "normal", samletBonus, G.saeson, saesonDetaljer);
 	
     visSaesonOversigt();
 }
