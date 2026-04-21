@@ -357,10 +357,7 @@ try {
 function gemScoreTilFirebase(data) {
     if (!firebaseKlar) return;
     try {
-        // Gem karriere-score (kun efter sæson 10)
         db.ref('scores/' + data.svaerhed).push().set(data);
-
-        // Bedste sæson gemmes separat via gemSaesonTilFirebase()
     } catch (e) {
         console.log('Fejl ved gem af score:', e);
     }
@@ -368,6 +365,9 @@ function gemScoreTilFirebase(data) {
 
 function gemSaesonTilFirebase(navn, svaerhed, point, saesonNr, detaljer) {
     if (!firebaseKlar) return;
+    var key = svaerhed + '_' + saesonNr;
+    if (gemteSaesoner[key]) return;
+    gemteSaesoner[key] = true;
     try {
         db.ref('bedsteSaeson/' + svaerhed).push().set({
             navn: navn,
@@ -383,6 +383,8 @@ function gemSaesonTilFirebase(navn, svaerhed, point, saesonNr, detaljer) {
 
 function gemFoersteSaesonTilFirebase(navn, svaerhed, point, detaljer) {
     if (!firebaseKlar) return;
+    if (gemtFoersteSaeson) return;
+    gemtFoersteSaeson = true;
     try {
         db.ref('foersteSaeson/' + svaerhed).push().set({
             navn: navn,
@@ -392,6 +394,24 @@ function gemFoersteSaesonTilFirebase(navn, svaerhed, point, detaljer) {
         });
     } catch (e) {
         console.log('Fejl ved gem af første sæson:', e);
+    }
+}
+
+function gemGTTilFirebase(navn, svaerhed, gtId, point, gcPlads, detaljer) {
+    if (!firebaseKlar) return;
+    var key = svaerhed + '_' + gtId + '_' + G.saeson;
+    if (gemteGT[key]) return;
+    gemteGT[key] = true;
+    try {
+        db.ref('bedsteGT/' + gtId + '/' + svaerhed).push().set({
+            navn: navn,
+            point: point,
+            gcPlads: gcPlads,
+            dato: new Date().toISOString(),
+            detaljer: detaljer || {}
+        });
+    } catch (e) {
+        console.log('Fejl ved gem af GT:', e);
     }
 }
 
@@ -429,17 +449,17 @@ function hentScoreboard(svaerhed, type, callback) {
     if (!firebaseKlar) { callback([]); return; }
     try {
         var ref;
-        var sortKey;
+        var sortKey = 'point';
 
         if (type === "karriere") {
             ref = db.ref('scores/' + svaerhed);
             sortKey = 'samletPoint';
         } else if (type === "saeson") {
             ref = db.ref('bedsteSaeson/' + svaerhed);
-            sortKey = 'point';
         } else if (type === "foerste") {
             ref = db.ref('foersteSaeson/' + svaerhed);
-            sortKey = 'point';
+        } else if (type === "giro" || type === "tdf" || type === "vuelta") {
+            ref = db.ref('bedsteGT/' + type + '/' + svaerhed);
         }
 
         ref.orderByChild(sortKey).limitToLast(25).once('value', function(snapshot) {
@@ -458,6 +478,9 @@ function hentScoreboard(svaerhed, type, callback) {
 
 var scoreboardTab = "foerste";
 var scoreboardSvaerhed = "normal";
+var gemteGT = {};
+var gemteSaesoner = {};
+var gemtFoersteSaeson = false;
 
 function visScoreboard() {
     setGTTema("tdf");
@@ -485,14 +508,27 @@ function visScoreboard() {
             'onclick="scoreboardSvaerhed=\'svaer\';visScoreboard()">Raceren</div>' +
     '</div>';
 
-    // Type-valg
-    html += '<div class="tabs">' +
+    // Type-valg - række 1
+    html += '<div class="tabs" style="margin-bottom:4px">' +
         '<div class="tab tab-blue ' + (scoreboardTab === "foerste" ? "active" : "") + '" ' +
             'onclick="scoreboardTab=\'foerste\';visScoreboard()">1. sæson</div>' +
         '<div class="tab tab-blue ' + (scoreboardTab === "saeson" ? "active" : "") + '" ' +
             'onclick="scoreboardTab=\'saeson\';visScoreboard()">Bedste sæson</div>' +
         '<div class="tab tab-blue ' + (scoreboardTab === "karriere" ? "active" : "") + '" ' +
             'onclick="scoreboardTab=\'karriere\';visScoreboard()">Karriere</div>' +
+    '</div>';
+
+    // Type-valg - række 2: Grand Tours
+    html += '<div class="tabs">' +
+        '<div class="tab ' + (scoreboardTab === "giro" ? "active" : "") + '" ' +
+            'style="border-color:#ff69b4;' + (scoreboardTab === "giro" ? "background:#ff69b4;color:#000" : "color:#ff69b4") + '" ' +
+            'onclick="scoreboardTab=\'giro\';visScoreboard()">Giro</div>' +
+        '<div class="tab ' + (scoreboardTab === "tdf" ? "active" : "") + '" ' +
+            'style="border-color:#ff0;' + (scoreboardTab === "tdf" ? "background:#ff0;color:#000" : "color:#ff0") + '" ' +
+            'onclick="scoreboardTab=\'tdf\';visScoreboard()">Tour</div>' +
+        '<div class="tab ' + (scoreboardTab === "vuelta" ? "active" : "") + '" ' +
+            'style="border-color:#f44;' + (scoreboardTab === "vuelta" ? "background:#f44;color:#000" : "color:#f44") + '" ' +
+            'onclick="scoreboardTab=\'vuelta\';visScoreboard()">Vuelta</div>' +
     '</div>';
 
     html += '<div id="scoreboardIndhold" class="box" style="min-height:200px">' +
@@ -519,20 +555,27 @@ function visScoreboard() {
         if (scores.length === 0) {
             var tomTekst = scoreboardTab === "karriere" ? "Gennemfør 10 sæsoner" :
                            scoreboardTab === "foerste" ? "Gennemfør din første sæson" :
-                           "Gennemfør en sæson";
+                           scoreboardTab === "saeson" ? "Gennemfør en sæson" :
+                           "Kør et " + (scoreboardTab === "giro" ? "Giro" : scoreboardTab === "tdf" ? "Tour de France" : "Vuelta") + " for at komme på listen";
             indhold.innerHTML = '<div style="text-align:center;color:#888;padding:40px">' +
                 '<div style="font-size:30px;margin-bottom:10px">🏜️</div>' +
                 'Ingen scores endnu for <strong>' + svaerhedNavn + '</strong>.<br><br>' +
-                '<span style="font-size:11px">' + tomTekst + ' for at komme på listen!</span>' +
+                '<span style="font-size:11px">' + tomTekst + '!</span>' +
             '</div>';
             return;
         }
 
-        var typNavn = scoreboardTab === "karriere" ? "Karriere - 10 sæsoner" :
-                      scoreboardTab === "foerste" ? "Bedste første sæson" :
-                      "Bedste enkelt-sæson";
+        var typNavn;
+        if (scoreboardTab === "karriere") typNavn = "Karriere - 10 sæsoner";
+        else if (scoreboardTab === "saeson") typNavn = "Bedste enkelt-sæson";
+        else if (scoreboardTab === "foerste") typNavn = "Bedste første sæson";
+        else if (scoreboardTab === "giro") typNavn = "🩷 Bedste Giro d'Italia";
+        else if (scoreboardTab === "tdf") typNavn = "🟡 Bedste Tour de France";
+        else if (scoreboardTab === "vuelta") typNavn = "🔴 Bedste Vuelta a España";
 
         var h = '<h3 style="color:' + svaerhedFarve + '">' + typNavn + '</h3>';
+
+        var erGT = (scoreboardTab === "giro" || scoreboardTab === "tdf" || scoreboardTab === "vuelta");
 
         for (var i = 0; i < scores.length; i++) {
             var s = scores[i];
@@ -541,8 +584,42 @@ function visScoreboard() {
             var farve = pos === 1 ? "#ff0" : pos === 2 ? "#ccc" : pos === 3 ? "#cd7f32" : "#888";
             var bgClr = pos <= 3 ? "background:rgba(255,255,255,0.03);" : "";
             var numTxt = pos > 3 ? pos + ". " : "";
+            var pointVal = s.samletPoint || s.point || 0;
 
-            if (scoreboardTab === "karriere") {
+            if (erGT) {
+                // GT-visning med GC-placering og detaljer
+                var detaljer = "";
+                if (s.detaljer) {
+                    var dele = [];
+                    if (s.detaljer.gcPlads) {
+                        if (s.detaljer.gcPlads <= 3) {
+                            var gcMedalje = s.detaljer.gcPlads === 1 ? "🥇" : s.detaljer.gcPlads === 2 ? "🥈" : "🥉";
+                            dele.push(gcMedalje + "GC");
+                        } else {
+                            dele.push("#" + s.detaljer.gcPlads);
+                        }
+                    }
+                    if (s.detaljer.sejre > 0) dele.push("🚩" + s.detaljer.sejre);
+                    if (s.detaljer.sprintTroeje) {
+                        var spEmoji = scoreboardTab === "giro" ? "🟣" : "🟢";
+                        dele.push(spEmoji + "SP");
+                    }
+                    if (s.detaljer.bjergTroeje) {
+                        var bjEmoji = scoreboardTab === "giro" ? "🔵" : scoreboardTab === "tdf" ? "🔴" : "🔵";
+                        dele.push(bjEmoji + "BJ");
+                    }
+                    if (dele.length > 0) {
+                        detaljer = ' <span style="color:#666;font-size:9px">' + dele.join(' ') + '</span>';
+                    }
+                }
+
+                h += '<div class="row" style="border-color:#333;' + bgClr + 'padding:6px 8px">' +
+                    '<span style="color:' + farve + ';font-weight:bold;min-width:24px;font-size:14px">' + medalje + numTxt + '</span>' +
+                    '<span style="flex:1;overflow:hidden"><span style="color:#fff">' + s.navn + '</span>' + detaljer + '</span>' +
+                    '<span style="color:' + farve + ';font-weight:bold;font-size:16px;white-space:nowrap">' + pointVal + ' <span style="color:#888;font-size:10px">pts</span></span>' +
+                '</div>';
+
+            } else if (scoreboardTab === "karriere") {
                 var detaljer = "";
                 if (s.detaljer) {
                     var dele = [];
@@ -557,10 +634,11 @@ function visScoreboard() {
                 h += '<div class="row" style="border-color:#333;' + bgClr + 'padding:6px 8px">' +
                     '<span style="color:' + farve + ';font-weight:bold;min-width:24px;font-size:14px">' + medalje + numTxt + '</span>' +
                     '<span style="flex:1;overflow:hidden"><span style="color:#fff">' + s.navn + '</span>' + detaljer + '</span>' +
-                    '<span style="color:' + farve + ';font-weight:bold;font-size:16px;white-space:nowrap">' + s.samletPoint + ' <span style="color:#888;font-size:10px">pts</span></span>' +
+                    '<span style="color:' + farve + ';font-weight:bold;font-size:16px;white-space:nowrap">' + pointVal + ' <span style="color:#888;font-size:10px">pts</span></span>' +
                 '</div>';
 
-            } else if (scoreboardTab === "saeson") {
+            } else {
+                // Sæson og første sæson
                 var detaljer = "";
                 if (s.detaljer) {
                     var dele = [];
@@ -573,29 +651,12 @@ function visScoreboard() {
                     }
                 }
 
-                h += '<div class="row" style="border-color:#333;' + bgClr + 'padding:6px 8px">' +
-                    '<span style="color:' + farve + ';font-weight:bold;min-width:24px;font-size:14px">' + medalje + numTxt + '</span>' +
-                    '<span style="flex:1;overflow:hidden"><span style="color:#fff">' + s.navn + '</span> <span style="color:#666;font-size:10px">S' + (s.saesonNr || '?') + '</span>' + detaljer + '</span>' +
-                    '<span style="color:' + farve + ';font-weight:bold;font-size:16px;white-space:nowrap">' + s.point + ' <span style="color:#888;font-size:10px">pts</span></span>' +
-                '</div>';
-
-            } else if (scoreboardTab === "foerste") {
-                var detaljer = "";
-                if (s.detaljer) {
-                    var dele = [];
-                    if (s.detaljer.gtSejre > 0) dele.push("🏆" + s.detaljer.gtSejre);
-                    if (s.detaljer.etapeSejre > 0) dele.push("🚩" + s.detaljer.etapeSejre);
-                    if (s.detaljer.monumentSejre > 0) dele.push("🏛️" + s.detaljer.monumentSejre);
-                    if (s.detaljer.klassikerSejre > 0) dele.push("🏅" + s.detaljer.klassikerSejre);
-                    if (dele.length > 0) {
-                        detaljer = ' <span style="color:#666;font-size:9px">' + dele.join(' ') + '</span>';
-                    }
-                }
+                var saesonTxt = (scoreboardTab === "saeson" && s.saesonNr) ? ' <span style="color:#666;font-size:10px">S' + s.saesonNr + '</span>' : '';
 
                 h += '<div class="row" style="border-color:#333;' + bgClr + 'padding:6px 8px">' +
                     '<span style="color:' + farve + ';font-weight:bold;min-width:24px;font-size:14px">' + medalje + numTxt + '</span>' +
-                    '<span style="flex:1;overflow:hidden"><span style="color:#fff">' + s.navn + '</span>' + detaljer + '</span>' +
-                    '<span style="color:' + farve + ';font-weight:bold;font-size:16px;white-space:nowrap">' + s.point + ' <span style="color:#888;font-size:10px">pts</span></span>' +
+                    '<span style="flex:1;overflow:hidden"><span style="color:#fff">' + s.navn + '</span>' + saesonTxt + detaljer + '</span>' +
+                    '<span style="color:' + farve + ';font-weight:bold;font-size:16px;white-space:nowrap">' + pointVal + ' <span style="color:#888;font-size:10px">pts</span></span>' +
                 '</div>';
             }
         }
@@ -2779,7 +2840,18 @@ function afslutGrandTour() {
         etapeHistorik: ETAPE_HISTORIK.slice()
     };
     G.saesonResultater.push(resultat);
-    
+
+	// Gem GT-resultat til Firebase
+    var gtDetaljer = {
+        gcPlads: resultat.gcPlads,
+        sejre: resultat.sejre || 0
+    };
+    if (resultat.bonusDetaljer) {
+        if (resultat.bonusDetaljer.sp > 0) gtDetaljer.sprintTroeje = true;
+        if (resultat.bonusDetaljer.bj > 0) gtDetaljer.bjergTroeje = true;
+    }
+    gemGTTilFirebase(G.navn, G.svaerhed || "normal", G.aktuelGT, resultat.bonus, resultat.gcPlads, gtDetaljer);
+	
 // Tjek om der er mere i kalenderen
     var naesteIdx = G.saesonKalenderIdx + 1;
     while (naesteIdx < G.saesonKalender.length && G.saesonKalender[naesteIdx].type === "reset") {
@@ -3294,6 +3366,9 @@ R('<div style="text-align:center;padding:20px 0">' +
 
 function startGame() {
     sletGemtSpil();
+	gemteGT = {};
+    gemteSaesoner = {};
+    gemtFoersteSaeson = false;
     var inp = $("pn");
     var n = inp ? inp.value.trim() : "";
     if (!n) { alert("Indtast dit navn!"); return; }
@@ -4234,7 +4309,9 @@ function gemSpil(etapeFaerdig) {
             ude: r.ude
         });
     }
-    
+    saveData.gemteGT = gemteGT;
+    saveData.gemteSaesoner = gemteSaesoner;
+    saveData.gemtFoersteSaeson = gemtFoersteSaeson;
 	localStorage.setItem('domestiqueSave', JSON.stringify(saveData));
 }
 
@@ -4293,6 +4370,10 @@ function indlaesGemtSpil() {
     G.saesonResultater = saveData.saesonResultater || [];
     G.karriereHistorik = saveData.karriereHistorik || [];
     G.aiRytterGT = saveData.aiRytterGT || {};
+	gemteGT = saveData.gemteGT || {};
+    gemteSaesoner = saveData.gemteSaesoner || {};
+    gemtFoersteSaeson = saveData.gemtFoersteSaeson || false;
+	
 	// Endagsløb-system
     G.valgteEndagsloeb = saveData.valgteEndagsloeb || [];
     G.endagsResultater = saveData.endagsResultater || [];
