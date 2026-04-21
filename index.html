@@ -108,7 +108,7 @@
     }
     .btn:hover { background: #0f0; color: #000; }
     .btn[style*="border-color:#0f0"]:hover { background: #0f0; color: #000; }
-    .btn[style*="border-color:#3399ff"]:hover { background: #135; color: #fff; }
+    .btn[style*="border-color:#3399ff"]:hover { background: #2266bb; color: #fff; }
     .btn[style*="border-color:#3399ff"] { color: #3399ff; }
     .btn:disabled { opacity: 0.3; cursor: not-allowed; }
     .btn-big { padding: 14px 32px; font-size: 20px; }
@@ -5442,7 +5442,7 @@ function findInArr(arr, fn) { for (var i = 0; i < arr.length; i++) { if (fn(arr[
 function findIdx(arr, fn) { for (var i = 0; i < arr.length; i++) { if (fn(arr[i])) return i; } return -1; }
 
 function getSvaerhedMultiplier() {
-    if (G.svaerhed === "let") return 1.3;
+    if (G.svaerhed === "let") return 1.25;
     if (G.svaerhed === "svaer") return 0.85;
     return 1.00;
 }
