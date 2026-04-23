@@ -7751,12 +7751,12 @@ for (var gi = 0; gi < G.grp.length; gi++) {
         var bundSnit = (styrkeArr.length > halvdel) ? bundSum / (styrkeArr.length - halvdel) : topSnit;
         grpStyrke = topSnit * 0.7 + bundSnit * 0.3;
 
-        // Større gruppefordel for udbrud
+        // Gruppefordel for udbrud
         var udbGrpBonus = 0;
-        if (grpSize >= 10) udbGrpBonus = 0.08;
-        else if (grpSize >= 7) udbGrpBonus = 0.07;
-        else if (grpSize >= 4) udbGrpBonus = 0.055;
-        else if (grpSize >= 2) udbGrpBonus = 0.035;
+        if (grpSize >= 10) udbGrpBonus = 0.0525;
+        else if (grpSize >= 7) udbGrpBonus = 0.0425;
+        else if (grpSize >= 4) udbGrpBonus = 0.0325;
+        else if (grpSize >= 2) udbGrpBonus = 0.02;
         spd += udbGrpBonus;
 
         var udbBonus = 0.02;
