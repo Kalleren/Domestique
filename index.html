@@ -4514,6 +4514,20 @@ function startEtape() {
     }
 	
     G.mps = genMP(e);
+	// Tilfældig neutraliseringszone (feltet holder sammen i starten)
+    if (!e.neutraliseringsKm) {
+        if (e.type === "tt") {
+            e.neutraliseringsKm = 0;
+        } else if (G.erEndagsloeb) {
+            e.neutraliseringsKm = ri(15, 30);
+        } else if (e.type === "bjerg") {
+            e.neutraliseringsKm = ri(10, 20);
+        } else if (e.type === "kuperet") {
+            e.neutraliseringsKm = ri(15, 30);
+        } else {
+            e.neutraliseringsKm = ri(20, 40);
+        }
+    }
     
     // Første etape i GT: sæt energi
     if (G.enr === 0) {
@@ -9101,6 +9115,30 @@ function rejUdb() {
 function chkIndhent() {
     var felt = findInArr(G.grp, function(g) { return g.type === "felt"; });
     if (!felt) return;
+	// Neutraliseringszone: feltet jagter ekstra aggressivt
+    var e = G.etaper[G.enr];
+    if (e.neutraliseringsKm && G.km < e.neutraliseringsKm) {
+        for (var ni = G.grp.length - 1; ni >= 0; ni--) {
+            var ng = G.grp[ni];
+            if (ng.type === "udbrud") {
+                var afstand = ng.pos - felt.pos;
+                if (afstand > 2) {
+                    // Hent dem inden for 2-3 km
+                    for (var nj = 0; nj < ng.ryt.length; nj++) {
+                        if (felt.ryt.indexOf(ng.ryt[nj]) < 0) {
+                            felt.ryt.push(ng.ryt[nj]);
+                        }
+                    }
+                    G.grp.splice(ni, 1);
+                    G.msg = "🏳️ Feltet holder sammen - for tidligt!";
+                } else {
+                    // Feltet jagter aggressivt
+                    felt.pos += 0.4;
+                }
+            }
+        }
+        return;
+    }
     
     var e = G.etaper[G.enr];
     var info = ETYPER[e.type];
