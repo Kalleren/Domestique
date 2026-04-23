@@ -9936,7 +9936,7 @@ function startFastForward() {
 }
 
 document.getElementById("game").addEventListener("mousedown", function(e) {
-    if (e.target.tagName === "CANVAS" && G.iv && !G.vent && !G.etapeSlut) {
+    if (e.target.tagName === "CANVAS" && G.iv && !G.vent && !G.etapeSlut && G.etaper[G.enr] && G.etaper[G.enr].type !== "tt") {
         fastForwardTimer = setTimeout(startFastForward, 1000);
     }
 });
@@ -9946,7 +9946,7 @@ document.getElementById("game").addEventListener("mouseleave", stopFastForward);
 document.addEventListener("touchstart", function(e) {
     var t = e.touches ? e.touches[0] : e;
     var el = document.elementFromPoint(t.clientX, t.clientY);
-    if (el && el.tagName === "CANVAS" && G.iv && !G.vent && !G.etapeSlut) {
+    if (el && el.tagName === "CANVAS" && G.iv && !G.vent && !G.etapeSlut && G.etaper[G.enr] && G.etaper[G.enr].type !== "tt") {
         fastForwardTimer = setTimeout(startFastForward, 1000);
     }
 }, { passive: true });
