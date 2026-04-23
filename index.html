@@ -9122,18 +9122,15 @@ function chkIndhent() {
             var ng = G.grp[ni];
             if (ng.type === "udbrud") {
                 var afstand = ng.pos - felt.pos;
-                if (afstand > 2) {
-                    // Hent dem inden for 2-3 km
+                if (afstand > 0.5) {
                     for (var nj = 0; nj < ng.ryt.length; nj++) {
                         if (felt.ryt.indexOf(ng.ryt[nj]) < 0) {
                             felt.ryt.push(ng.ryt[nj]);
+                            ng.ryt[nj].gi = 0;
                         }
                     }
                     G.grp.splice(ni, 1);
                     G.msg = "🏳️ Feltet holder sammen - for tidligt!";
-                } else {
-                    // Feltet jagter aggressivt
-                    felt.pos += 0.4;
                 }
             }
         }
