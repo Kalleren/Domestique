@@ -9031,6 +9031,8 @@ function accUdb() {
 		if (rErFavorit && !r.ude && r.energi > 35) {
             // Højere chance for at reagere jo bedre GC-rytter
             var reaktionsChance = (r.gc - 75) / 25 * (r.energi / 100);
+			if (r.gc >= 97) reaktionsChance *= 1.4;
+			else if (r.gc >= 93) reaktionsChance *= 1.2;
             // Øget chance på bjerge og kuperet
             if (e.type === "bjerg") reaktionsChance *= 1.3;
             else if (e.type === "kuperet") reaktionsChance *= 1.1;
@@ -9340,6 +9342,8 @@ if (udb) {
             var rErFavorit = G.erEndagsloeb ? (r.bj > 73 || r.spr > 76 || r.fl > 78) : (r.gc > 78);
 			if (rErFavorit && !r.ude && r.energi > 30) {
                 var reaktionsChance = (r.gc - 75) / 25 * (r.energi / 100);
+				if (r.gc >= 97) reaktionsChance *= 1.4;
+				else if (r.gc >= 93) reaktionsChance *= 1.2;
                 if (e.type === "bjerg") reaktionsChance *= 1.4;
                 else if (e.type === "kuperet") reaktionsChance *= 1.2;
                 
@@ -9402,6 +9406,8 @@ for (var i = 0; i < sg.ryt.length; i++) {
     var rErFavorit = G.erEndagsloeb ? (r.bj > 73 || r.spr > 76 || r.fl > 78) : (r.gc > 78);
 	if (rErFavorit && !r.ude && r.energi > 35) {
         var reaktionsChance = (r.gc - 75) / 25 * (r.energi / 100);
+		if (r.gc >= 97) reaktionsChance *= 1.4;
+		else if (r.gc >= 93) reaktionsChance *= 1.2;
         if (e.type === "bjerg") reaktionsChance *= 1.3;
         else if (e.type === "kuperet") reaktionsChance *= 1.1;
         
@@ -9496,6 +9502,8 @@ if (Math.random() < ch) {
         var rErFavorit = G.erEndagsloeb ? (r.bj > 73 || r.spr > 76 || r.fl > 78) : (r.gc > 78);
 		if (rErFavorit && !r.ude && r.energi > 30) {
             var reaktionsChance = (r.gc - 75) / 25 * (r.energi / 100);
+			if (r.gc >= 97) reaktionsChance *= 1.4;
+			else if (r.gc >= 93) reaktionsChance *= 1.2;
             if (e.type === "bjerg") reaktionsChance *= 1.4;
             else if (e.type === "kuperet") reaktionsChance *= 1.2;
             
