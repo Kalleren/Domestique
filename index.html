@@ -4519,13 +4519,13 @@ function startEtape() {
         if (e.type === "tt") {
             e.neutraliseringsKm = 0;
         } else if (G.erEndagsloeb) {
-            e.neutraliseringsKm = ri(15, 30);
+            e.neutraliseringsKm = ri(15, 40);
         } else if (e.type === "bjerg") {
-            e.neutraliseringsKm = ri(10, 20);
+            e.neutraliseringsKm = ri(10, 40);
         } else if (e.type === "kuperet") {
-            e.neutraliseringsKm = ri(15, 30);
+            e.neutraliseringsKm = ri(15, 50);
         } else {
-            e.neutraliseringsKm = ri(20, 40);
+            e.neutraliseringsKm = ri(20, 60);
         }
     }
     
