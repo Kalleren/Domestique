@@ -1218,6 +1218,7 @@ var TEAMS = {
         { n: "Tao Geoghegan Hart", gc: 78, bj: 82, sp: 48, tt: 80, ud: 82, re: 78, fl: 72, pri: "vuelta", pref: ["vuelta","giro"] },
         { n: "Juan Ayuso", gc: 88, bj: 86, sp: 62, tt: 88, ud: 84, re: 82, fl: 78, pri: "tdf", pref: ["tdf","vuelta"] },
 		{ n: "Jonathan Milan", gc: 38, bj: 28, sp: 95, tt: 72, ud: 76, re: 84, fl: 82, pri: "giro", pref: ["giro","tdf"] },
+		{ n: "Mattias Skjelmose", gc: 78, bj: 85, sp: 62, tt: 80, ud: 84, re: 80, fl: 78, pri: "tdf", pref: ["tdf","vuelta"] },
         { n: "Julien Bernard", gc: 54, bj: 60, sp: 58, tt: 72, ud: 88, re: 84, fl: 78, pri: "tdf", pref: ["tdf"] },
         { n: "Tony Gallopin", gc: 56, bj: 64, sp: 66, tt: 68, ud: 82, re: 78, fl: 74, pri: "tdf", pref: ["tdf","vuelta"] },
         { n: "Mathias Vacek", gc: 64, bj: 70, sp: 72, tt: 76, ud: 82, re: 80, fl: 78, pri: "giro", pref: ["giro","vuelta"] },
@@ -8199,7 +8200,13 @@ function aiAngrebKuperet() {
     for (var i = 0; i < felt.ryt.length; i++) {
         var r = felt.ryt[i];
         if (r.sp || r.ude) continue;
-        
+
+		// I neutraliseringszonen: kun lykkeriddere forsøger udbrud
+        if (e.neutraliseringsKm && G.km < e.neutraliseringsKm) {
+            if (r.gc > 70) continue;
+            if (G.erEndagsloeb && erEndagsFavorit(r)) continue;
+        }
+		
         // GC-favoritter holder sig i ro på kuperede etaper - kun aktive i sidste tredjedel
         if (r.gc > 75 && G.km < e.dist * 0.67) continue;
         // Mellem-favoritter holder sig også mere i ro tidligt
