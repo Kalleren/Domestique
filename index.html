@@ -8418,7 +8418,9 @@ for (var fi = 0; fi < g.ryt.length; fi++) {
     var rivalErFavorit = G.erEndagsloeb ? (rival.bj > 75 || rival.spr > 78 || rival.fl > 80) : (rival.gc > 80);
 	if (rivalErFavorit && !rival.ude && !rival.sp) {
         // Reagerer hvis de har energi og er stærke nok
-        var reaktionsChance = (rival.energi - 30) / 70 * (rival.bj / 100);
+        var rivalStat = rival.bj;
+        if (G.erEndagsloeb) rivalStat = Math.max(rival.bj, rival.spr, rival.fl);
+        var reaktionsChance = (rival.energi - 30) / 70 * (rivalStat / 100);
         if (rival.energi > 50 && Math.random() < reaktionsChance * 0.7) {
             reagerende.push(rival);
         }
@@ -8501,7 +8503,9 @@ return;
         var rival = felt.ryt[fi];
         var rivalErFavorit2 = G.erEndagsloeb ? (rival.bj > 75 || rival.spr > 78 || rival.fl > 80) : (rival.gc > 80);
 		if (rivalErFavorit2 && !rival.ude && !rival.sp && rival.energi > 45) {
-            var reaktionsChance = (rival.energi - 40) / 60 * (rival.bj / 100);
+            var rivalStat = rival.bj;
+            if (G.erEndagsloeb) rivalStat = Math.max(rival.bj, rival.spr, rival.fl);
+            var reaktionsChance = (rival.energi - 40) / 60 * (rivalStat / 100);
             if (Math.random() < reaktionsChance * 0.6) {
                 reagerende.push(rival);
             }
@@ -8610,7 +8614,9 @@ function favoritAngrebMidtvejs() {
             var rival = g.ryt[fi];
             var rivalErFavorit = G.erEndagsloeb ? (rival.bj > 73 || rival.spr > 76 || rival.fl > 78) : (rival.gc > 78);
 			if (rivalErFavorit && !rival.ude && !rival.sp && rival.energi > 40) {
-                var reaktionsChance = (rival.energi - 35) / 65 * (rival.bj / 100);
+                var rivalStat = rival.bj;
+                if (G.erEndagsloeb) rivalStat = Math.max(rival.bj, rival.spr, rival.fl);
+                var reaktionsChance = (rival.energi - 35) / 65 * (rivalStat / 100);
                 if (Math.random() < reaktionsChance * 0.6) {
                     reagerende.push(rival);
                 }
@@ -8709,7 +8715,9 @@ for (var fi = 0; fi < felt.ryt.length; fi++) {
     var rival = felt.ryt[fi];
     var rivalErFavorit = G.erEndagsloeb ? (rival.bj > 73 || rival.spr > 76 || rival.fl > 78) : (rival.gc > 78);
 	if (rivalErFavorit && !rival.ude && !rival.sp && rival.energi > 40) {
-        var reaktionsChance = (rival.energi - 35) / 65 * ((rival.bj + rival.gc) / 200);
+        var rivalStat = (rival.bj + rival.gc) / 2;
+        if (G.erEndagsloeb) rivalStat = Math.max(rival.bj, rival.spr, rival.fl);
+        var reaktionsChance = (rival.energi - 35) / 65 * (rivalStat / 100);
         if (Math.random() < reaktionsChance * 0.5) {
             reagerende.push(rival);
         }
@@ -9048,7 +9056,9 @@ function accUdb() {
         var rErFavorit = G.erEndagsloeb ? (r.bj > 73 || r.spr > 76 || r.fl > 78) : (r.gc > 78);
 		if (rErFavorit && !r.ude && r.energi > 35) {
             // Højere chance for at reagere jo bedre GC-rytter
-            var reaktionsChance = (r.gc - 75) / 25 * (r.energi / 100);
+            var favStat = r.gc;
+            if (G.erEndagsloeb) favStat = Math.max(r.bj, r.spr, r.fl);
+            var reaktionsChance = (favStat - 75) / 25 * (r.energi / 100);
 			if (r.gc >= 97) reaktionsChance *= 1.4;
 			else if (r.gc >= 93) reaktionsChance *= 1.2;
             // Øget chance på bjerge og kuperet
@@ -9380,7 +9390,9 @@ if (udb) {
             var r = sg.ryt[i];
             var rErFavorit = G.erEndagsloeb ? (r.bj > 73 || r.spr > 76 || r.fl > 78) : (r.gc > 78);
 			if (rErFavorit && !r.ude && r.energi > 30) {
-                var reaktionsChance = (r.gc - 75) / 25 * (r.energi / 100);
+                var favStat = r.gc;
+            if (G.erEndagsloeb) favStat = Math.max(r.bj, r.spr, r.fl);
+            var reaktionsChance = (favStat - 75) / 25 * (r.energi / 100);
 				if (r.gc >= 97) reaktionsChance *= 1.4;
 				else if (r.gc >= 93) reaktionsChance *= 1.2;
                 if (e.type === "bjerg") reaktionsChance *= 1.4;
@@ -9444,7 +9456,9 @@ for (var i = 0; i < sg.ryt.length; i++) {
     var r = sg.ryt[i];
     var rErFavorit = G.erEndagsloeb ? (r.bj > 73 || r.spr > 76 || r.fl > 78) : (r.gc > 78);
 	if (rErFavorit && !r.ude && r.energi > 35) {
-        var reaktionsChance = (r.gc - 75) / 25 * (r.energi / 100);
+        var favStat = r.gc;
+            if (G.erEndagsloeb) favStat = Math.max(r.bj, r.spr, r.fl);
+            var reaktionsChance = (favStat - 75) / 25 * (r.energi / 100);
 		if (r.gc >= 97) reaktionsChance *= 1.4;
 		else if (r.gc >= 93) reaktionsChance *= 1.2;
         if (e.type === "bjerg") reaktionsChance *= 1.3;
@@ -9540,7 +9554,9 @@ if (Math.random() < ch) {
         var r = sg.ryt[i];
         var rErFavorit = G.erEndagsloeb ? (r.bj > 73 || r.spr > 76 || r.fl > 78) : (r.gc > 78);
 		if (rErFavorit && !r.ude && r.energi > 30) {
-            var reaktionsChance = (r.gc - 75) / 25 * (r.energi / 100);
+            var favStat = r.gc;
+            if (G.erEndagsloeb) favStat = Math.max(r.bj, r.spr, r.fl);
+            var reaktionsChance = (favStat - 75) / 25 * (r.energi / 100);
 			if (r.gc >= 97) reaktionsChance *= 1.4;
 			else if (r.gc >= 93) reaktionsChance *= 1.2;
             if (e.type === "bjerg") reaktionsChance *= 1.4;
