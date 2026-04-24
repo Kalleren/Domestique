@@ -3442,7 +3442,7 @@ function erEndagsFavorit(rytter) {
     
     var el = findEndagsLoeb(G.valgteEndagsloeb[G.aktuelEndagsIdx]);
     if (!el) return false;
-    if (el.type === "bjerg" || el.type === "kuperet_bjerg") return rytter.bj > 87;
+    if (el.type === "bjerg" || el.type === "kuperet_bjerg") return rytter.bj > 84;
     if (el.type === "brosten" || el.type === "brosten_kuperet" || el.type === "grus_kuperet") return rytter.fl > 88;
     if (el.type === "kuperet") return Math.max(rytter.bj, rytter.fl) > 86;
     return Math.max(rytter.spr, rytter.fl) > 90;
@@ -7779,10 +7779,10 @@ for (var gi = 0; gi < G.grp.length; gi++) {
 
         // Gruppefordel for udbrud - reduceret på stejle stigninger
         var udbGrpBonus = 0;
-        if (grpSize >= 10) udbGrpBonus = 0.0525;
-        else if (grpSize >= 7) udbGrpBonus = 0.0425;
-        else if (grpSize >= 4) udbGrpBonus = 0.0325;
-        else if (grpSize >= 2) udbGrpBonus = 0.02;
+        if (grpSize >= 10) udbGrpBonus = 0.05;
+        else if (grpSize >= 7) udbGrpBonus = 0.04;
+        else if (grpSize >= 4) udbGrpBonus = 0.03;
+        else if (grpSize >= 2) udbGrpBonus = 0.0185;
         
         var erUdbrudPaaBrosten = false;
         if (G.erEndagsloeb && G.etaper[G.enr] && G.etaper[G.enr].brostenSektioner) {
