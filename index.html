@@ -7651,7 +7651,7 @@ function loop() {
                 var ekstra = baseTab * (endagsLoeb.energiMult - 1);
 				// Spilleren bruger mere energi i endagsløb (sværere at vinde)
                 if (r.sp) {
-                    ekstra *= 1.04;
+                    ekstra *= 1.05;
                 }
                 // Brosten-sektioner: tjek om rytterens gruppe er på brosten
                 var etape = G.etaper[G.enr];
@@ -7765,12 +7765,16 @@ for (var gi = 0; gi < G.grp.length; gi++) {
         var bundSnit = (styrkeArr.length > halvdel) ? bundSum / (styrkeArr.length - halvdel) : topSnit;
         grpStyrke = topSnit * 0.7 + bundSnit * 0.3;
 
-        // Gruppefordel for udbrud
+        // Gruppefordel for udbrud - reduceret på stejle stigninger
         var udbGrpBonus = 0;
         if (grpSize >= 10) udbGrpBonus = 0.0525;
         else if (grpSize >= 7) udbGrpBonus = 0.0425;
         else if (grpSize >= 4) udbGrpBonus = 0.0325;
         else if (grpSize >= 2) udbGrpBonus = 0.02;
+        
+        if (stig > 20) udbGrpBonus *= 0.15;
+        else if (stig > 12) udbGrpBonus *= 0.30;
+        
         spd += udbGrpBonus;
 
         var udbBonus = 0.02;
