@@ -1107,7 +1107,7 @@ var ENDAGS_ALTID_KLASSIKER = [
 
 var TEAMS = {
     "UAE Team Emirates-XRG": { abbr: "UAE", clr: "#fe3c3c", r: [
-        { n: "Tadej Pogačar", gc: 98, bj: 98, sp: 72, tt: 95, ud: 96, re: 86, fl: 86, pri: "tdf", pref: ["tdf"] },
+        { n: "Tadej Pogačar", gc: 98, bj: 98, sp: 72, tt: 95, ud: 96, re: 86, fl: 92, pri: "tdf", pref: ["tdf"] },
         { n: "Adam Yates", gc: 84, bj: 86, sp: 55, tt: 80, ud: 88, re: 82, fl: 76, pri: "giro", pref: ["giro","tdf"] },
         { n: "João Almeida", gc: 85, bj: 84, sp: 58, tt: 86, ud: 86, re: 84, fl: 80, pri: "tdf", pref: ["tdf","vuelta"] },
         { n: "Isaac Del Toro", gc: 82, bj: 84, sp: 62, tt: 80, ud: 82, re: 80, fl: 76, pri: "giro", pref: ["giro","vuelta"] },
@@ -1122,7 +1122,7 @@ var TEAMS = {
         { n: "Florian Vermeersch", gc: 56, bj: 62, sp: 70, tt: 80, ud: 88, re: 84, fl: 86, pri: "tdf", pref: ["tdf","giro"] }
     ]},
     "Visma-Lease a Bike": { abbr: "VIS", clr: "#ffcc00", r: [
-        { n: "Jonas Vingegaard", gc: 97, bj: 97, sp: 60, tt: 94, ud: 94, re: 90, fl: 80, pri: "tdf", pref: ["tdf"] },
+        { n: "Jonas Vingegaard", gc: 97, bj: 98, sp: 60, tt: 94, ud: 94, re: 90, fl: 80, pri: "tdf", pref: ["tdf"] },
         { n: "Wout van Aert", gc: 68, bj: 70, sp: 94, tt: 90, ud: 90, re: 84, fl: 94, pri: "giro", pref: ["giro","tdf"] },
         { n: "Matteo Jorgenson", gc: 80, bj: 80, sp: 56, tt: 82, ud: 86, re: 82, fl: 78, pri: "tdf", pref: ["tdf","vuelta"] },
         { n: "Christophe Laporte", gc: 60, bj: 56, sp: 85, tt: 78, ud: 84, re: 80, fl: 88, pri: "tdf", pref: ["tdf"] },
@@ -1153,7 +1153,7 @@ var TEAMS = {
         { n: "Sam Welsford", gc: 36, bj: 28, sp: 92, tt: 68, ud: 76, re: 82, fl: 82, pri: "giro", pref: ["giro","tdf"] }
     ]},
     "Red Bull-BORA-hansgrohe": { abbr: "RBH", clr: "#00d84f", r: [
-        { n: "Primož Roglič", gc: 94, bj: 90, sp: 60, tt: 90, ud: 86, re: 76, fl: 80, pri: "giro", pref: ["vuelta","giro","tdf"] },
+        { n: "Primož Roglič", gc: 89, bj: 90, sp: 60, tt: 90, ud: 86, re: 76, fl: 80, pri: "giro", pref: ["vuelta","giro","tdf"] },
         { n: "Remco Evenepoel", gc: 92, bj: 83, sp: 68, tt: 97, ud: 88, re: 80, fl: 90, pri: "tdf", pref: ["tdf","giro","vuelta"] },
         { n: "Aleksandr Vlasov", gc: 84, bj: 86, sp: 48, tt: 80, ud: 86, re: 80, fl: 72, pri: "tdf", pref: ["tdf","vuelta"] },
         { n: "Jai Hindley", gc: 82, bj: 88, sp: 44, tt: 76, ud: 88, re: 82, fl: 70, pri: "giro", pref: ["giro","tdf"] },
@@ -3437,11 +3437,14 @@ function findEndagsLoeb(id) {
 }
 
 function erEndagsFavorit(rytter) {
+    // Superstjerner reagerer altid
+    if (rytter.gc >= 91) return true;
+    
     var el = findEndagsLoeb(G.valgteEndagsloeb[G.aktuelEndagsIdx]);
     if (!el) return false;
-    if (el.type === "bjerg" || el.type === "kuperet_bjerg") return rytter.bj > 80;
-    if (el.type === "brosten" || el.type === "brosten_kuperet" || el.type === "grus_kuperet") return rytter.fl > 84;
-    if (el.type === "kuperet") return Math.max(rytter.bj, rytter.fl) > 82;
+    if (el.type === "bjerg" || el.type === "kuperet_bjerg") return rytter.bj > 84;
+    if (el.type === "brosten" || el.type === "brosten_kuperet" || el.type === "grus_kuperet") return rytter.fl > 88;
+    if (el.type === "kuperet") return Math.max(rytter.bj, rytter.fl) > 86;
     return Math.max(rytter.spr, rytter.fl) > 90;
 }
 	
@@ -3907,14 +3910,14 @@ function startNaesteEndagsloeb() {
         // Paris-Roubaix har ~30 sektioner af 1-3 km
         // Flandern har ~17 korte hellingen med brosten
         var antalSektioner;
-        if (loeb.id === "roubaix") {
-            antalSektioner = ri(25, 30);
+		if (loeb.id === "roubaix") {
+            antalSektioner = ri(28, 34);
         } else if (loeb.id === "flandern") {
-            antalSektioner = ri(14, 18);
+            antalSektioner = ri(17, 22);
         } else if (loeb.id === "strade") {
-            antalSektioner = ri(8, 11);
+            antalSektioner = ri(10, 14);
         } else {
-            antalSektioner = Math.round(loeb.brosten * 30) + ri(2, 5);
+            antalSektioner = Math.round(loeb.brosten * 35) + ri(3, 6);
         }
         
         for (var bi = 0; bi < antalSektioner; bi++) {
@@ -7781,7 +7784,15 @@ for (var gi = 0; gi < G.grp.length; gi++) {
         else if (grpSize >= 4) udbGrpBonus = 0.0325;
         else if (grpSize >= 2) udbGrpBonus = 0.02;
         
-        if (stig > 20) udbGrpBonus *= 0.15;
+        var erUdbrudPaaBrosten = false;
+        if (G.erEndagsloeb && G.etaper[G.enr] && G.etaper[G.enr].brostenSektioner) {
+            for (var bsi3 = 0; bsi3 < G.etaper[G.enr].brostenSektioner.length; bsi3++) {
+                var bs3 = G.etaper[G.enr].brostenSektioner[bsi3];
+                if (g.pos >= bs3.start && g.pos <= bs3.slut) { erUdbrudPaaBrosten = true; break; }
+            }
+        }
+        if (erUdbrudPaaBrosten) udbGrpBonus *= 0.20;
+        else if (stig > 20) udbGrpBonus *= 0.15;
         else if (stig > 12) udbGrpBonus *= 0.30;
         
         spd += udbGrpBonus;
@@ -7939,7 +7950,19 @@ for (var gi = 0; gi < G.grp.length; gi++) {
     
 // AI angreb - baseret på etapetype og energi
 var angrebBoost = G.erEndagsloeb ? 2.5 : 1.0;
-if (e.type === "bjerg" && Math.random() < 0.05 * angrebBoost) {
+// Tjek om vi er på brosten
+var erPaaBrostenNu = false;
+if (G.erEndagsloeb && e.brostenSektioner) {
+    var feltPos = G.grp[0] ? G.grp[0].pos : G.km;
+    for (var bsi4 = 0; bsi4 < e.brostenSektioner.length; bsi4++) {
+        var bs4 = e.brostenSektioner[bsi4];
+        if (feltPos >= bs4.start && feltPos <= bs4.slut) { erPaaBrostenNu = true; break; }
+    }
+}
+
+if (erPaaBrostenNu && Math.random() < 0.06 * angrebBoost) {
+    aiAngrebKuperet();
+} else if (e.type === "bjerg" && Math.random() < 0.05 * angrebBoost) {
     aiAngrebBjerg();
 } else if (e.type === "kuperet" && Math.random() < 0.05 * angrebBoost) {
     aiAngrebKuperet();
