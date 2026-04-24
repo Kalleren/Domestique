@@ -8419,7 +8419,15 @@ for (var fi = 0; fi < g.ryt.length; fi++) {
 	if (rivalErFavorit && !rival.ude && !rival.sp) {
         // Reagerer hvis de har energi og er stærke nok
         var rivalStat = rival.bj;
-        if (G.erEndagsloeb) rivalStat = Math.max(rival.bj, rival.spr, rival.fl);
+		if (G.erEndagsloeb) {
+		    var endagsLoeb = findEndagsLoeb(G.valgteEndagsloeb[G.aktuelEndagsIdx]);
+		    if (endagsLoeb) {
+		        if (endagsLoeb.type === "bjerg" || endagsLoeb.type === "kuperet_bjerg") rivalStat = rival.bj;
+		        else if (endagsLoeb.type === "brosten" || endagsLoeb.type === "brosten_kuperet" || endagsLoeb.type === "grus_kuperet") rivalStat = rival.fl;
+		        else if (endagsLoeb.type === "kuperet") rivalStat = Math.max(rival.bj, rival.fl);
+		        else rivalStat = Math.max(rival.spr, rival.fl);
+		    }
+		}
         var reaktionsChance = (rival.energi - 30) / 70 * (rivalStat / 100);
         if (rival.energi > 50 && Math.random() < reaktionsChance * 0.7) {
             reagerende.push(rival);
@@ -8504,7 +8512,15 @@ return;
         var rivalErFavorit2 = G.erEndagsloeb ? (rival.bj > 75 || rival.spr > 78 || rival.fl > 80) : (rival.gc > 80);
 		if (rivalErFavorit2 && !rival.ude && !rival.sp && rival.energi > 45) {
             var rivalStat = rival.bj;
-            if (G.erEndagsloeb) rivalStat = Math.max(rival.bj, rival.spr, rival.fl);
+			if (G.erEndagsloeb) {
+			    var endagsLoeb = findEndagsLoeb(G.valgteEndagsloeb[G.aktuelEndagsIdx]);
+			    if (endagsLoeb) {
+			        if (endagsLoeb.type === "bjerg" || endagsLoeb.type === "kuperet_bjerg") rivalStat = rival.bj;
+			        else if (endagsLoeb.type === "brosten" || endagsLoeb.type === "brosten_kuperet" || endagsLoeb.type === "grus_kuperet") rivalStat = rival.fl;
+			        else if (endagsLoeb.type === "kuperet") rivalStat = Math.max(rival.bj, rival.fl);
+			        else rivalStat = Math.max(rival.spr, rival.fl);
+			    }
+			}
             var reaktionsChance = (rival.energi - 40) / 60 * (rivalStat / 100);
             if (Math.random() < reaktionsChance * 0.6) {
                 reagerende.push(rival);
@@ -8615,7 +8631,15 @@ function favoritAngrebMidtvejs() {
             var rivalErFavorit = G.erEndagsloeb ? (rival.bj > 73 || rival.spr > 76 || rival.fl > 78) : (rival.gc > 78);
 			if (rivalErFavorit && !rival.ude && !rival.sp && rival.energi > 40) {
                 var rivalStat = rival.bj;
-                if (G.erEndagsloeb) rivalStat = Math.max(rival.bj, rival.spr, rival.fl);
+				if (G.erEndagsloeb) {
+				    var endagsLoeb = findEndagsLoeb(G.valgteEndagsloeb[G.aktuelEndagsIdx]);
+				    if (endagsLoeb) {
+				        if (endagsLoeb.type === "bjerg" || endagsLoeb.type === "kuperet_bjerg") rivalStat = rival.bj;
+				        else if (endagsLoeb.type === "brosten" || endagsLoeb.type === "brosten_kuperet" || endagsLoeb.type === "grus_kuperet") rivalStat = rival.fl;
+				        else if (endagsLoeb.type === "kuperet") rivalStat = Math.max(rival.bj, rival.fl);
+				        else rivalStat = Math.max(rival.spr, rival.fl);
+				    }
+				}
                 var reaktionsChance = (rival.energi - 35) / 65 * (rivalStat / 100);
                 if (Math.random() < reaktionsChance * 0.6) {
                     reagerende.push(rival);
@@ -8716,7 +8740,15 @@ for (var fi = 0; fi < felt.ryt.length; fi++) {
     var rivalErFavorit = G.erEndagsloeb ? (rival.bj > 73 || rival.spr > 76 || rival.fl > 78) : (rival.gc > 78);
 	if (rivalErFavorit && !rival.ude && !rival.sp && rival.energi > 40) {
         var rivalStat = (rival.bj + rival.gc) / 2;
-        if (G.erEndagsloeb) rivalStat = Math.max(rival.bj, rival.spr, rival.fl);
+		if (G.erEndagsloeb) {
+		    var endagsLoeb = findEndagsLoeb(G.valgteEndagsloeb[G.aktuelEndagsIdx]);
+		    if (endagsLoeb) {
+		        if (endagsLoeb.type === "bjerg" || endagsLoeb.type === "kuperet_bjerg") rivalStat = rival.bj;
+		        else if (endagsLoeb.type === "brosten" || endagsLoeb.type === "brosten_kuperet" || endagsLoeb.type === "grus_kuperet") rivalStat = rival.fl;
+		        else if (endagsLoeb.type === "kuperet") rivalStat = Math.max(rival.bj, rival.fl);
+		        else rivalStat = Math.max(rival.spr, rival.fl);
+		    }
+		}
         var reaktionsChance = (rival.energi - 35) / 65 * (rivalStat / 100);
         if (Math.random() < reaktionsChance * 0.5) {
             reagerende.push(rival);
@@ -9057,7 +9089,15 @@ function accUdb() {
 		if (rErFavorit && !r.ude && r.energi > 35) {
             // Højere chance for at reagere jo bedre GC-rytter
             var favStat = r.gc;
-            if (G.erEndagsloeb) favStat = Math.max(r.bj, r.spr, r.fl);
+			if (G.erEndagsloeb) {
+			    var endagsLoeb = findEndagsLoeb(G.valgteEndagsloeb[G.aktuelEndagsIdx]);
+			    if (endagsLoeb) {
+			        if (endagsLoeb.type === "bjerg" || endagsLoeb.type === "kuperet_bjerg") favStat = r.bj;
+			        else if (endagsLoeb.type === "brosten" || endagsLoeb.type === "brosten_kuperet" || endagsLoeb.type === "grus_kuperet") favStat = r.fl;
+			        else if (endagsLoeb.type === "kuperet") favStat = Math.max(r.bj, r.fl);
+			        else favStat = Math.max(r.spr, r.fl);
+			    }
+			}
             var reaktionsChance = (favStat - 75) / 25 * (r.energi / 100);
 			if (r.gc >= 97) reaktionsChance *= 1.4;
 			else if (r.gc >= 93) reaktionsChance *= 1.2;
@@ -9391,7 +9431,15 @@ if (udb) {
             var rErFavorit = G.erEndagsloeb ? (r.bj > 73 || r.spr > 76 || r.fl > 78) : (r.gc > 78);
 			if (rErFavorit && !r.ude && r.energi > 30) {
                 var favStat = r.gc;
-            if (G.erEndagsloeb) favStat = Math.max(r.bj, r.spr, r.fl);
+				if (G.erEndagsloeb) {
+				    var endagsLoeb = findEndagsLoeb(G.valgteEndagsloeb[G.aktuelEndagsIdx]);
+				    if (endagsLoeb) {
+				        if (endagsLoeb.type === "bjerg" || endagsLoeb.type === "kuperet_bjerg") favStat = r.bj;
+				        else if (endagsLoeb.type === "brosten" || endagsLoeb.type === "brosten_kuperet" || endagsLoeb.type === "grus_kuperet") favStat = r.fl;
+				        else if (endagsLoeb.type === "kuperet") favStat = Math.max(r.bj, r.fl);
+				        else favStat = Math.max(r.spr, r.fl);
+				    }
+				}
             var reaktionsChance = (favStat - 75) / 25 * (r.energi / 100);
 				if (r.gc >= 97) reaktionsChance *= 1.4;
 				else if (r.gc >= 93) reaktionsChance *= 1.2;
@@ -9457,7 +9505,15 @@ for (var i = 0; i < sg.ryt.length; i++) {
     var rErFavorit = G.erEndagsloeb ? (r.bj > 73 || r.spr > 76 || r.fl > 78) : (r.gc > 78);
 	if (rErFavorit && !r.ude && r.energi > 35) {
         var favStat = r.gc;
-            if (G.erEndagsloeb) favStat = Math.max(r.bj, r.spr, r.fl);
+		if (G.erEndagsloeb) {
+		    var endagsLoeb = findEndagsLoeb(G.valgteEndagsloeb[G.aktuelEndagsIdx]);
+		    if (endagsLoeb) {
+		        if (endagsLoeb.type === "bjerg" || endagsLoeb.type === "kuperet_bjerg") favStat = r.bj;
+		        else if (endagsLoeb.type === "brosten" || endagsLoeb.type === "brosten_kuperet" || endagsLoeb.type === "grus_kuperet") favStat = r.fl;
+		        else if (endagsLoeb.type === "kuperet") favStat = Math.max(r.bj, r.fl);
+		        else favStat = Math.max(r.spr, r.fl);
+		    }
+		}
             var reaktionsChance = (favStat - 75) / 25 * (r.energi / 100);
 		if (r.gc >= 97) reaktionsChance *= 1.4;
 		else if (r.gc >= 93) reaktionsChance *= 1.2;
@@ -9555,7 +9611,15 @@ if (Math.random() < ch) {
         var rErFavorit = G.erEndagsloeb ? (r.bj > 73 || r.spr > 76 || r.fl > 78) : (r.gc > 78);
 		if (rErFavorit && !r.ude && r.energi > 30) {
             var favStat = r.gc;
-            if (G.erEndagsloeb) favStat = Math.max(r.bj, r.spr, r.fl);
+			if (G.erEndagsloeb) {
+			    var endagsLoeb = findEndagsLoeb(G.valgteEndagsloeb[G.aktuelEndagsIdx]);
+			    if (endagsLoeb) {
+			        if (endagsLoeb.type === "bjerg" || endagsLoeb.type === "kuperet_bjerg") favStat = r.bj;
+			        else if (endagsLoeb.type === "brosten" || endagsLoeb.type === "brosten_kuperet" || endagsLoeb.type === "grus_kuperet") favStat = r.fl;
+			        else if (endagsLoeb.type === "kuperet") favStat = Math.max(r.bj, r.fl);
+			        else favStat = Math.max(r.spr, r.fl);
+			    }
+			}
             var reaktionsChance = (favStat - 75) / 25 * (r.energi / 100);
 			if (r.gc >= 97) reaktionsChance *= 1.4;
 			else if (r.gc >= 93) reaktionsChance *= 1.2;
