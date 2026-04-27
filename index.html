@@ -6580,23 +6580,28 @@ function genererResume(res, erTT, udeRyttere) {
         for (var i = 0; i < HOEJDEPUNKTER.length; i++) {
             var h = HOEJDEPUNKTER[i];
             if (h.type === "angreb" && h.data.rytter === vinder.navn) {
+                if (e.neutraliseringsKm && h.km < e.neutraliseringsKm) continue;
                 vinderAngrebKm = Math.round(h.km);
             }
         }
     }
     // Find hvornår spilleren stak af (til solo-finish tekst)
-    var spillerAngrebKm = -1;
+	var spillerAngrebKm = -1;
     if (vinder && vinder.sp && vinderVandtSolo) {
         for (var i = 0; i < HOEJDEPUNKTER.length; i++) {
             var h = HOEJDEPUNKTER[i];
             if (h.type === "angreb" && h.data.rytter === G.spiller.navn) {
+                if (e.neutraliseringsKm && h.km < e.neutraliseringsKm) continue;
                 spillerAngrebKm = Math.round(h.km);
             }
         }
     }
     
     // ===== KATEGORISER HØJDEPUNKTER =====
-    var angreb = HOEJDEPUNKTER.filter(function(h) { return h.type === "angreb"; });
+    var angreb = HOEJDEPUNKTER.filter(function(h) { 
+        if (h.type !== "angreb") return false;
+        if (e.neutraliseringsKm && h.km < e.neutraliseringsKm) return false;
+        return true
     var gcKollaps = HOEJDEPUNKTER.filter(function(h) { return h.type === "gc_kollaps"; });
     var daarligeDage = HOEJDEPUNKTER.filter(function(h) { return h.type === "daarlig_dag"; });
     var udbrud = HOEJDEPUNKTER.filter(function(h) { return h.type === "udbrud"; });
