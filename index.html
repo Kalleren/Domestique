@@ -459,6 +459,8 @@ function hentScoreboard(svaerhed, type, callback) {
             ref = db.ref('bedsteSaeson/' + svaerhed);
         } else if (type === "foerste") {
             ref = db.ref('foersteSaeson/' + svaerhed);
+		} else if (type === "endags") {
+            ref = db.ref('bedsteEndags/' + svaerhed);
         } else if (type === "giro" || type === "tdf" || type === "vuelta") {
             ref = db.ref('bedsteGT/' + type + '/' + svaerhed);
         }
@@ -515,8 +517,8 @@ function visScoreboard() {
             'onclick="scoreboardTab=\'foerste\';visScoreboard()">1. sæson</div>' +
         '<div class="tab tab-blue ' + (scoreboardTab === "saeson" ? "active" : "") + '" ' +
             'onclick="scoreboardTab=\'saeson\';visScoreboard()">Bedste sæson</div>' +
-        '<div class="tab tab-blue ' + (scoreboardTab === "karriere" ? "active" : "") + '" ' +
-            'onclick="scoreboardTab=\'karriere\';visScoreboard()">Karriere</div>' +
+        '<div class="tab tab-blue ' + (scoreboardTab === "endags" ? "active" : "") + '" ' +
+            'onclick="scoreboardTab=\'endags\';visScoreboard()">Endagsløb</div>' +
     '</div>';
 
     // Type-valg - række 2: Grand Tours
@@ -554,9 +556,9 @@ function visScoreboard() {
         if (!indhold) return;
 
         if (scores.length === 0) {
-            var tomTekst = scoreboardTab === "karriere" ? "Gennemfør 10 sæsoner" :
-                           scoreboardTab === "foerste" ? "Gennemfør din første sæson" :
-                           scoreboardTab === "saeson" ? "Gennemfør en sæson" :
+            var tomTekst = scoreboardTab === "foerste" ? "Gennemfør din første sæson" :
+                           scoreboardTab === "endags" ? "Kør endagsløb i en sæson" :
+                           "Gennemfør en sæson";
                            "Kør et " + (scoreboardTab === "giro" ? "Giro" : scoreboardTab === "tdf" ? "Tour de France" : "Vuelta") + " for at komme på listen";
             indhold.innerHTML = '<div style="text-align:center;color:#888;padding:40px">' +
                 '<div style="font-size:30px;margin-bottom:10px">🏜️</div>' +
@@ -567,7 +569,7 @@ function visScoreboard() {
         }
 
         var typNavn;
-        if (scoreboardTab === "karriere") typNavn = "Karriere - 10 sæsoner";
+        if (scoreboardTab === "endags") typNavn = "Bedste endagsløb-sæson";
         else if (scoreboardTab === "saeson") typNavn = "Bedste enkelt-sæson";
         else if (scoreboardTab === "foerste") typNavn = "Bedste første sæson";
         else if (scoreboardTab === "giro") typNavn = "🩷 Bedste Giro d'Italia";
@@ -635,6 +637,25 @@ function visScoreboard() {
                 h += '<div class="row" style="border-color:#333;' + bgClr + 'padding:6px 8px">' +
                     '<span style="color:' + farve + ';font-weight:bold;min-width:24px;font-size:14px">' + medalje + numTxt + '</span>' +
                     '<span style="flex:1;overflow:hidden"><span style="color:#fff">' + s.navn + '</span>' + detaljer + '</span>' +
+                    '<span style="color:' + farve + ';font-weight:bold;font-size:16px;white-space:nowrap">' + pointVal + ' <span style="color:#888;font-size:10px">pts</span></span>' +
+                '</div>';
+
+            } else if (scoreboardTab === "endags") {
+                var detaljer = "";
+                if (s.detaljer) {
+                    var dele = [];
+                    if (s.detaljer.monumentSejre > 0) dele.push("🏛️" + s.detaljer.monumentSejre);
+                    if (s.detaljer.klassikerSejre > 0) dele.push("🏅" + s.detaljer.klassikerSejre);
+                    if (dele.length > 0) {
+                        detaljer = ' <span style="color:#666;font-size:9px">' + dele.join(' ') + '</span>';
+                    }
+                }
+
+                var saesonTxt = s.saesonNr ? ' <span style="color:#666;font-size:10px">S' + s.saesonNr + '</span>' : '';
+
+                h += '<div class="row" style="border-color:#333;' + bgClr + 'padding:6px 8px">' +
+                    '<span style="color:' + farve + ';font-weight:bold;min-width:24px;font-size:14px">' + medalje + numTxt + '</span>' +
+                    '<span style="flex:1;overflow:hidden"><span style="color:#fff">' + s.navn + '</span>' + saesonTxt + detaljer + '</span>' +
                     '<span style="color:' + farve + ';font-weight:bold;font-size:16px;white-space:nowrap">' + pointVal + ' <span style="color:#888;font-size:10px">pts</span></span>' +
                 '</div>';
 
@@ -3012,6 +3033,30 @@ function afslutSaeson() {
     }
 
     gemSaesonTilFirebase(G.navn, G.svaerhed || "normal", samletBonus, G.saeson, saesonDetaljer);
+
+	// Gem endagsløb-sæson til Firebase
+    if (G.endagsResultater && G.endagsResultater.length > 0) {
+        var endagsPoint = 0;
+        var endagsSejre = 0;
+        var monumentSejre = 0;
+        var klassikerSejre = 0;
+        for (var edi = 0; edi < G.endagsResultater.length; edi++) {
+            var er = G.endagsResultater[edi];
+            endagsPoint += (er.bonus || 0);
+            if (er.plads === 1) {
+                endagsSejre++;
+                if (er.monument) monumentSejre++;
+                else klassikerSejre++;
+            }
+        }
+        if (endagsPoint > 0) {
+            gemEndagsSaesonTilFirebase(G.navn, G.svaerhed || "normal", endagsPoint, {
+                sejre: endagsSejre,
+                monumentSejre: monumentSejre,
+                klassikerSejre: klassikerSejre
+            });
+        }
+    }
 	
     visSaesonOversigt();
 }
@@ -3107,91 +3152,11 @@ function visSaesonOversigt() {
     
     // Knapper
     if (G.saeson >= 10) {
-    // Beregn karriere-statistikker til scoreboard
-    var karriereSamletPoint = samletBonus;
-    var karriereGTSejre = 0;
-    var karriereEtapeSejre = 0;
-    var karriereMonumentSejre = 0;
-    var bedsteSaesonPoint = samletBonus;
-    var bedsteSaesonNr = G.saeson;
-    var foersteSaesonPoint = 0;
-
-    for (var ki = 0; ki < G.karriereHistorik.length; ki++) {
-        var kh = G.karriereHistorik[ki];
-        karriereSamletPoint += (kh.bonusPoint || 0);
-
-        // Track bedste sæson
-        if ((kh.bonusPoint || 0) > bedsteSaesonPoint) {
-            bedsteSaesonPoint = kh.bonusPoint || 0;
-            bedsteSaesonNr = kh.saeson || (ki + 1);
-        }
-
-        // Track første sæson
-        if ((kh.saeson || (ki + 1)) === 1) {
-            foersteSaesonPoint = kh.bonusPoint || 0;
-        }
-
-        // Tæl GT-sejre og etapesejre
-        if (kh.resultater) {
-            for (var ri5 = 0; ri5 < kh.resultater.length; ri5++) {
-                var kRes = kh.resultater[ri5];
-                if (!kRes.udgaaet && kRes.gcPlads === 1) karriereGTSejre++;
-                if (kRes.sejre) karriereEtapeSejre += kRes.sejre;
-            }
-        }
-
-        // Tæl monument-sejre
-        if (kh.endagsResultater) {
-            for (var ei2 = 0; ei2 < kh.endagsResultater.length; ei2++) {
-                if (kh.endagsResultater[ei2].monument && kh.endagsResultater[ei2].plads === 1) {
-                    karriereMonumentSejre++;
-                }
-            }
-        }
-    }
-
-    // Tæl også denne sæsons resultater (endnu ikke i karriereHistorik)
-    if (G.endagsResultater) {
-        for (var ei3 = 0; ei3 < G.endagsResultater.length; ei3++) {
-            if (G.endagsResultater[ei3].monument && G.endagsResultater[ei3].plads === 1) {
-                karriereMonumentSejre++;
-            }
-        }
-    }
-    for (var sri = 0; sri < G.saesonResultater.length; sri++) {
-        var sRes = G.saesonResultater[sri];
-        if (!sRes.udgaaet && sRes.gcPlads === 1) karriereGTSejre++;
-        if (sRes.sejre) karriereEtapeSejre += sRes.sejre;
-    }
-
-    // Gem til Firebase
-    gemScoreTilFirebase({
-        navn: G.navn,
-        svaerhed: G.svaerhed || "normal",
-        samletPoint: karriereSamletPoint,
-        saesoner: 10,
-        bedsteSaesonNr: bedsteSaesonNr,
-        bedsteSaesonPoint: bedsteSaesonPoint,
-        foersteSaesonPoint: foersteSaesonPoint,
-        dato: new Date().toISOString(),
-        detaljer: {
-            gtSejre: karriereGTSejre,
-            etapeSejre: karriereEtapeSejre,
-            monumentSejre: karriereMonumentSejre
-        }
-    });
-
     sletGemtSpil();
 
     html += '<div class="box" style="text-align:center;border-color:#f80">' +
         '<h3 style="color:#f80">🎖️ Karrieren er slut!</h3>' +
         '<p>' + G.navn + ' trækker sig tilbage efter 10 sæsoner.</p>' +
-        '<p style="color:#0f0;margin-top:8px;font-size:18px">📊 Samlet score: ' + karriereSamletPoint + ' point!</p>' +
-        '<div style="font-size:11px;color:#888;margin-top:5px">' +
-            (karriereGTSejre > 0 ? '🏆 ' + karriereGTSejre + ' GT-sejre ' : '') +
-            (karriereEtapeSejre > 0 ? '🚩 ' + karriereEtapeSejre + ' etapesejre ' : '') +
-            (karriereMonumentSejre > 0 ? '🏛️ ' + karriereMonumentSejre + ' monumenter' : '') +
-        '</div>' +
     '</div>' +
     '<div class="ctrls">' +
         '<button class="btn btn-big btn-y" onclick="visScoreboard()">🏆 SCOREBOARD</button>' +
