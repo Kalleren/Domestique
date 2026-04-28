@@ -3034,30 +3034,7 @@ function afslutSaeson() {
 
     gemSaesonTilFirebase(G.navn, G.svaerhed || "normal", samletBonus, G.saeson, saesonDetaljer);
 
-	// Gem endagsløb-sæson til Firebase
-    if (G.endagsResultater && G.endagsResultater.length > 0) {
-        var endagsPoint = 0;
-        var endagsSejre = 0;
-        var monumentSejre = 0;
-        var klassikerSejre = 0;
-        for (var edi = 0; edi < G.endagsResultater.length; edi++) {
-            var er = G.endagsResultater[edi];
-            endagsPoint += (er.bonus || 0);
-            if (er.plads === 1) {
-                endagsSejre++;
-                if (er.monument) monumentSejre++;
-                else klassikerSejre++;
-            }
-        }
-        if (endagsPoint > 0) {
-            gemEndagsSaesonTilFirebase(G.navn, G.svaerhed || "normal", endagsPoint, {
-                sejre: endagsSejre,
-                monumentSejre: monumentSejre,
-                klassikerSejre: klassikerSejre
-            });
-        }
-    }
-	
+
     visSaesonOversigt();
 }
 
