@@ -6601,7 +6601,9 @@ function genererResume(res, erTT, udeRyttere) {
     var angreb = HOEJDEPUNKTER.filter(function(h) { 
         if (h.type !== "angreb") return false;
         if (e.neutraliseringsKm && h.km < e.neutraliseringsKm) return false;
-        return true
+        return true;
+	});
+
     var gcKollaps = HOEJDEPUNKTER.filter(function(h) { return h.type === "gc_kollaps"; });
     var daarligeDage = HOEJDEPUNKTER.filter(function(h) { return h.type === "daarlig_dag"; });
     var udbrud = HOEJDEPUNKTER.filter(function(h) { return h.type === "udbrud"; });
