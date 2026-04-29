@@ -416,6 +416,24 @@ function gemGTTilFirebase(navn, svaerhed, gtId, point, gcPlads, detaljer) {
     }
 }
 
+function gemEndagsSaesonTilFirebase(navn, svaerhed, point, detaljer) {
+    if (!firebaseKlar) return;
+    var key = svaerhed + '_endags_' + G.saeson;
+    if (gemteSaesoner[key]) return;
+    gemteSaesoner[key] = true;
+    try {
+        db.ref('bedsteEndags/' + svaerhed).push().set({
+            navn: navn,
+            point: point,
+            saesonNr: G.saeson,
+            dato: new Date().toISOString(),
+            detaljer: detaljer || {}
+        });
+    } catch (e) {
+        console.log('Fejl ved gem af endags-sæson:', e);
+    }
+}
+	
 function beregnSaesonDetaljer() {
     var gtSejre = 0;
     var etapeSejre = 0;
@@ -3034,6 +3052,29 @@ function afslutSaeson() {
 
     gemSaesonTilFirebase(G.navn, G.svaerhed || "normal", samletBonus, G.saeson, saesonDetaljer);
 
+	// Gem endagsløb-sæson til Firebase
+    if (G.endagsResultater && G.endagsResultater.length > 0) {
+        var endagsPoint = 0;
+        var endagsSejre = 0;
+        var monumentSejre = 0;
+        var klassikerSejre = 0;
+        for (var edi = 0; edi < G.endagsResultater.length; edi++) {
+            var er = G.endagsResultater[edi];
+            endagsPoint += (er.bonus || 0);
+            if (er.plads === 1) {
+                endagsSejre++;
+                if (er.monument) monumentSejre++;
+                else klassikerSejre++;
+            }
+        }
+        if (endagsPoint > 0) {
+            gemEndagsSaesonTilFirebase(G.navn, G.svaerhed || "normal", endagsPoint, {
+                sejre: endagsSejre,
+                monumentSejre: monumentSejre,
+                klassikerSejre: klassikerSejre
+            });
+        }
+    }
 
     visSaesonOversigt();
 }
