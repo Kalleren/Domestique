@@ -8156,6 +8156,28 @@ function aiAngrebFraUdbrud() {
         for (var ai = 0; ai < antalAngribere; ai++) {
             angribere.push(kand[ai].r);
         }
+
+		// Endagsløb: Andre favoritter følger med hvis en favorit angriber
+        if (G.erEndagsloeb) {
+            var harFavoritAngreb = false;
+            for (var afi = 0; afi < angribere.length; afi++) {
+                if (erEndagsFavorit(angribere[afi])) {
+                    harFavoritAngreb = true;
+                    break;
+                }
+            }
+            if (harFavoritAngreb) {
+                for (var gfi = 0; gfi < g.ryt.length; gfi++) {
+                    var rival = g.ryt[gfi];
+                    if (rival.sp || rival.ude || rival.energi < 40) continue;
+                    if (angribere.indexOf(rival) >= 0) continue;
+                    if (!erEndagsFavorit(rival)) continue;
+                    if (Math.random() < 0.8) {
+                        angribere.push(rival);
+                    }
+                }
+            }
+        }
         
         for (var ai = 0; ai < angribere.length; ai++) {
             g.ryt = g.ryt.filter(function(x) { return x !== angribere[ai]; });
