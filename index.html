@@ -9014,7 +9014,31 @@ if (e.type === "bjerg") {
     if (e.type === "bjerg") kand.sort(function(a,b) { return (b.bj + b.energi*0.3) - (a.bj + a.energi*0.3); });
     else if (e.type === "flad") kand.sort(function(a,b) { return (b.spr + b.energi*0.3) - (a.spr + a.energi*0.3); });
     else kand.sort(function(a,b) { return b.energi - a.energi; });
-    
+
+	// Endagsløb: Hvis en favorit er kandidat, øg chancen for andre favoritter
+    if (G.erEndagsloeb && kand.length > 0) {
+        var harFavoritIKand = false;
+        for (var ki2 = 0; ki2 < kand.length; ki2++) {
+            if (erEndagsFavorit(kand[ki2])) {
+                harFavoritIKand = true;
+                break;
+            }
+        }
+        if (harFavoritIKand) {
+            // Andre favoritter i feltet reagerer og hopper med
+            for (var fi2 = 0; fi2 < felt.ryt.length; fi2++) {
+                var rival = felt.ryt[fi2];
+                if (rival.sp || rival.ude || rival.energi < 40) continue;
+                if (kand.indexOf(rival) >= 0) continue;
+                if (!erEndagsFavorit(rival)) continue;
+                // Høj chance for at følge med
+                if (Math.random() < 0.8) {
+                    kand.push(rival);
+                }
+            }
+        }
+    }
+	
     if (kand.length < n) {
         // Fyld op med tilfældige energiske ryttere
         var ekstra = [];
