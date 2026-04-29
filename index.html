@@ -576,8 +576,8 @@ function visScoreboard() {
         if (scores.length === 0) {
             var tomTekst = scoreboardTab === "foerste" ? "Gennemfør din første sæson" :
                            scoreboardTab === "endags" ? "Kør endagsløb i en sæson" :
+                           (scoreboardTab === "giro" || scoreboardTab === "tdf" || scoreboardTab === "vuelta") ? "Kør et " + (scoreboardTab === "giro" ? "Giro" : scoreboardTab === "tdf" ? "Tour de France" : "Vuelta") + " for at komme på listen" :
                            "Gennemfør en sæson";
-                           "Kør et " + (scoreboardTab === "giro" ? "Giro" : scoreboardTab === "tdf" ? "Tour de France" : "Vuelta") + " for at komme på listen";
             indhold.innerHTML = '<div style="text-align:center;color:#888;padding:40px">' +
                 '<div style="font-size:30px;margin-bottom:10px">🏜️</div>' +
                 'Ingen scores endnu for <strong>' + svaerhedNavn + '</strong>.<br><br>' +
