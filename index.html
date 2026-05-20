@@ -1749,37 +1749,54 @@ function vaelgHoldtrup(holdNavn, gtId, saesonNr) {
     if (!team) return [];
     
     var pool = team.r;
-    
-    // Score hver rytter baseret på GT-præference
     var scored = [];
+    
+    // Trin 1: Score kun ryttere der ER tildelt denne GT
     for (var i = 0; i < pool.length; i++) {
         var r = pool[i];
-
-		if (G.aiRytterGT && G.aiRytterGT[r.n]) {
+        
+        if (G.aiRytterGT && G.aiRytterGT[r.n]) {
             if (G.aiRytterGT[r.n].indexOf(gtId) < 0) continue;
         }
+        
         var score = 0;
-        
-        // Primær GT = høj score
         if (r.pri === gtId) score += 100;
-        
-        // Foretrukken GT = middel score
         if (r.pref && r.pref.indexOf(gtId) >= 0) score += 50;
-        
-        // Tilfældig variation (10% per sæson - simulerer form/skader)
         score += ri(-15, 15);
-        
-        // Stærkere ryttere foretrækkes generelt
         var styrke = (r.gc + r.bj + r.sp + r.tt) / 4;
         score += styrke * 0.1;
         
-        scored.push({ rytter: r, score: score, idx: i });
+        scored.push({ rytter: r, score: score });
     }
     
-    // Sortér efter score (højeste først)
+    // Trin 2: Hvis under 8, fyld op med andre ryttere fra poolen
+    // (uden de stærke stjerner som Pogačar/Vingegaard hvis de IKKE er tildelt)
+    if (scored.length < 8) {
+        var alreadyIn = {};
+        for (var si = 0; si < scored.length; si++) alreadyIn[scored[si].rytter.n] = true;
+        
+        for (var i = 0; i < pool.length; i++) {
+            var r = pool[i];
+            if (alreadyIn[r.n]) continue;
+            
+            // Beskyt: spring topstjerner over der eksplicit IKKE er tildelt
+            if (r.gc >= 95 && G.aiRytterGT && G.aiRytterGT[r.n] && 
+                G.aiRytterGT[r.n].indexOf(gtId) < 0) {
+                continue;
+            }
+            
+            var score = -50; // Lavere base end de "rigtige"
+            if (r.pref && r.pref.indexOf(gtId) >= 0) score += 30;
+            score += ri(-15, 15);
+            var styrke = (r.gc + r.bj + r.sp + r.tt) / 4;
+            score += styrke * 0.1;
+            
+            scored.push({ rytter: r, score: score });
+        }
+    }
+    
     scored.sort(function(a, b) { return b.score - a.score; });
     
-    // Vælg de 8 bedste
     var valgte = [];
     for (var i = 0; i < Math.min(8, scored.length); i++) {
         valgte.push(scored[i].rytter);
@@ -1801,8 +1818,8 @@ function bestemAIGTdeltagelse(saesonNr) {
             var r = pool[ri2];
             var gts = [];
             
-            // Primær GT: altid med (95% chance)
-            if (Math.random() < 0.95) {
+            // Primær GT: altid med (99% chance)
+            if (Math.random() < 0.99) {
                 gts.push(r.pri);
             }
             
