@@ -3823,11 +3823,24 @@ function koerNaesteIKalender() {
         G.aktuelEndagsIdx = G.valgteEndagsloeb.indexOf(aktuel.id);
         startNaesteEndagsloeb();
     } else if (aktuel.type === "gt") {
-        G.erEndagsloeb = false;
-        G.aktuelGT = aktuel.id;
-        G.aktuelGTIdx = G.valgteGT.indexOf(aktuel.id);
-        startGrandTour();
-    }
+	    G.erEndagsloeb = false;
+	    G.aktuelGT = aktuel.id;
+	    G.aktuelGTIdx = G.valgteGT.indexOf(aktuel.id);
+	    // Beregn rigtig endagsløb-træthed til den nye GT (uden tidligere GT-træthed indpakket)
+	    var endagsTraethedReel = 0;
+	    for (var ei = 0; ei < G.endagsResultater.length; ei++) {
+	        var er = G.endagsResultater[ei];
+	        // Tæl kun endagsløb der ligger MELLEM forrige og nuværende GT
+	        // For sommerløb (Juli/Aug) før Vuelta: tæl med
+	        var loeb = findEndagsLoeb(er.loebId);
+	        if (!loeb) continue;
+	        if (aktuel.id === "vuelta" && (loeb.maaned === "Juli" || loeb.maaned === "August")) {
+	            endagsTraethedReel += loeb.monument ? 0.05 : 0.03;
+	        }
+	    }
+	    G.endagsTraethed = Math.min(endagsTraethedReel, 0.25);
+	    startGrandTour();
+	}
 }
 
 function gaaVidereIKalender() {
