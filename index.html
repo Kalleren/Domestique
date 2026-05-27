@@ -2252,7 +2252,7 @@ function visSaesonKalender() {
         '<button class="btn btn-big" style="border-color:#3399ff;color:#3399ff" onclick="tilbageFraKalender()">← TILBAGE</button>' +
     '</div>';
     
-    R(html);
+    document.getElementById("game").innerHTML = html;
     
     // Auto-scroll til aktuel
     setTimeout(function() {
