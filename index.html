@@ -7615,7 +7615,7 @@ function loop() {
 
 		// Gruppestørrelse påvirker energiforbrug (kun på flade/kuperede stykker)
         var rGrp = findInArr(G.grp, function(g) { return g.ryt.indexOf(r) >= 0; });
-        if (rGrp && stig <= 12) {
+        if (rGrp && stig <= 12 && stig >= -20) {
             var grpStr = rGrp.ryt.length;
             var energiMod = 0;
             if (rGrp.type === "felt" || grpStr >= 30) {
@@ -7623,13 +7623,13 @@ function loop() {
             } else if (grpStr >= 16) {
                 energiMod = 0;
             } else if (grpStr >= 7) {
-                energiMod = 0.01;
+                energiMod = 0.1;
             } else if (grpStr >= 4) {
-                energiMod = 0.02;
+                energiMod = 0.3;
             } else if (grpStr >= 2) {
-                energiMod = 0.03;
+                energiMod = 0.6;
             } else {
-                energiMod = 0.05; // Solo +5%
+                energiMod = 1.5; // Solo +150%
             }
             baseTab *= (1 + energiMod);
         }
@@ -7914,10 +7914,10 @@ for (var gi = 0; gi < G.grp.length; gi++) {
                 var v = favStat === "bj" ? sr.bj : favStat === "fl" ? sr.fl : sr.spr;
                 if (v > bedsteStjerne) bedsteStjerne = v;
             }
-            // Kun stærke ryttere (90+ i nøglestat) får bonus, og kun i små grupper
-            if (bedsteStjerne >= 90 && g.ryt.length <= 4) {
-                var stjBonus = (bedsteStjerne - 88) * 0.004; // 90→0.008, 95→0.028, 98→0.04
-                if (g.ryt.length === 1) stjBonus *= 1.4; // solo belønnes ekstra
+            if (bedsteStjerne >= 90) {
+                var stjBonus = (bedsteStjerne - 88) * 0.004;
+                // Aftager gradvist med gruppestørrelse - ingen klippe
+                stjBonus *= Math.max(0, 1 - (g.ryt.length - 1) * 0.2);
                 spd += stjBonus;
             }
         }
@@ -8023,7 +8023,7 @@ for (var gi = 0; gi < G.grp.length; gi++) {
 
     
 // AI angreb - baseret på etapetype og energi
-var angrebBoost = G.erEndagsloeb ? 2.5 : 1.0;
+var angrebBoost = G.erEndagsloeb ? 3.5 : 1.0;
 // Tjek om vi er på brosten
 var erPaaBrostenNu = false;
 if (G.erEndagsloeb && e.brostenSektioner) {
