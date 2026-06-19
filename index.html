@@ -3642,7 +3642,7 @@ function visEndagsValg() {
                     foraarPct += fl2.monument ? 5 : 3;
                 }
             }
-            foraarPct = Math.min(foraarPct, 25);
+
             if (harGiro) {
                 traethedLinjer.push('<span style="color:#f80">' + foraarLoeb + ' forårsløb: -' + foraarPct + '% startenergi til Giro</span>');
             } else {
@@ -3672,7 +3672,7 @@ function visEndagsValg() {
         
 // 7. Sommerløb → Vuelta (ekstra oven i GT-træthed)
         if (sommerLoeb > 0 && harVuelta) {
-            var sommerPct = Math.min(sommerLoeb * 3, 25);
+            var sommerPct = sommerLoeb * 3;
             var yderligere = (harTour || harGiro) ? 'yderligere ' : '';
             traethedLinjer.push('<span style="color:#f80">' + sommerLoeb + ' sommerløb: ' + yderligere + '-' + sommerPct + '% startenergi til Vuelta</span>');
         }
