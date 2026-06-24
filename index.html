@@ -9060,10 +9060,10 @@ function chkMP() {
             G.msg = em + ": " + alleRyttere[0].r.navn.split(" ").pop() + " vinder!";
         }
         
-        // Fjern mellempunkt-resultat efter 6 sekunder
+        // Fjern mellempunkt-resultat efter 3 sekunder
         setTimeout(function() {
             G.lastMpResult = null;
-        }, 6000);
+        }, 3000);
         
         // Kun ét mellempunkt ad gangen
         return;
