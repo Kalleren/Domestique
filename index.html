@@ -324,7 +324,12 @@
 	.btn[style*="border-color:#0f0"]:hover { background: #0a0; color: #000; }
 	.btn[style*="border-color:#0a0"]:hover { background: #020; color: #0a0; }
 	.btn[style*="border-color:#f80"]:hover { background: #420; color: #f80; }
-	button, .btn { touch-action: manipulation; }
+	button, .btn { 
+		touch-action: manipulation; 
+		-webkit-tap-highlight-color: rgba(0,0,0,0); 
+		-webkit-touch-callout: none;
+		cursor: pointer;
+	}
     html, body { touch-action: pan-y; }
     </style>
 </head>
@@ -5857,8 +5862,8 @@ function rend() {
     		'<p>' + medTxt + '</p><p class="warn">Koster: ' + Math.round(d.cost / getMaxEnergi(r) * 100) + '%</p>' +
     		'<p>Din energi: ' + getVisEnergi(r) + '%</p>' +
     		'<div style="margin-top:12px">' +
-    		'<button class="btn btn-big" style="border-color:#0f0;color:#0f0" onclick="accUdb()"' + dis + '>[U] HOP MED!</button>' +
-    		'<button class="btn btn-big btn-r" onclick="rejUdb()">[N] NEJ</button>' +
+    		'<button class="btn btn-big" style="border-color:#0f0;color:#0f0" ontouchstart="event.preventDefault();accUdb()" onclick="accUdb()"' + dis + '>[U] HOP MED!</button>' +
+    		'<button class="btn btn-big btn-r" ontouchstart="event.preventDefault();rejUdb()" onclick="rejUdb()">[N] NEJ</button>' +
     		'</div></div></div>';
     	}
     
@@ -6056,8 +6061,8 @@ if (G.lastMpResult) {
     R(mod + pmod +
     // KNAPPER ØVERST
 	'<div style="background:' + (G.erEndagsloeb ? '#010' : '#110') + ';padding:8px;margin-bottom:8px;border:1px solid ' + (G.erEndagsloeb ? '#0a0' : '#aa0') + ';border-radius:4px;text-align:center">' +
-        '<button class="btn btn-big" style="border-color:#0f0;color:#0f0;min-width:140px" onclick="accel()"' + aDis + '>[A] ACCELERER</button>' +
-        '<button class="btn btn-big" onclick="pause()" style="border-color:#3399ff;color:#3399ff;min-width:140px"' + pDis + '>[P] ' + pBtn + '</button>' +
+        '<button class="btn btn-big" style="border-color:#0f0;color:#0f0;min-width:140px" ontouchstart="event.preventDefault();accel()" onclick="accel()"' + aDis + '>[A] ACCELERER</button>' +
+        '<button class="btn btn-big" ontouchstart="event.preventDefault();pause()" onclick="pause()" style="border-color:#3399ff;color:#3399ff;min-width:140px"' + pDis + '>[P] ' + pBtn + '</button>' +
     '</div>' + // ETAPE INFO
 // -- Desktop Version --
 '<div class="top-bar-desktop" style="display:flex;align-items:center;padding:8px;background:#110;border:1px solid #aa0;border-radius:4px;margin-bottom:8px">' +
