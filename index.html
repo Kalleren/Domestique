@@ -10080,8 +10080,8 @@ function rendTT() {
     R(
     // KNAP ØVERST
     '<div style="background:#000;padding:8px;margin-bottom:8px;border:1px solid #0aa;border-radius:4px;text-align:center">' +
-        '<button class="btn btn-big" style="border-color:#0f0;color:#0f0;min-width:140px" onclick="accTT()"' + (r.energi < 3 ? ' disabled' : '') + '>[A] FULD GAS!</button>' +
-        '<button class="btn btn-big" style="border-color:#3399ff;color:#3399ff;min-width:140px" onclick="pause()">[P] ' + (G.iv ? 'PAUSE' : 'FORTSÆT') + '</button>' +
+        '<button class="btn btn-big" style="border-color:#0f0;color:#0f0;min-width:140px" ontouchstart="event.preventDefault();accTT()" onclick="accTT()"' + (r.energi < 3 ? ' disabled' : '') + '>[A] FULD GAS!</button>' +
+        '<button class="btn btn-big" style="border-color:#3399ff;color:#3399ff;min-width:140px" ontouchstart="event.preventDefault();pause()" onclick="pause()">[P] ' + (G.iv ? 'PAUSE' : 'FORTSÆT') + '</button>' +
     '</div>' +
     '<div style="padding:8px;background:#011;border:1px solid #0aa;border-radius:4px;margin-bottom:8px">' +
         '<strong>Etape ' + e.nr + ':</strong> ' + e.start + ' | ENKELTSTART ⏱️ ' + e.dist + ' km</div>' +
